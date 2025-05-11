@@ -1,17 +1,8 @@
-TEXFILES := $(wildcard *.tex)
+#/usr/bin/make -f
 
-all:  thesis
+all:
+	$(MAKE) -s -C src all
+	cp src/*.pdf .
 
-thesis: $(TEXFILES) all.bib references.bib
-	latexmk -pdf thesis.tex
-
-tidy:
-	$(RM) *.log *.aux \
-	*.cfg *.glo *.idx *.toc \
-	*.ilg *.ind *.out *.lof \
-	*.lot *.bbl *.blg *.gls *.cut *.hd \
-	*.dvi *.ps *.thm *.tgz *.zip *.rpi \
-	preprint.*
-
-clean: tidy
-	$(RM) thesis.pdf
+clean:
+	$(MAKE) -s -C src clean
