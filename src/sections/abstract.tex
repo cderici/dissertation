@@ -14,7 +14,28 @@
 \vspace{1.5\baselineskip}
 
 %Insert your abstract here
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+\begin{abstract}
+Meta-tracing JITs promise ``compiler construction kits'' for dynamic languages, yet their behaviour on \emph{self-hosting language runtimes} is still poorly understood.  
+This dissertation shows that a complete Racket implementation can run correctly on Pycket's RPython-based meta-tracing VM, validating the feasibility of efficient, self-hosting execution on a meta-tracer.
+
+The work begins by formalising \emph{linklets}—Racket's fine-grained compilation units—with a new operational semantics and an executable Redex model.
+These semantics give the first rigorous account of linklet evaluation and underpin the remainder of the system.
+
+Using linklets, I re-engineer Pycket's front-end: the reader, macro expander, module system, and large portions of the standard library are imported as pre-compiled linklets.
+The resulting \emph{bootstrapped Pycket} loads, expands, and runs unmodified Racket programs while passing the full regression suite, demonstrating a practical path to portability for the entire Racket stack on a meta-tracing runtime.
+
+Although functionally complete, this architecture exposes a \emph{fundamental challenge}: data-driven, branch-heavy phases (e.g.\ macro expansion, regexp engine) scatter hot loops, inflate traces, and magnify garbage-collection cost.
+Micro- and macro-benchmarks, combined with targeted ablation studies, isolate these effects and quantify their impact.
+
+The dissertation then stakes out two research avenues—supported by prototype evidence—as the most promising ways forward:
+\begin{enumerate}
+  \item \textbf{Stackful execution for memory locality}: selectively running deeply nested interpreter frames on the native stack collapses heap-allocated continuation chains and cuts GC time by up to 30\%.
+  \item \textbf{Hot-branch steering for trace quality}: lightweight runtime feedback diverts the tracer away from unpredictable branches, curbing trace explosion without relying on partial evaluation, which fares poorly on large, branchy workloads.
+\end{enumerate}
+
+Taken together, the prototypes, formal models, and empirical results presented here provide the first definitive proof that a full-featured functional programming language can \emph{indeed self-host} atop a meta-tracing JIT while remaining semantically sound—establishing a solid foundation on which future optimisation research can confidently build.
+\end{abstract}
 
 
 
