@@ -2,8 +2,10 @@ name: Build dissertation with Make
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: '0 8 * * *'   # → 08:00 UTC = 02:00 America/Denver
+  schedule:
+    - cron: '0 8 * * *'
+  push:
+    branches: [ main ]
 
 jobs:
   build:
