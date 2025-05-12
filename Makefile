@@ -2,7 +2,7 @@
 
 all:
 	$(MAKE) -s -C src all
-	cp src/*.pdf .
+	mv src/*.pdf .
 
 clean:
 	$(MAKE) -s -C src clean
