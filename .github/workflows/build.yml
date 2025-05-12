@@ -1,0 +1,25 @@
+name: Build dissertation with Make
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '0 8 * * *'   # → 08:00 UTC = 02:00 America/Denver
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ghcr.io/xu-cheng/texlive-full:latest   # full TeX Live stack ✔️ :contentReference[oaicite:1]{index=1}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile via Makefile
+        run: |
+          make          # top-level Makefile calls src/Makefile & copies thesis.pdf
+
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dissertation
+          path: thesis.pdf
+
