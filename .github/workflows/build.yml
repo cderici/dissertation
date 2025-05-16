@@ -1,4 +1,4 @@
-name: Build & Publish Dissertation
+name: Build dissertation
 
 on:
   workflow_dispatch: 
@@ -45,7 +45,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: latest-pdf
-          name: Most Recent Dissertation PDF
+          name: Most Recent Build
           body: |
             Automated build from commit ${{ github.sha }}.
             This release is replaced on every successful CI run.
