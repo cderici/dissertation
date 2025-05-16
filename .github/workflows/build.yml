@@ -1,27 +1,56 @@
-name: Build
+name: Build & Publish Dissertation
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 8 * * *'
+  workflow_dispatch: 
   push:
     branches: [ main ]
+  schedule:
+    - cron: '0 8 * * *'
+
+# The release job needs write access to repo contents
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ghcr.io/xu-cheng/texlive-full:latest   # full TeX Live stack ✔️ :contentReference[oaicite:1]{index=1}
+    container: ghcr.io/xu-cheng/texlive-full:latest
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Compile via Makefile
         run: |
-          make          # top-level Makefile calls src/Makefile & copies thesis.pdf
+          make              # builds src/thesis.pdf and copies to repo root
 
-      - name: Upload PDF artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: dissertation
           path: thesis.pdf
 
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ needs.build.result == 'success' }}
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dissertation
+          path: .
+
+      - name: Create / Update single release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: latest-pdf
+          name: Most Recent Dissertation PDF
+          body: |
+            Automated build from commit ${{ github.sha }}.
+            This release is replaced on every successful CI run.
+          artifacts: thesis.pdf
+          allowUpdates: true
+          replacesArtifacts: true
+          artifactContentType: application/pdf
+          token: ${{ secrets.GITHUB_TOKEN }}
