@@ -1,8 +1,27 @@
-\chapter{How do we know it's correct?}
+\chapter{Language Correctness \& Completeness under Self-Hosting}
 
-	- Section: Approach to correctness
-		- We start with the Old Pycket, and added the expander, ensured existing correctness.
-	- Section: Old and New Unit Tests
-	- Section: We evaluate untouched Racket code
+	\section{Building the Correctness}
+		We start with the Old Pycket, and built the whole language with
+		correctness preserving additions with bootstrapping linklets.
+		We evaluate untouched Racket code
+
+	\section{Ensuring the Correctness}
+		Old and New Unit Tests
+		Old and New End-to-End/Integration Tests
+
+
+	\section{Completeness under Self-Hosting}
+
+	Completeness of a Proramming Language Programming Language
+	implementing \#lang racket/base is a big enough step that allows you to implement 
+	much bigger languages such as \#lang racket or typed/racket
+
+	There is no such thing as "complete" for a 
+	programming language programming language like Racket
+
+	if you have a language that has a decent expansion system that allows you to 
+	modify or create new languages, and you're able to evaluate the language's 
+	expander in your runtime, then you're potentially implementing all the 
+	infinite languages you can make
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
