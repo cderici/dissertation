@@ -98,8 +98,8 @@
 \renewcommand{\cftchapfont}{\bfseries}  %set title font weight
 \renewcommand{\cftchappagefont}{}  %set page number font weight
 \renewcommand{\cftchappresnum}{Chapter }
-\renewcommand{\cftchapaftersnum}{:}
-\renewcommand{\cftchapnumwidth}{5em}
+\renewcommand{\cftchapaftersnum}{:\enspace}
+\settowidth{\cftchapnumwidth}{Chapter 12:\enspace}
 \renewcommand{\cftchapafterpnum}{\vskip\baselineskip} %set correct spacing for entries in single space environment
 \renewcommand{\cftsecafterpnum}{\vskip\baselineskip}  %set correct spacing for entries in single space environment
 \renewcommand{\cftsubsecafterpnum}{\vskip\baselineskip} %set correct spacing for entries in single space environment
@@ -177,7 +177,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Part 1
-\part{Self-Hosting Functional Languages on Meta-tracing JIT}
+\part{Self-Hosting Languages on Meta-tracing JIT Compilers}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
@@ -216,13 +216,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
-% General Performance Characteristics of Tracing JIT Compilers
+% Performance Characteristics of Tracing JIT Compilers
 \inputChapter{performance-tracing-jit}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
 % Meta-tracing & Performance
-\inputChapter{performance-meta-tracing}
+% \inputChapter{performance-meta-tracing}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
