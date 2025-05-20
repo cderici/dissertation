@@ -4,3 +4,28 @@
 \newcommand{\inputMisc}[1]{\input{misc/#1.tex}}
 
 \newcommand{\figPath}[1]{./chapters/#1/figures}
+
+%———————————————————————————————————————————————————————
+%  PART ENTRIES IN THE TABLE OF CONTENT
+%———————————————————————————————————————————————————————
+\makeatletter
+\renewcommand\thepart{\Roman{part}}
+
+%   #1 = title text,   #2 = page number
+\renewcommand*\l@part[2]{%
+  \ifnum\c@tocdepth>-1\relax
+    \addpenalty{-\@highpenalty}
+    \addvspace{2.25em \@plus\p@}
+    \begingroup
+      \parindent \z@
+      \rightskip \@pnumwidth
+      \parfillskip -\rightskip
+      \leavevmode
+      \large\bfseries
+      % actual text
+      Part~\thepart\space#1\hfil\hb@xt@\@pnumwidth{\hss #2}%
+      \par
+      \addvspace{1.0em}
+    \endgroup
+  \fi}
+\makeatother
