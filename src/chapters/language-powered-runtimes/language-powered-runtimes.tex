@@ -1,0 +1,32 @@
+\chapter{Language-Powered Runtimes}
+	\begin{mainpoint}[Chapter Main Point]
+		Languages can influence the capabilities of the runtime they are implemented on.
+
+		What does a self-hosting language look like in practice?
+
+	\end{mainpoint}
+
+	\section{Concrete Implementations of Linklets}
+
+		\begin{mainpoint}
+			Runtimes can represent linklets however they want.
+
+			Chez Scheme represents them as functions, here's how Pycket represents and implements them.
+		\end{mainpoint}
+
+	\section{Enhancing Runtime with Bootstrapping Linklets}
+		\begin{mainpoint}
+			Importing functionality straight from the language in the form of linklets allows the language to shape the runtime.
+		\end{mainpoint}
+		\subsection{Interfacing with the Compiler: Expander Linklet}
+
+		\subsection{Interfacing with the Host Environment: IO \& Thread Linklets}
+			\begin{placeholder}[TODO]
+				rktio
+			\end{placeholder}
+			\begin{placeholder}[TODO]
+				engines
+			\end{placeholder}
+		\subsection{Language Utilities: Fasl \& Regexp Linklets}
+
+	
