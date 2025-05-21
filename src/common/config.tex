@@ -1,0 +1,31 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Prevent abstract to clearpage after title
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\makeatletter
+\renewenvironment{abstract}
+  {\section*{}     % no clearpage, just a heading
+   }
+  {}
+\makeatother
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Trying to prevent \part to automatically clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% % keep \part inline (no automatic clearpages)
+% \titleclass{\part}{straight}
+% \titleformat{\part}[block]{\centering\Large\bfseries}
+%             {\partname~\thepart}{1ex}{}
+% \titlespacing*{\part}{0pt}{2\baselineskip}{\baselineskip}
+
+% % define inline-chapter   ——>  same page as preceding part
+% \titleclass{\ichapter}{straight}[\chapter]   % establish a new heading name
+% \makeatletter
+% \newcommand{\inlinechapter}[1]{%
+%   \titleclass{\chapter}{straight}%  locally kill clearpage
+%   \chapter{#1}%
+%   \titleclass{\chapter}{top}[\part]% restore normal behaviour
+% }
+% \makeatother
