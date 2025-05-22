@@ -1,27 +1,57 @@
-\chapter{Language Correctness \& Completeness under Self-Hosting}
+\chapter{Pycket as a Racket Host: Validation}
 
-	\section{Building the Correctness}
-		We start with the Old Pycket, and built the whole language with
-		correctness preserving additions with bootstrapping linklets.
-		We evaluate untouched Racket code
+	\begin{mainpoint}[Chapter Main Point]
+		Bootstrapped Racket on Pycket works, and is correct and complete.
+	\end{mainpoint}
 
-	\section{Ensuring the Correctness}
-		Old and New Unit Tests
-		Old and New End-to-End/Integration Tests
+	\section{Pycket in Practice}
 
+		\begin{mainpoint}
+			Pycket as a Racket implementation works.
+		\end{mainpoint}
+
+	\section{Correctness by Construction}
+
+		\begin{mainpoint}
+			Pycket is developed into being a full Racket implementation by a correctness preserving process. 
+			
+			(Started with the Old Pycket, added untouched Racket code on top of it.)
+		\end{mainpoint}
+
+		\subsection{Ensuring Correctness of the Linklet Layer}
+			\begin{mainpoint}
+				We have 100\% coverage on the operational semantics as unit tests.
+				
+				Additionally, we symmetrically used the same set of tests with the redex model that realize the operational semantics.
+			\end{mainpoint}
+
+		\subsection{Correctness of Pycket as a Racket Runtime}
+			\begin{mainpoint}
+				We add untouched Racket code on top of Old Pycket to expand functionality.
+
+				Correctness is preserved.
+			\end{mainpoint}
+
+		\subsection{Overall Correctness of the System}
+
+			\begin{mainpoint}
+				... is ensured by the Old and New Unit and end-to-end/integration tests.
+			\end{mainpoint}
 
 	\section{Completeness under Self-Hosting}
 
-	Completeness of a Proramming Language Programming Language
-	implementing \#lang racket/base is a big enough step that allows you to implement 
-	much bigger languages such as \#lang racket or typed/racket
+		\begin{mainpoint}
+			Pycket can evaluate any \#lang that Racket evaluates.
+		\end{mainpoint}
 
-	There is no such thing as "complete" for a 
-	programming language programming language like Racket
+		\subsection{From \#\%kernel to \#lang racket/base}
+			\begin{mainpoint}
+				Racket is a programming language programming language.
 
-	if you have a language that has a decent expansion system that allows you to 
-	modify or create new languages, and you're able to evaluate the language's 
-	expander in your runtime, then you're potentially implementing all the 
-	infinite languages you can make
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				As long as you have the expander to reduce the given language to \#\%kernel, you're golden.
+			\end{mainpoint}
+		
+		\subsection{Beyond \#lang racket/base}
+			\begin{mainpoint}
+				Being able to implement \#lang racket/base is a good springboard to implement larger languages.
+			\end{mainpoint}
