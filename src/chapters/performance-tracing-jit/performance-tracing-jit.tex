@@ -1,7 +1,21 @@
-\chapter{Performance Characteristics of Tracing JIT Compilers}
+\chapter{Performance in Tracing and Meta-Tracing JIT Compilation}
 
-    \section{Original Pycket (OP)'s Performance Characteristics}
+    \begin{mainpoint}[Chapter Main Point]
+        Traces are the real performance currency of a tracing JIT compiler.
 
-    \section{What problem did PyPy solve?}
+        Understanding performance-related concepts, such as traces, warmup, and relevant RPython backend optimizations, as well as reviewing Pycket's characteristics is important for further content in this part.
+    \end{mainpoint}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    \section{Meta-tracing in JIT Compilation}
+        \begin{mainpoint}
+            The problem that PyPy solves:
+
+            Rather than the loops in the interpreter being evaluated, meta-tracing manages to capture the hot loops in the user program being interpreted.
+        \end{mainpoint}
+
+    \section{Pycket's Performance Characteristics}
+        \begin{mainpoint}
+            We introduced in earlier Pycket studies the performance characteristics of Pycket, and already foresaw a part of the problem with self-hosting we're going to discuss in the rest of this part.
+        \end{mainpoint}
+
+
