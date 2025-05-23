@@ -1,13 +1,13 @@
 \chapter{Fundamental Problems with Self-Hosting on a Tracing JIT}
 
-	\begin{mainpoint}[Chapter Main Point]
+	\begin{chapterpoint}
 		There are two critical problems fundamental to self-hosting on a meta-tracing JIT:
 		\begin{itemize}
 			\item The data-dependent interpreter-style code leads to overspecialized, non-reusable traces.
 			\item Computations such as program expansion that's critical to self-hosting is not a suitable target for meta-tracing (because it's all static computation, there's no loop).
 		\end{itemize}
 		There are a bunch of performance issues spawn from these two problems. 
-	\end{mainpoint}
+	\end{chapterpoint}
 
 	\section{Tracing JIT vs Branchy Interpreters}
 		\begin{mainpoint}	

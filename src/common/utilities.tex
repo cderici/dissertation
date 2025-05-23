@@ -26,13 +26,14 @@
    title=\textsc{#1},      % small-caps heading
    before skip=1em, after skip=1em}
 
-% ─── example usage in the document body ────────────────────────────────────────
-% \begin{placeholder}[Section Main Point]
-% Summarise the point you'll flesh out here.  
-% Bullet ideas, references, notes, anything that helps future-you remember.
-% \end{placeholder}
-
-% % A shorter “reminder only” version
-% \begin{placeholder}
-% Paragraph still missing – decide whether to keep!
-% \end{placeholder}
+   \NewTColorBox{chapterpoint}{O{Chapter Main Point}}
+   {enhanced,
+    colback=white,            % interior left plain
+    colframe=purple!70!black,  % visible red border
+    boxrule=1pt,              % border thickness
+    sharp corners,            % square corners
+    width=\linewidth,         % full text width
+    enlarge top by=0.5\baselineskip,
+    enlarge bottom by=0.5\baselineskip,
+    title=\textsc{#1},      % small-caps heading
+    before skip=1em, after skip=1em}
