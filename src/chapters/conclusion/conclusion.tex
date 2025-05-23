@@ -1,11 +1,51 @@
 \chapter{Conclusion \& Final Thoughts}
 
-Does this research alter what was known?
+    \begin{chapterpoint}
+        The research alters the way we think about runtimes, as an isolated separate
+        part of language implementation. We add a new perspective that the runtime
+        can literally be a part of the language, and that the language can have an
+        opinion about how the runtime looks like.
 
-What new avenues of research does this open up?
+        The research adds a new perspective on the performance analysis of tracing JIT compilers.
+        (Everyone has been looking for a hot loop to trace, we show that if you could
+        identify what you want to avoid tracing, you can unlock the full potential.)
 
-Where the research might be applied?
+        We made a solid tool (Pycket) while doing this research, 
+        and it can be used for a lot more research about both language
+        runtimes, and self-hosting.
 
+        The research opens up new avenues of research\dots
 
+    \end{chapterpoint}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    \section{Related Work}
+
+        \begin{mainpoint}
+            There is research related to higher-order dynamic VMs.
+
+            There is research related to tracing JIT VMs for languages.
+
+            There is research related to optimizing VM performance in a meta-tracing context.
+
+            There is research related to self-hosting.
+
+            There is research related to managing abstraction levels.
+
+            There is research related to space concerns \& heap allocated continuations.
+
+        \end{mainpoint}
+
+    \section{Future Work}
+        \begin{mainpoint}
+            There are a few future directions for this research:
+
+            \begin{itemize}
+                \item Solve all the issues with self-hosting on meta-tracing JIT, and realize
+            the full potential of the approach.
+                \item Investigate the language-runtime communication and how it can be improved.
+                \item Survey the characteristics of different VMs (e.g. RacketCS vs Pycket) 
+                across a variety of computations.
+                \item Build on the analysis we provide for the tracing performance of
+            branch-heavy code, and make tracing JITs cool again.
+            \end{itemize}
+        \end{mainpoint}
