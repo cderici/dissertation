@@ -1,19 +1,42 @@
 \chapter{Performance Analysis of Self-Hosting with Meta-tracing}
 
+	\begin{chapterpoint}
+		Pycket did not suffer too much general performance hit by hosting Racket.
+
+		Branchy code makes tracing worse.
+
+		Self-hosting on Pycket brings some memory issues.
+	\end{chapterpoint}
+
 	\section{General Performance Impact of Self-Hosting}
 	
-	How much actual general performance hit did Pycket suffer with self-hosting?
-		- There's no reason NP should be faster than OP.
-		- Argue using CrossBenchmarks that it's not too much worse.
+		\begin{mainpoint}
+			There's no reason Pycket with full Racket should be faster than the original Pycket.
+
+			Warmup is worse.
+		\end{mainpoint}
 
 		\subsection{Cross Benchmarks}
 
+			\begin{mainpoint}
+				Argue using CrossBenchmarks that it's not too much worse.
+			\end{mainpoint}
+
 	\section{Runtime Performance of Tracing Data-Dependent Branchy Code}
+		\begin{mainpoint}
+			Branchy code makes tracing worse.
+		\end{mainpoint}
+
 		\subsection{Regexp experiments}
 		\subsection{Branchy experiments}
 
 	\section{Memory Issues with Self-Hosting}
-		valgrind analyses
-		\subsection{Garbage Collection Pressure}
+		\begin{mainpoint}
+			Long continuation chains causing problems.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+			Big and old objects in the heap is causing GC pressure.
+		\end{mainpoint}
+		
+		valgrind analyses
+
+		\subsection{Garbage Collection Pressure}
