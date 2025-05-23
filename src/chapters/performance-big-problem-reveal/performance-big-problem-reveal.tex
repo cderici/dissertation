@@ -4,14 +4,16 @@
 		There are two critical problems fundamental to self-hosting on a meta-tracing JIT:
 		\begin{itemize}
 			\item The data-dependent interpreter-style code leads to overspecialized, non-reusable traces.
-			\item Computations such as program expansion that's critical to self-hosting is not a suitable target for meta-tracing (because it's all static computation, there's no loop).
+			\item Computations like program expansion that's critical to self-hosting is not suitable for meta-tracing (because it's all static computation, there's no loop).
 		\end{itemize}
 		There are a bunch of performance issues spawn from these two problems. 
 	\end{chapterpoint}
 
-	\section{Tracing JIT vs Branchy Interpreters}
+	\section{Tracing JIT vs Branch-Heavy Code}
 		\begin{mainpoint}	
 		 	Tracing JITs suck at non-tight loops more than they thrive at tight ones.
+
+			Branchiness of a source code by itself doesn't make sense. We need a computation for talking about branchiness.
 
 			The data-dependent interpreter-style code leads to overspecialized, non-reusable traces.
 		\end{mainpoint}
@@ -21,4 +23,6 @@
 			Self-hosting is a different problem from the one meta-tracing solves.
 		
 			There is no loop.
+
+			This problem requires a significant amount of research to solve.
 		\end{mainpoint}
