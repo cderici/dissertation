@@ -11,30 +11,40 @@
 
 \end{center}
 
-\vspace{-2\baselineskip}
+\vspace{-2.7\baselineskip}
 
 %Insert your abstract here
 
 \begin{abstract}
-Meta-tracing JITs promise ``compiler construction kits'' for dynamic languages, yet their behaviour on \emph{self-hosting language runtimes} is still poorly understood.  
-This dissertation shows that a complete Racket implementation can run correctly on Pycket's RPython-based meta-tracing VM, validating the feasibility of efficient, self-hosting execution on a meta-tracer.
 
-The work begins by formalising \emph{linklets}—Racket's fine-grained compilation units—with a new operational semantics and an executable Redex model.
-These semantics give the first rigorous account of linklet evaluation and underpin the remainder of the system.
+Self-hosting a full-scale, higher-order functional language on a meta-tracing
+just-in-time (JIT) compiler promises portable, high-performance
+implementations, yet prior work remains confined to toy subsets. This
+dissertation shows, for the first time, that an \emph{unmodified} Racket
+ecosystem can run atop Pycket, a meta-tracing JIT, while preserving
+semantic fidelity and practical usability.
 
-Using linklets, I re-engineer Pycket's front-end: the reader, macro expander, module system, and large portions of the standard library are imported as pre-compiled linklets.
-The resulting \emph{bootstrapped Pycket} loads, expands, and runs unmodified Racket programs while passing the full regression suite, demonstrating a practical path to portability for the entire Racket stack on a meta-tracing runtime.
+The key insight is to let the language itself steer its own runtime.
+Using \emph{linklets}—formally specified compilation units encapsulating code,
+mutable state, and import/export contracts—we grow a minimal Pycket kernel
+into a complete Racket runtime. Untouched Racket functionality are incrementally
+imported as linklets, and validated by operational-semantics test
+suites, Redex equivalence checks, and a comprehensive coverage.
 
-Although functionally complete, this architecture exposes a \emph{fundamental challenge}: data-driven, branch-heavy phases (e.g.\ macro expansion, regexp engine) scatter hot loops, inflate traces, and magnify garbage-collection cost.
-Micro- and macro-benchmarks, combined with targeted ablation studies, isolate these effects and quantify their impact.
+Performance evaluation reveals two fundamental obstacles: interpreter-shaped
+control flow yields overspecialized, non-reusable traces, and compile-time
+expansion lacks the tight loops that meta-tracing rewards. Although overall
+slowdown is modest, branch-heavy programs inflate warm-up costs, deepen
+continuation chains, and increase garbage-collection pressure.
 
-The dissertation then stakes out two research avenues—supported by prototype evidence—as the most promising ways forward:
-\begin{enumerate}
-  \item \textbf{Stackful execution for memory locality}: selectively running deeply nested interpreter frames on the native stack collapses heap-allocated continuation chains and cuts GC time by up to 30\%.
-  \item \textbf{Hot-branch steering for trace quality}: lightweight runtime feedback diverts the tracer away from unpredictable branches, curbing trace explosion without relying on partial evaluation, which fares poorly on large, branchy workloads.
-\end{enumerate}
+To address these issues we prototype hot-branch detection, and introduce a hybrid CEK + stackful
+evaluation model that trims memory footprint. Together, these techniques
+promise to narrow the performance gap and chart a research path for making
+meta-tracing JITs hospitable to self-hosting languages. Beyond the concrete
+system, the work reframes the runtime as a language-defined artifact
+and offers a versatile platform for future studies on language–runtime
+co-design and tracing-compiler optimization.
 
-Taken together, the prototypes, formal models, and empirical results presented here provide the first definitive proof that a full-featured functional programming language can \emph{indeed self-host} atop a meta-tracing JIT while remaining semantically sound—establishing a solid foundation on which future optimisation research can confidently build.
 \end{abstract}
 
 
