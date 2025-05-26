@@ -1,7 +1,19 @@
-% \placeholder[<heading>]{<optional note>}
+% \todo[<heading>]{<optional note>}
 %   <heading>  – short title that shows in small caps (default: TODO)
 %   <note>     – anything you want to remember (optional)
-\NewTColorBox{placeholder}{O{Paragraph}}
+\NewTColorBox{todo}{O{Todo}}
+  {enhanced,
+   colback=white,          % interior left plain
+   colframe=red!70!black,  % visible red border
+   boxrule=1pt,            % border thickness
+   sharp corners,          % square corners
+   width=\linewidth,       % full text width
+   enlarge top by=0.5\baselineskip,
+   enlarge bottom by=0.5\baselineskip,
+   title=\textsc{#1},      % small-caps heading
+   before skip=1em, after skip=1em}
+
+\NewTColorBox{paragraph-here}{O{Paragraph}}
   {enhanced,
    colback=white,          % interior left plain
    colframe=red!70!black,  % visible red border
