@@ -9,12 +9,16 @@
 	\end{chapterpoint}
 
 	\section{General Performance Impact of Self-Hosting}
-	
+
 		\begin{mainpoint}
 			There's no reason Pycket with full Racket should be faster than the original Pycket.
 
 			Warmup is worse.
 		\end{mainpoint}
+
+		\begin{todo}[Import]
+				Read section 3.2 "Performance" in the Quals written document.
+		\end{todo}
 
 		\subsection{Cross Benchmarks}
 
@@ -36,7 +40,11 @@
 
 			Big and old heap objects cause GC pressure.
 		\end{mainpoint}
-		
+
 		valgrind analyses
+
+		\begin{todo}[Import]
+			Section 3.4.1 Garbage Collection (GC) Pressure of the proposal document is relevant for this section.
+		\end{todo}
 
 		\subsection{Garbage Collection Pressure}

@@ -13,17 +13,21 @@
 	\section{Correctness by Construction}
 
 		\begin{mainpoint}
-			Pycket is developed into a full Racket implementation by a correctness preserving process. 
-			
+			Pycket is developed into a full Racket implementation by a correctness preserving process.
+
 			(Started with the original Pycket, added untouched Racket code on top of it.)
 		\end{mainpoint}
 
 		\subsection{Ensuring Correctness of the Linklet Layer}
 			\begin{mainpoint}
 				We have 100\% coverage on the operational semantics as unit tests.
-				
+
 				Additionally, we symmetrically used the same set of tests with the redex model that realize the operational semantics.
 			\end{mainpoint}
+
+			\begin{todo}[Import]
+				Use section 1.4 "Testing the model" from the Quals written document for testing linklets.
+			\end{todo}
 
 		\subsection{Correctness of Pycket as a Racket Runtime}
 			\begin{mainpoint}
@@ -50,7 +54,7 @@
 
 				As long as you have the expander to reduce the given language to \#\%kernel, you're golden.
 			\end{mainpoint}
-		
+
 		\subsection{Beyond \#lang racket/base}
 			\begin{mainpoint}
 				Being able to implement \#lang racket/base is a good springboard to implement larger languages.
