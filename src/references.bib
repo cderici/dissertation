@@ -1,27 +1,61 @@
-@BOOK
-  {ref1,
-   AUTHOR  = "Kernighan, Brian W. and Ritchie, Dennis M.",
-   TITLE   = "{The C Programming Language Second Edition}",
-   PUBLISHER = "Prentice-Hall, Inc.",
-   YEAR = 1988
-  }
+@inproceedings{anconaRPythonStepReconciling2007,
+  title = {{{RPython}}: {{A Step Towards Reconciling Dynamically}} and {{Statically Typed OO Languages}}},
+  shorttitle = {{{RPython}}},
+  booktitle = {Proceedings of the 2007 {{Symposium}} on {{Dynamic Languages}}},
+  author = {Ancona, Davide and Ancona, Massimo and Cuni, Antonio and Matsakis, Nicholas D.},
+  year = {2007},
+  series = {{{DLS}} '07},
+  pages = {53--64},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/1297081.1297091},
+  urldate = {2019-11-12},
+  abstract = {Although the C-based interpreter of Python is reasonably fast, implementations on the CLI or the JVM platforms offers some advantages in terms of robustness and interoperability. Unfortunately, because the CLI and JVM are primarily designed to execute statically typed, object-oriented languages, most dynamic language implementations cannot use the native bytecodes for common operations like method calls and exception handling; as a result, they are not able to take full advantage of the power offered by the CLI and JVM. We describe a different approach that attempts to preserve the flexibility of Python, while still allowing for efficient execution. This is achieved by limiting the use of the more dynamic features of Python to an initial, bootstrapping phase. This phase is used to construct a final RPython (Restricted Python) program that is actually executed. RPython is a proper subset of Python, is statically typed, and does not allow dynamic modification of class or method definitions; however, it can still take advantage of Python features such as mixins and first-class methods and classes. This paper presents an overview of RPython, including its design and its translation to both CLI and JVM bytecode. We show how the bootstrapping phase can be used to implement advanced features, like extensible classes and generative programming. We also discuss what work remains before RPython is truly ready for general use, and compare the performance of RPython with that of other approaches.},
+  isbn = {978-1-59593-868-8},
+  keywords = {.NET,JVM,Python},
+  file = {C:\Users\caner\Zotero\storage\MVZCMYBI\Ancona et al. - 2007 - RPython A Step Towards Reconciling Dynamically an.pdf}
+}
 
-@BOOK
-  {ref2,
-   AUTHOR  = "George P. Burdell",
-   TITLE   = "{Myths and Their Origins}",
-   PUBLISHER = "Real Books, Inc.",
-   YEAR = 2016 
-  }
+@article{bolzMetatracingMakesFast,
+  title = {Meta-Tracing Makes a Fast {{Racket}}},
+  author = {Bolz, Carl Friedrich and Pape, Tobias and Siek, Jeremy and {Tobin-Hochstadt}, Sam},
+  pages = {7},
+  abstract = {Tracing just-in-time (JIT) compilers record and optimize the instruction sequences they observe at runtime. With some modifications, a tracing JIT can perform well even when the executed program is itself an interpreter, an approach called meta-tracing. The advantage of meta-tracing is that it separates the concern of JIT compilation from language implementation, enabling the same JIT compiler to be used with many different languages. The RPython meta-tracing JIT compiler has enabled the efficient interpretation of several dynamic languages including Python (PyPy), Prolog, and Smalltalk. In this paper we present initial findings in applying the RPython JIT to Racket. Racket comes from the Scheme family of programming languages for which there are mature static optimizing compilers. We present the result of spending just a couple person-months implementing and tuning an implementation of Racket written in RPython. The results are promising, with a geometric mean equal to Racket's performance and within a factor of 2 slower than Gambit and Larceny on a collection of standard Scheme benchmarks. The results on individual benchmarks vary widely. On the positive side, our interpreter is sometimes up to two to six times faster than Gambit, an order of magnitude faster than Larceny, and two orders of magnitude faster than the Racket JIT compiler when making heavy use of continuations. On the negative side, our interpreter is sometimes three times slower than Racket, nine times slower than Gambit, and five times slower than Larceny.},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\2RGFN3VC\Bolz et al. - Meta-tracing makes a fast Racket.pdf}
+}
 
-@article{ref3,
-	title = {Can Quantum-Mechanical Description of Physical Reality Be Considered Complete?},
-	author = {Einstein, A. and Podolsky, B. and Rosen, N.},
-	journal = {Phys. Rev.},
-	volume = {47},
-	issue = {10},
-	pages = {777--780},
-	year = {1935},
-	publisher = {American Physical Society},
-	doi = {10.1103/PhysRev.47.777}
+@inproceedings{pycketmain,
+  title = {Pycket: {{A Tracing JIT}} for a {{Functional Language}}},
+  shorttitle = {Pycket},
+  booktitle = {Proceedings of the 20th {{ACM SIGPLAN International Conference}} on {{Functional Programming}}},
+  author = {Bauman, Spenser and Bolz, Carl Friedrich and Hirschfeld, Robert and Kirilichev, Vasily and Pape, Tobias and Siek, Jeremy G. and {Tobin-Hochstadt}, Sam},
+  year = {2015},
+  series = {{{ICFP}} 2015},
+  pages = {22--34},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/2784731.2784740},
+  urldate = {2019-03-22},
+  abstract = {We present Pycket, a high-performance tracing JIT compiler for Racket. Pycket supports a wide variety of the sophisticated features in Racket such as contracts, continuations, classes, structures, dynamic binding, and more. On average, over a standard suite of benchmarks, Pycket outperforms existing compilers, both Racket's JIT and other highly-optimizing Scheme compilers. Further, Pycket provides much better performance for Racket proxies than existing systems, dramatically reducing the overhead of contracts and gradual typing. We validate this claim with performance evaluation on multiple existing benchmark suites. The Pycket implementation is of independent interest as an application of the RPython meta-tracing framework (originally created for PyPy), which automatically generates tracing JIT compilers from interpreters. Prior work on meta-tracing focuses on bytecode interpreters, whereas Pycket is a high-level interpreter based on the CEK abstract machine and operates directly on abstract syntax trees. Pycket supports proper tail calls and first-class continuations. In the setting of a functional language, where recursion and higher-order functions are more prevalent than explicit loops, the most significant performance challenge for a tracing JIT is identifying which control flows constitute a loop---we discuss two strategies for identifying loops and measure their impact.},
+  isbn = {978-1-4503-3669-7},
+  keywords = {contracts,functional languages,JIT compilers,Racket,tracing},
+  file = {C:\Users\caner\Zotero\storage\2JP3BUTY\Bauman et al. - 2015 - Pycket A Tracing JIT for a Functional Language.pdf}
+}
+
+@inproceedings{pypy-main,
+  title = {Tracing the {{Meta-level}}: {{PyPy}}'s {{Tracing JIT Compiler}}},
+  shorttitle = {Tracing the {{Meta-level}}},
+  booktitle = {Proceedings of the 4th {{Workshop}} on the {{Implementation}}, {{Compilation}}, {{Optimization}} of {{Object-Oriented Languages}} and {{Programming Systems}}},
+  author = {Bolz, Carl Friedrich and Cuni, Antonio and Fijalkowski, Maciej and Rigo, Armin},
+  year = {2009},
+  series = {{{ICOOOLPS}} '09},
+  pages = {18--25},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/1565824.1565827},
+  urldate = {2019-03-22},
+  abstract = {We attempt to apply the technique of Tracing JIT Compilers in the context of the PyPy project, i.e., to programs that are interpreters for some dynamic languages, including Python. Tracing JIT compilers can greatly speed up programs that spend most of their time in loops in which they take similar code paths. However, applying an unmodified tracing JIT to a program that is itself a bytecode interpreter results in very limited or no speedup. In this paper we show how to guide tracing JIT compilers to greatly improve the speed of bytecode interpreters. One crucial point is to unroll the bytecode dispatch loop, based on two kinds of hints provided by the implementer of the bytecode interpreter. We evaluate our technique by applying it to two PyPy interpreters: one is a small example, and the other one is the full Python interpreter.},
+  isbn = {978-1-60558-541-3},
+  file = {C:\Users\caner\Zotero\storage\ZW64A5W8\Bolz et al. - 2009 - Tracing the Meta-level PyPy's Tracing JIT Compile.pdf}
 }
