@@ -2,7 +2,7 @@
 	\begin{chapterpoint}
 		Languages can influence the capabilities of the runtime they are implemented on.
 
-		What does a self-hosting language look like in practice?
+		Self-hosting of Racket is realized on Pycket.
 
 	\end{chapterpoint}
 
@@ -47,3 +47,18 @@
 			\end{todo}
 		\subsection{Language Utilities: Fasl \& Regexp Linklets}
 
+	\section{Growing Pycket into full Racket}
+
+		\begin{mainpoint}
+            How it's all tied up together to demonstrate the self-hosting hypothesis.
+
+			\textit{Self-hosting of full-scale functional languages on meta-tracing just-in-time (JIT) compilers is achievable.}
+        \end{mainpoint}
+
+        \begin{todo}
+			A rudimentary interpreter can be bootstrapped into a full language implementation by importing linklets into the runtime.
+		\end{todo}
+
+		\begin{todo}[Import]
+			Section 3.3 Making Pycket an Independent Self-Hosting Racket of the proposal document is relevant for this section.
+		\end{todo}

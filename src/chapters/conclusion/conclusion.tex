@@ -1,16 +1,7 @@
 \chapter{Conclusion \& Final Thoughts}
 
     \begin{chapterpoint}
-        The research expands the way we think about runtimes, rather than an isolated separate
-        part of a language implementation, a runtime can literally be a part of the language, 
-        and that the language can have an opinion about how the runtime looks like.
-
-        The research reframes performance analysis of tracing JITs: instead of only looking for hot loops to trace, identifying what to avoid tracing can unlock full potential.
-
-        We built a solid tool (Pycket), useful for further research into both language runtimes and self-hosting.
-
-        The research opens up new avenues of research\dots
-
+        Conclude the dissertation.
     \end{chapterpoint}
 
     \section{Related Work}
@@ -30,6 +21,40 @@
 
         \end{mainpoint}
 
+    \section{Research Contributions}
+		\begin{mainpoint}
+			\begin{itemize}
+                \item This demonstrates with evidence that it is possible to have a working and complete self-hosting functional programming language on a meta-tracing JIT compiler.
+                \item We revealed and analyzed a fundamental problem with self-hosting on meta-tracing JITs and argued it is solvable, proposing solution avenues clearly worth further study.  This is a significant contribution to PL research.
+                \item We detailed a big problem in tracing JITs in general--you lose more when slow than you gain when fast, especially in branch-heavy code--and showed why solving it would be a major contribution.
+                \item We built a solid tool (Pycket), useful for further research into both language runtimes and self-hosting.
+                \item The research reframes performance analysis of tracing JITs: instead of only looking for hot loops to trace, identifying what to avoid tracing can unlock full potential.
+                \item The research expands the way we think about runtimes, rather than an isolated separate part of a language implementation, a runtime can literally be a part of the language, and that the language can have an opinion about how the runtime looks like.
+		    \end{itemize}
+		\end{mainpoint}
+
+		\begin{paragraph-here}
+			A working system where you run full Racket (is a contribution).
+		\end{paragraph-here}
+
+    \section{Significance}
+		\begin{mainpoint}
+			% Why is this research cool/exciting/important?
+			Paves the way and provides an example for future work on
+			different ways of self-hosting languages.
+
+			It's a step towards more intelligent communication between
+			the language and the runtime.
+
+			Having another Racket implementation symmetric to RacketCS
+			enables further research on language runtimes for functional
+			programming languages.
+
+			It's also beneficial for furthering meta-tracing research.
+
+            The research opens up new avenues of research\dots
+		\end{mainpoint}
+
     \section{Future Work}
         \begin{mainpoint}
             There are a few future directions for this research:
@@ -38,7 +63,7 @@
                 \item Solve all the issues with self-hosting on meta-tracing JIT, and realize
             the full potential of the approach.
                 \item Investigate the language-runtime communication and how it can be improved.
-                \item Survey the characteristics of different VMs (e.g. RacketCS vs Pycket) 
+                \item Survey the characteristics of different VMs (e.g. RacketCS vs Pycket)
                 across a variety of computations.
                 \item Build on the analysis we provide for the tracing performance of
             branch-heavy code, and make tracing JITs cool again.

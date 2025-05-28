@@ -1,2 +1,56 @@
 % Tracing JITs and Meta-Tracing Frameworks
 \chapter{Tracing JITs and Meta-Tracing Frameworks}
+
+    \begin{chapterpoint}
+        Introduce tracing JITs and meta-tracing.
+        Introduce RPython, and trace internals.
+    \end{chapterpoint}
+
+    \begin{paragraph-here}
+        Tracing JIT compilers are based on two main assumptions, programs spend most of their runtime in loops, and several iterations of the same loop are likely to take similar code paths \cite{pypy-main}
+        The idea is to trace and generate optimized machine code for these frequently taken code paths to improve performance.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}
+        What is a trace?
+
+        A trace in a tracing JIT compiler is a ......
+    \end{paragraph-here}
+
+    \begin{paragraph-here}
+        Trace looks like this ...................
+    \end{paragraph-here}
+
+    \begin{paragraph-here}
+        Traces are the real performance currency of a tracing JIT compiler.
+        Understanding performance-related concepts, such as traces, warmup, and relevant RPython backend optimizations, as well as reviewing Pycket's characteristics is important for this research.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}
+        The tracer is a component of a JIT compiler that is responsible for tracing the execution of the program and generating traces.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}
+        Whenever a hot loop is detected, the tracer generates a trace that captures the execution of the loop.
+
+        For a given program, a time that it takes for the JIT to find and trace all the hot loops is called the warmup time.
+    \end{paragraph-here}
+
+    \section{Meta-tracing in JIT Compilation}
+        \begin{mainpoint}
+            The problem that PyPy solves:
+
+            Rather than the loops in the interpreter being evaluated, meta-tracing manages to capture the hot loops in the user program being interpreted.
+        \end{mainpoint}
+
+        \begin{paragraph-here}
+            If the program that's being JIT compiled is a language interpreter that's interpreting a user program, then a naive JIT compiler will try to capture the hot loops in the interpreter itself, rather than in the user program being interpreted. The most significant loop in an interpreter is the main dispatch loop. For a functional programming language, this would typically be a recursive descent loop that evaluate a sub-expression at each iteration. But this violates the second assumption of the tracing JITs where we assume several iterations of a hot loop take similar code paths. Because it is highly unlikely that the interpreter keeps evaluating the same expression over and over again.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            Besides, by its nature tracing captures the most essential part of the program being executed, and on an interpreter interpreting a user program, the main dispatch loop of the interpreter is not the most essential part, the hot loops within the user program are the most essential parts. So we really want the JIT compiler to capture the hot loops in the user program, rather than the interpreter itself.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            Meta-tracing defined in PyPy \cite{pypy-main} solves exactly that. It manages to capture the hot loops in the user program being interpreted, rather than the interpreter itself. When we evaluate a Racket program on Pycket, Pycket's meta-tracing JIT compiler captures the hot loops in the Racket program, rather than the CEK interpreter in RPython itself.
+        \end{paragraph-here}
