@@ -167,7 +167,7 @@
 {\normalfont\bfseries\filcenter}{\MakeUppercase\chaptertitlename\ \thechapter}{0pt}{\MakeUppercase{#1}}  %spacing between titles
 \titlespacing*{\chapter}
   {0pt}{0pt}{30pt}	%controls vertical margins on title
-  
+
 % Adjust section title formatting
 \titleformat{\section}{\normalfont\bfseries}{\thesection}{1em}{#1}
 
@@ -185,27 +185,32 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Part 1
-\part{Self-Hosting Languages on Meta-tracing JIT Compilers}
+% \part{Self-Hosting Languages on Meta-tracing JIT Compilers}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
+% Tracing JITs and Meta-Tracing Frameworks
+\inputChapter{rpython}
+%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%
 % PROGRAMMING LANGUAGES & PORTABILITY
-\inputChapter{pl-portability}
+\inputChapter{linklets}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
 % Language-Powered Runtimes
-\inputChapter{language-powered-runtimes}
+\inputChapter{pycket}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
 % Full-Scale Language Self-Hosting
-\inputChapter{pycket-full-scale-racket}
+% \inputChapter{pycket-full-scale-racket}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
 % Pycket as a Racket Host: Validation
-\inputChapter{new-pycket-correct}
+\inputChapter{validation}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
@@ -215,17 +220,17 @@
 
 %%%%%%%%%%%%%%%%
 % Conclusion of Part 1
-\inputChapter{conclusion-part1}
+% \inputChapter{conclusion-part1}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Part 2
-\part{Performance Analysis of Self-Hosting with Meta-tracing}
+% \part{Performance Analysis of Self-Hosting with Meta-tracing}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
 % Performance Characteristics of Tracing JIT Compilers
-\inputChapter{performance-tracing-jit}
+% \inputChapter{performance-tracing-jit}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
@@ -235,22 +240,22 @@
 
 %%%%%%%%%%%%%%%%
 % Big reveal of the fundamental problem with self-hosting & meta-tracing
-\inputChapter{performance-big-problem-reveal}
+\inputChapter{problem}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
 % Performance characteristics of the big problem
-\inputChapter{performance-big-problem-analysis}
+\inputChapter{analysis}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
 % Proposing solution approaches that are worthy of further investigation
-\inputChapter{performance-big-problem-solutions}
+\inputChapter{solution}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%
 % Conclusion of Part 2
-\inputChapter{conclusion-part2}
+% \inputChapter{conclusion-part2}
 %%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -291,7 +296,7 @@
 %\addcontentsline{toc}{chapter}{References}  %add References section to Table of Contents
 
 %%%%%%%%%%%%%%%%
-% Vita 
+% Vita
 % Only for PhD students
 % Masters students remove this line
 %%%%%%%%%%%%%%%%
