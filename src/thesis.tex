@@ -14,6 +14,10 @@
 \usepackage[page]{appendix}  %for appendices
 \usepackage{rotating}  %for rotated, landscape images
 \usepackage[most]{tcolorbox} %for my todo boxes
+%\usepackage{lmodern}
+%\usepackage{tgtermes}
+% Linux Biolinum Bold
+\usepackage{times}
 
 \input{common/config.tex}
 
@@ -98,8 +102,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Format for Table of Contents
-\renewcommand{\cftchapdotsep}{\cftnodots}
-\renewcommand{\cftsecdotsep}{\cftnodots}
+% \renewcommand{\cftchapdotsep}{\cftnodots}
+% \renewcommand{\cftsecdotsep}{\cftnodots}
 \renewcommand{\cftsubsecdotsep}{\cftnodots}
 
 \renewcommand{\cftchapfont}{\bfseries}  %set title font weight
@@ -112,16 +116,16 @@
 \renewcommand{\cftsubsecafterpnum}{} %set correct spacing for entries in single space environment
 \renewcommand{\cftsubsubsecafterpnum}{} %set correct spacing for entries in single space environment
 
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{1}
 %format title font size and position (this also applys to list of figures and list of tables)
 \titleformat{\chapter}[display]
 {\normalfont\bfseries\filcenter}{\chaptertitlename\ \thechapter}{0pt}{\MakeUppercase{#1}}
 
 \renewcommand\contentsname{Table of Contents}
 \currentpdfbookmark{Table of Contents}{TOC}
-\begin{singlespace}
+%\begin{singlespace}
 \tableofcontents
-\end{singlespace}
+%\end{singlespace}
 
 
 \clearpage
