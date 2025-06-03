@@ -1,26 +1,40 @@
 \chapter{Performance Analysis of Self-Hosting with Meta-tracing}
 
-	\begin{chapterpoint}
-		Pycket did not suffer too much general performance hit by hosting Racket.
+	\paragraph{}%
+	 Self-hosting imposes performance overhead on a language runtime in several ways, as detailed in Chapter~\ref{chapter:problem}. Although the exact symptoms vary with the design of a given runtime and the hosted language, the underlying issues remain the same on every meta-tracing system.
 
-		Branchy code makes tracing worse.
+	\paragraph{}%
+	 Data-dependent, interpreter-style, branch-heavy code still produces overspecialized, non-reusable traces; self-hosting still raises memory-usage concerns; and computations that are critical to self-hosting—such as program expansion—remain poorly suited to meta-tracing because they contain no hot loops for the tracer to capture.
 
-		Self-hosting on Pycket brings some memory issues.
-	\end{chapterpoint}
+	\paragraph{}%
+	 In this chapter we study one concrete system, \emph{Racket on Pycket}, in detail.  We first quantify the global performance impact of self-hosting, then examine two specific problems: branch-heavy code (\S\ref{section:branchy}) and memory pressure caused by self-hosting (\S\ref{section:memory}).  The memory study combines footprint measurements with an analysis of garbage collection (GC) pressure introduced by self-hosting features.
 
-	\section{General Performance Impact of Self-Hosting}
+	\section{Performance Impact of Self-Hosting on Overall System}
 
-		\begin{mainpoint}
-			There's no reason Pycket with full Racket should be faster than the original Pycket.
+		\paragraph{}%
+		 Recall from Chapter~\ref{chapter:pycket} that the original Pycket front-end invoked the Racket executable to expand a program—including its \verb|#lang| line—before evaluation.  The new self-hosting front-end instead expands programs in Racket code using the bootstrapping linklets.  This architectural change has both costs and benefits.
 
-			Warmup is worse.
-		\end{mainpoint}
+		\paragraph{}%
+		 Also recall that Pycket is a tracing JIT compiler: its primary goal is still to find and trace hot loops in user programs.  With the new front-end, however, part of every “user program’’ is now the language program that expands the user code. After expansion, the fully expanded \verb|#%kernel| program is identical whether it is produced by the external Racket binary or by the expander linklet. In other words, the meta-traced CEK interpreter evaluates the same expanded program in both cases.
 
-		\begin{todo}[Import]
-				Read section 3.2 "Performance" in the Quals written document.
-		\end{todo}
+		\paragraph{}%
+		 Thus, the performance impact of self-hosting manifests in two places:
+		\begin{enumerate}
+		\item the performance of \emph{program expansion} (i.e.\ evaluating the expander on the user program), and
+		\item the performance of \emph{evaluating the expanded user program}.
+		\end{enumerate}
 
-		\subsection{Cross Benchmarks}
+		\subsection{Performance of Program Expansion}
+
+			\paragraph{Module Evaluation}%
+			Although the linklet mechanism gives Pycket many Racket facilities “for free’’—notably a full Racket REPL—it also deprives Pycket of most control over how core library modules are evaluated.  As soon as Pycket loads the module, macro, and linklet systems from the bootstrapping linklets, their implementation becomes opaque to Pycket.
+
+			This opacity simplifies comparisons between Pycket and Racket because both systems execute exactly the same high-level implementation of modules, macros, and other services exported by the bootstrap linklets.  Unfortunately, because Pycket has no static view of that implementation, it cannot inject JIT hints (e.g.\ \verb|@jit.unroll_safe|) into the relevant Racket functions the way it does for its own CEK interpreter.  Given that Pycket’s JIT is generated automatically by RPython, specializing it for high-level Racket code is non-trivial.
+
+			\paragraph{}%
+			Consequently, Pycket often interprets expander-level code that the Racket VM compiles more aggressively, increasing total run time and, in some cases, warm-up time.
+
+		\subsection{Performance of Evaluating Fully-Expanded Programs}
 
 			\begin{mainpoint}
 				Argue using CrossBenchmarks that it's not too much worse.
@@ -33,8 +47,11 @@
 
 		\subsection{Regexp experiments}
 		\subsection{Branchy experiments}
+			\label{section:branchy}
 
 	\section{Memory Issues with Self-Hosting}
+		\label{section:memory}
+
 		\begin{mainpoint}
 			Long continuation chains cause problems.
 
