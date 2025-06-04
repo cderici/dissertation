@@ -45,6 +45,61 @@
 			Branchy code makes tracing worse.
 		\end{mainpoint}
 
+	\begin{figure}[tbp]
+		\centering
+		% ---------- RPython trace ----------------------------------------
+\begin{minipage}{0.9\textwidth}
+\begin{lstlisting}[language=rptrace]
+# start of the trace (preamble)
+label(i0, p1, descr="124248176")
+i3  = int_add(i0, 1)
+p4  = getfield_gc_r(p1)
+i5  = strgetitem(p4, i0)
+i7  = int_eq(i5, 100)
+guard_false(i7)
+i8  = getfield_gc_i(p1)
+i9  = int_lt(i3, i8)
+guard_true(i9)
+# peeled-iteration (inner loop)
+label(i3, p1, p4, i8, descr="124248256")
+i11 = int_add(i3, 1)
+i12 = strgetitem(p4, i3)
+i14 = int_eq(i12, 100)
+guard_false(i14)
+i15 = int_lt(i11, i8)
+guard_true(i15)
+# jump
+jump(i11, p1, p4, i8, descr="124248256")
+\end{lstlisting}
+\end{minipage}
+
+		\vspace{0.8em} % small vertical gap
+
+		% ---------- Racket driver code -----------------------------------
+		\begin{minipage}{0.9\textwidth}
+\begin{lstlisting}[language=racket]
+#lang racket/base
+
+(define l (make-string 4000 #\a))
+(define r (make-string 4000 #\p))
+(define str-big (string-append l "defg" r))
+
+(define reg-r (regexp "defg"))
+(define iter 1000000)
+
+(time
+(for ([i (in-range iter)])
+	(regexp-match reg-r str-big)))
+\end{lstlisting}
+		\end{minipage}
+
+		\caption{\small Trace of Pycket’s regexp (in RPython) matching
+				{\tt\#rx"defg"}.}
+		\label{fig:regexp-trace}
+	\end{figure}
+
+
+
 		\subsection{Regexp experiments}
 		\subsection{Branchy experiments}
 			\label{section:branchy}
