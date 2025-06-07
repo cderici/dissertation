@@ -5,7 +5,12 @@
 
 \newcommand{\figPath}[1]{./chapters/#1/figures}
 
-\newcommand{\inputTrace}[2]{\input{chapters/#1/#2.tex}}
+\newcommand{\inputSub}[2]{\input{chapters/#1/#2.tex}}
+
+\newcommand\figref[1]{Figure~\ref{#1}}
+\newcommand{\chapterRef}[1]{Chapter~\ref{#1}}
+% Inline racket
+\newcommand{\racketcode}[1]{\lstinline[basicstyle=\ttfamily\small,language=racket]{#1}}
 
 %———————————————————————————————————————————————————————
 %  PART ENTRIES IN THE TABLE OF CONTENT
