@@ -26,7 +26,19 @@
    before skip=1em, after skip=1em}
 
 
-\NewTColorBox{mainpoint}{O{Section Main Point}}
+\NewTColorBox{mainpoint}{O{Main Point}}
+  {enhanced,
+   colback=white,          % interior left plain
+   colframe=blue!70!black,  % visible red border
+   boxrule=1pt,            % border thickness
+   sharp corners,          % square corners
+   width=\linewidth,       % full text width
+   enlarge top by=0.5\baselineskip,
+   enlarge bottom by=0.5\baselineskip,
+   title=\textsc{#1},      % small-caps heading
+   before skip=1em, after skip=1em}
+
+\NewTColorBox{sectionpoint}{O{Section Main Point}}
   {enhanced,
    colback=white,          % interior left plain
    colframe=blue!70!black,  % visible red border
