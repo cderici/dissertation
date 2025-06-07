@@ -16,7 +16,7 @@
 	\end{todo}
 
 
-	\section{Tracing JIT vs Branch-Heavy Code}
+	\section{Tracing Branch-Heavy Code}
 		\begin{mainpoint}
 		 	Tracing JITs suck at non-tight loops more than they thrive at tight ones.
 
@@ -25,7 +25,7 @@
 			The data-dependent interpreter-style code leads to overspecialized, non-reusable traces.
 		\end{mainpoint}
 
-	\section{The Nature of the Beast}
+	\section{The Nature of the Beast: Tracing Data-Dependent Code}
 		\begin{mainpoint}
 			Self-hosting is a different problem from the one meta-tracing solves.
 
@@ -33,3 +33,29 @@
 
 			This problem requires a significant amount of research to solve.
 		\end{mainpoint}
+
+
+
+		\inputSub{problem}{reg-match-figure}
+
+		\paragraph{}%
+		Tracing interpreter-style programs with complex control-flow paths is
+		a known weakness of JIT compilers. The large number of indirections
+		not only cripple the JIT optimizations but also causes the loops to be
+		segmented into many highly data driven traces. For
+		example, consider the following program in \figref{fig:regexp}, which
+		is a very simple regular expression matcher. It is highly simplified
+		and some of the rules are removed for space.
+
+		%
+		\paragraph{}%
+		Tracing this program running with an input regexp, say
+		$\mathtt{\#}$\racketcode{rx"defg"}, trying to match it against an
+		input string produces a trace that follows the control-flow path of
+		the program for that input, making tracing quite wasteful because for
+		any other input regexp, say $\mathtt{\#}$\racketcode{rx"a*"} which
+		follows an entirely different path on the program, the JIT produces,
+		compiles and optimizes yet another trace for that input, unable to use
+		the previously generated trace. This problem not only increases the
+		warmup time but also produces traces that are unlikely to be
+		frequently re-used.
