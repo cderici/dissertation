@@ -2,6 +2,10 @@
 
 	\label{chapter:analysis}
 
+	\begin{chapterpoint}
+		All the issues we talked about in the previous chapter are clearly observable on a concrete system, namely Pycket.
+	\end{chapterpoint}
+
 	\paragraph{}%
 	 	Self-hosting introduces performance issues on a language runtime in several ways, as detailed in Chapter~\ref{chapter:problem}. Although the exact symptoms vary with the design of a given runtime and the hosted language, the underlying issues remain the same on every meta-tracing system.
 
@@ -12,16 +16,20 @@
 	 	In this chapter we study in detail and demonstrate the impact of these performance issues on a concrete system, namely \emph{Racket on Pycket}. Recall from \chapterRef{chapter:pycket} that the original Pycket front-end invoked the stand-alone Racket executable to load core libraries, as well as the -\verb|#lang|-language, and fully expand the user program before handing the expanded \verb|#%kernel| form to its CEK back-end. The new self-hosting front-end instead runs the expander entirely inside Pycket: it evaluates the bootstrapping linklets that implement the expander, uses them to expand the user program, and then evaluates the resulting core program—all on the CEK back-end from the outset. This architectural shift brings clear benefits, but it also introduces fresh costs.
 
 	\paragraph{}%
-		Note that, Pycket remains a tracing JIT compiler whose primary objective is to identify and trace hot loops in \emph{user} code. But with the new front-end, part of every “user program’’ is now the language program that expands the user code. After expansion, the fully expanded \verb|#%kernel| program is identical to what the Racket stand-alone binary would generate. Thus, the meta-traced CEK interpreter ultimately executes the same core program in both configurations—the difference lies only in where and how that program is obtained.
+		Note that, Pycket remains a tracing JIT compiler whose primary objective is to identify and trace hot loops in \emph{user} code. But with the new front-end, part of every \smartQL user program\smartQR is now the language program that expands the user code. After expansion, the fully expanded \verb|#%kernel| program is identical to what the Racket stand-alone binary would generate. Thus, the meta-traced CEK interpreter ultimately executes the same core program in both configurations—the difference lies only in where and how that program is obtained.
 
 	\paragraph{}%
-		In the remainder of this chapter, we proceed in the same order a program travels through the system. We first cover Pycket’s baseline performance profile and review those RPython back-end optimizations most relevant to our study (\S\ref{section:pycket-performance-characteristics}). Then we examine how the runtime cooperates with Racket’s module system to improve the loading of core libraries (\S\ref{section:module-and-language-loading}). Afterward, we analyze the cost of program expansion itself—a step now executed inside Pycket (\S\ref{section:expander-performance}). Finally, we measure how self-hosting affects the performance of the \emph{expanded} user program (\S\ref{section:cross-benchmarks}).
+		In the remainder of this chapter, we proceed in the same order a program travels through the system. We first cover Pycket's baseline performance profile and review those RPython back-end optimizations most relevant to our study (\S\ref{section:pycket-performance-characteristics}). Then we examine how the runtime cooperates with Racket's module system to improve the loading of core libraries (\S\ref{section:module-and-language-loading}). Afterward, we analyze the cost of program expansion itself—a step now executed inside Pycket (\S\ref{section:expander-performance}). Finally, we measure how self-hosting affects the performance of the \emph{expanded} user program (\S\ref{section:cross-benchmarks}).
 
 	\paragraph{}%
 		In Chapter~\ref{chapter:solution}, we propose concrete remedies for each challenge we expose and, supported by preliminary evidence, argues that these directions warrant deeper investigation as a general strategy for improving the performance of self-hosting on meta-tracing systems.
 
 	\section{Pycket's Performance Characteristics}
 	\label{section:pycket-performance-characteristics}
+
+	\begin{sectionpoint}
+		Pycket is generally fast, but self-hosting exposes performance issues.
+	\end{sectionpoint}
 
 	\paragraph{}%
 		With an extensive suite of micro- and macro-benchmarks plus larger real-world experiments, the existing Pycket implementation consistently demonstrates competitive performance when executing Racket code. It benefits from the generic optimizations provided by the RPython framework—including common-subexpression elimination, copy propagation, constant folding, loop-invariant code motion, malloc removal, and the inlining that naturally arises from tracing \cite{loop-aware:12,hotpath:06,malloc-removal:11}. It also benefits from interpreter-specific improvements such as environment pruning, data-structure specialization, strategy objects, and gradual-typing features like hidden classes. Nevertheless, earlier studies revealed workloads on which Pycket lags behind every other system—namely “almost exclusively recursive programs with data-dependent control flow in the style of an interpreter over an AST” \cite{pycketmain,pycketmain2}. Investigating these cases launched the present line of research.
