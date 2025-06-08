@@ -64,8 +64,50 @@
 			Self-hosting introduces a "language and user program expansion" overhead, which Pycket didn't have before.
 		\end{sectionpoint}
 
-		\paragraph{Module Evaluation}%
-		The expansion was \%100 opaque to the Old Pycket before. With the new frontend, the New Pycket not only gained many Racket facilities "for free", but also gained some transparency as well as control over those facilities.
+		\begin{paragraph-here}
+			Racket runtime expands the language and sets up the environment *before* expanding user program.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Therefore, the entire language needs to be expanded before we evaluate user program.
+		\end{paragraph-here}
+-
+		\begin{paragraph-here}
+			That can be costly ?? can we get numbers of modules need to be loaded for langs?
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Self-hosting adds THIS-MUCH extra work on the front-end.
+		\end{paragraph-here}
+
+		\begin{show-experiment}
+			Across all benchmarks, show the time spent on the frontend, without using compiled.
+		\end{show-experiment}
+
+		\begin{paragraph-here}
+			Paragraph to discuss the experiment and results.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Expansion was opaque to OP, NP has transparency and control over facilities.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			For example, Pycket can use compiled code via `use-compiled-code`
+		\end{paragraph-here}
+
+		\begin{show-experiment}
+			Show the time spent on the frontend, using compiled code.
+		\end{show-experiment}
+
+		\begin{paragraph-here}
+			Paragraph to discuss the experiment and results.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Expansion of all modules including user program are all subject to expander's performance.
+		\end{paragraph-here}
+
 
 	\section{Performance of Program Expansion}
 	\label{section:expander-performance}
