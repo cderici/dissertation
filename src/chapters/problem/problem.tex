@@ -43,7 +43,7 @@
 		The picture changes when control flow branches unpredictably or when large interpreter-like dispatch loops dominate execution. Here Pycket must juggle deep continuation structures, environment chains, and dynamically typed tag checks, all of which inflate trace size and lengthen warm-up. Garbage-collector telemetry (in \sectionRef{subsection:memory}) further shows that such workloads allocate an order of magnitude more temporary objects per unit time than steady-state numeric code, stressing the nursery and triggering full collections. These observations motivate the detailed analysis that follows.
 
 	\paragraph{}%
-		To explain the core issue we first outline how Pycket currently detects loops. While for the low-level languages such as in a byte-code interpreter a program counter is used to detect loops, in Pycket the focus is on function applications, since Pycket works on program ASTs and the only AST that may create loops is an application. As reported in the previous studies, Pycket utilizes two techniques, namely the two-state tracking and the use of a dynamic call-graph. In both techniques the idea is to eliminate the “false-loops” among all the observed trace headers (i.e. potential start of a loop). The two-state tracking encodes the trace headers as a pair of a lambda body and its call-site, and the call-graph method detects cycles on a call-graph that's dynamically generated within the interpreter to handle extra levels of indirection. These approaches together are proven to be very effective in tracing code with a heavy use of shared control-flow indirections, such as the contract system \cite{pycketmain,pycketmain2}.
+		To develop the core issue we first recall from \ref{chapter:pycket} how Pycket currently detects loops. While for the low-level languages such as in a byte-code interpreter a program counter is used to detect loops, in Pycket the focus is on function applications, since Pycket works on program ASTs and the only AST that may create a loop is an application. Whether it is a basic counter or a compound state, the idea is that a loop is registered as soon as a program state transitions to one of the previous states. As reported in the previous studies, Pycket utilizes two techniques, namely the two-state tracking and the use of a dynamic call-graph. In both techniques the idea is to eliminate the “false-loops” among all the observed trace headers (i.e. potential start of a loop). The two-state tracking encodes the trace headers as a pair of a lambda body and its call-site, and the call-graph method detects cycles on a call-graph that's dynamically generated within the interpreter to handle extra levels of indirection. These approaches together are proven to be very effective in tracing code with a heavy use of shared control-flow indirections, such as the contract system \cite{pycketmain,pycketmain2}.
 
 	\paragraph{}%
 		A second crucial component is the relevant RPython back-end optimizations. For example, loop-invariant code motion (LICM) performed by the JIT \cite{loop-aware:12}. LICM hoists interpreter-state destructuring into a preamble, leaving a compact peeled iteration that forms the loop body. If a side trace (a \emph{bridge}) can jump directly into this peeled iteration, the runtime avoids re-executing hoisted operations and gains a substantial speed-up.
@@ -130,7 +130,7 @@
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
-			Specialising JIT for high-level Racket code is non-trivial, Pycket can't use hints (e.g.\ \verb|@jit.unroll_safe|).
+			Specializing JIT for high-level Racket code is non-trivial, Pycket can't use hints (e.g.\ \verb|@jit.unroll_safe|).
 		\end{paragraph-here}
 
 		\paragraph{}%
@@ -308,17 +308,29 @@
 	\label{section:memory}
 
 		\begin{mainpoint}
-			Long continuation chains cause problems.
-
-			Big and old heap objects cause GC pressure.
+			Long continuation chains, and big and old heap objects cause GC pressure.
 		\end{mainpoint}
 
-		valgrind analyses
-		Garbage Collection Pressure
+		\begin{paragraph-here}
+			user program is effected by everything before including expansion.
+		\end{paragraph-here}
 
-		\begin{todo}[Import]
-			Section 3.4.1 Garbage Collection (GC) Pressure of the proposal document is relevant for this section.
-		\end{todo}
+		\begin{paragraph-here}
+			RPython GC minimark assumes short-lived small objects.
+		\end{paragraph-here}
+
+		\begin{show-experiment}
+				Demonstrate the issues concretely, nursery overflows/promotions, long-lived old objects, GC pause time eaten by majors, real-world cost
+				Maybe also deeper insights, like "`W\_StructDescriptor` accounts for 68\% of promoted bytes".
+		\end{show-experiment}
+
+		\begin{paragraph-here}
+			But Racket's objects are gigantic and long-lived.	structs, parameters
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Various paragraphs discussing experiments.
+		\end{paragraph-here}
 
 	\section{Performance of Fully Expanded Programs}
 	\label{section:cross-benchmarks}
