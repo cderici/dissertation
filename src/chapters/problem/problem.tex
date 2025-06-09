@@ -336,13 +336,38 @@
 	\label{section:cross-benchmarks}
 
 		\begin{mainpoint}
-				Argue using CrossBenchmarks that it's not too much worse.
+				Pycket didn't lose too much end-program performance by adding self-hosting.
 		\end{mainpoint}
 
-		\paragraph{}%
-		The fully expanded user program is the same in both Pycket and Racket, so we can compare their performance directly.  However, the Pycket JIT is not specialized for the high-level Racket code it executes, so it does not perform as well as the Racket VM.
+		\begin{paragraph-here}
+			We're not talking about Pycket vs Racket, we're talking about Pycket with \& without self-hosting.
+		\end{paragraph-here}
 
+		\begin{paragraph-here}
+			There’s no reason Pycket with self-hosting should be faster than the original Pycket.
 
+			Both OP/NP using the same expander generates same kernel code.
+		\end{paragraph-here}
+
+		\begin{show-experiment}
+			CrossBenchmark experiments.
+		\end{show-experiment}
+
+		\begin{paragraph-here}
+			There are rare cases where self-hosting Pycket is faster.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			 Often we're slower, for reasons.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Warmup is worse
+		\end{paragraph-here}
+
+		\begin{show-experiment}
+			Warmup breakdowns
+		\end{show-experiment}
 
 		\inputSub{problem}{sample-trace}
 
