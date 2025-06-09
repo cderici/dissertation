@@ -21,7 +21,7 @@
 		Note that, Pycket remains a tracing JIT compiler whose primary objective is to identify and trace hot loops in \emph{user} code. But with the new front-end, part of every \smartQL user program\smartQR is now the language program that expands the user code. After expansion, the fully expanded \verb|#%kernel| program is identical to what the Racket stand-alone binary would generate. Thus, the meta-traced CEK interpreter ultimately executes the same core program in both configurations—the difference lies only in where and how that program is obtained.
 
 	\paragraph{}%
-		In the remainder of this chapter, we proceed in the same order a program travels through the system. We first cover Pycket's baseline performance profile and review those RPython back-end optimizations most relevant to our study (\S\ref{section:pycket-performance-characteristics}). Then we examine how the runtime cooperates with Racket's module system to improve the loading of core libraries (\S\ref{section:module-and-language-loading}). Afterward, we analyze the cost of program expansion itself—a step now executed inside Pycket (\S\ref{section:expander-performance}). Finally, we measure how self-hosting affects the performance of the \emph{expanded} user program (\S\ref{section:cross-benchmarks}).
+		In the remainder of this chapter, we proceed in the same order a program travels through the system. We first cover Pycket's baseline performance profile and review those RPython back-end optimizations most relevant to our study (\S\ref{section:pycket-performance-characteristics}). Then we examine how the runtime cooperates with Racket's module system to improve the loading of core libraries (\S\ref{section:module-and-language-loading}). Afterward, we analyze the cost of program expansion itself—a step now executed inside Pycket (\S\ref{section:nature-of-the-beast}). Finally, we measure how self-hosting affects the performance of the \emph{expanded} user program (\S\ref{section:cross-benchmarks}).
 
 	\paragraph{}%
 		In Chapter~\ref{chapter:solution}, we propose concrete remedies for each challenge we expose and, supported by preliminary evidence, argues that these directions warrant deeper investigation as a general strategy for improving the performance of self-hosting on meta-tracing systems.
@@ -108,9 +108,8 @@
 			Expansion of all modules including user program are all subject to expander's performance.
 		\end{paragraph-here}
 
-
 	\section{The Nature of the Beast: Tracing Data-Dependent Computation}
-	\label{section:expander-performance}
+	\label{section:nature-of-the-beast}
 
 		\begin{sectionpoint}
 			Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces.
@@ -118,10 +117,24 @@
 			Computations that are critical to self-hosting—such as program expansion—seem poorly suited to meta-tracing because they contain no hot loops for the tracer to capture.
 		\end{sectionpoint}
 
-		 Unfortunately, because Pycket has no static view of that implementation, it cannot inject JIT hints (e.g.\ \verb|@jit.unroll_safe|) into the relevant Racket functions the way it does for its own CEK interpreter.  Given that Pycket’s JIT is generated automatically by RPython, specializing it for high-level Racket code is non-trivial.
+		\begin{paragraph-here}
+			Expander's performance plays a critical role in all aspects of self-hosting.
+
+				- Expansion is now part of user program runtime. We detailed in [[chapter - pycket]].
+
+				- And the language needs to be loaded (prev section)
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Expander is an interpreter-style, branch-heavy code that outputs expanded user program.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Specialising JIT for high-level Racket code is non-trivial, Pycket can't use hints (e.g.\ \verb|@jit.unroll_safe|).
+		\end{paragraph-here}
 
 		\paragraph{}%
-			This problem is immediately observable on Pycket self-hosting Racket
+		This problem is immediately observable on Pycket self-hosting Racket
 		through the expander linklet, because the interpreter style programs
 		with complex control-flow paths are quite central in self-hosting a
 		language (e.g. expand, fasl etc.). Additionally, since the Pycket's
@@ -132,12 +145,44 @@
 		out and interprets the code instead of using the traces, which defeats
 		the purpose of using a tracing JIT.
 
+		\begin{paragraph-here}
+			We'll introduce some meta-hints in [[chapter - solution]] to help identify and avoid branchy code.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Let's first talk about tracing branch-heavy computations, then whatever.
+		\end{paragraph-here}
+
 		\subsection{Tracing Branch-Heavy Computation}
 			\begin{mainpoint}
 				Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces.
 		\end{mainpoint}
 			\label{section:branchy}
 
+		\begin{paragraph-here}
+			Investigating issues on a program that big is crazy. Therefore, we'll work with smaller nuanced programs.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Introduce branchy.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			Branchiness of a source code by itself doesn't make sense. We need a computation for talking about branchiness. This is where the data-dependency comes from.
+		\end{paragraph-here}
+
+		\begin{show-experiment}
+			Demonstrate the effects of data dependency. Some programs are blazing fast because of the data.
+			Compare traces of the effects of lucky data vs unlucky data.
+		\end{show-experiment}
+
+		\begin{paragraph-here}
+			Interleaving paragraphs to talk about various experiments with branchy.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
+			You lose more when slow than you gain when fast. If you're 10x slower on half of the benchmarks, and 10x faster than the other half, then you're 5.05x slower overall.
+		\end{paragraph-here}
 
 		\subsection{Performance of Program Expansion}
 			% regexp stuff
