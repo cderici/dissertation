@@ -192,8 +192,32 @@
 
 			\end{sectionpoint}
 
+			\begin{paragraph-here}
+				Moving on to a more real-world program: regexp.
+			\end{paragraph-here}
 
-			Working on regexp is great for our purposes, extrapolating which reveals what happens in the expander at larger scale.
+			\begin{paragraph-here}
+				Working on regexp is great for us, extrapolating which reveals what happens in the expander at larger scale.
+			\end{paragraph-here}
+
+
+			\begin{paragraph-here}
+				It's an interpreter-style data-driven branch-heavy code.
+			\end{paragraph-here}
+
+
+			\begin{paragraph-here}
+				We have an RPython implementation, same with what we have in regexp linklet, so 1:1 comparison yay.
+
+				Even regexp linklet is very complex to distill the nature of the issue concretely.
+			\end{paragraph-here}
+
+
+			\begin{paragraph-here}
+				Introduce a synthetic regexp implementation (Figure 17 in proposal)
+			\end{paragraph-here}
+
+			\inputSub{problem}{reg-match-figure}
 
 			\paragraph{}%
 			The reason that we chose the regular expression matcher as an example
@@ -227,30 +251,57 @@
 			allocation/deallocation. For space concerns in this document we defer
 			presenting the large traces to the dissertation.
 
-			\inputSub{problem}{reg-match-figure}
+			\paragraph{}%
+			Tracing interpreter-style programs with complex control-flow paths is
+			a known weakness of JIT compilers. The large number of indirections
+			not only cripple the JIT optimizations but also causes the loops to be
+			segmented into many highly data driven traces. For
+			example, consider the following program in \figref{fig:regexp}, which
+			is a very simple regular expression matcher. It is highly simplified
+			and some of the rules are removed for space.
 
-		\paragraph{}%
-		Tracing interpreter-style programs with complex control-flow paths is
-		a known weakness of JIT compilers. The large number of indirections
-		not only cripple the JIT optimizations but also causes the loops to be
-		segmented into many highly data driven traces. For
-		example, consider the following program in \figref{fig:regexp}, which
-		is a very simple regular expression matcher. It is highly simplified
-		and some of the rules are removed for space.
+			%
+			\paragraph{}%
+			Tracing this program running with an input regexp, say
+			$\mathtt{\#}$\racketcode{rx"defg"}, trying to match it against an
+			input string produces a trace that follows the control-flow path of
+			the program for that input, making tracing quite wasteful because for
+			any other input regexp, say $\mathtt{\#}$\racketcode{rx"a*"} which
+			follows an entirely different path on the program, the JIT produces,
+			compiles and optimizes yet another trace for that input, unable to use
+			the previously generated trace. This problem not only increases the
+			warmup time but also produces traces that are unlikely to be
+			frequently re-used.
 
-		%
-		\paragraph{}%
-		Tracing this program running with an input regexp, say
-		$\mathtt{\#}$\racketcode{rx"defg"}, trying to match it against an
-		input string produces a trace that follows the control-flow path of
-		the program for that input, making tracing quite wasteful because for
-		any other input regexp, say $\mathtt{\#}$\racketcode{rx"a*"} which
-		follows an entirely different path on the program, the JIT produces,
-		compiles and optimizes yet another trace for that input, unable to use
-		the previously generated trace. This problem not only increases the
-		warmup time but also produces traces that are unlikely to be
-		frequently re-used.
+			\begin{show-experiment}
+				Similar experiments with some data making it go super fast and some super slow.
+			\end{show-experiment}
 
+			\begin{paragraph-here}
+				Interleaving paragraphs to talk about various experiments with regexp, showing traces.
+			\end{paragraph-here}
+
+			\begin{paragraph-here}
+				Maybe a paragraph to tie up this discussion with relating to the real Racket expander.
+			\end{paragraph-here}
+
+			(We move here into the very nature of the self-hosting on a meta-tracing JIT)
+
+			\begin{paragraph-here}
+				Let's recall what problem meta-tracing solved.
+			\end{paragraph-here}
+
+			\begin{paragraph-here}
+				Self-hosting is a different problem from what meta-tracing solves. (Find figure I made before-or make it again).
+			\end{paragraph-here}
+
+			\begin{paragraph-here}
+				Tie it up with data dependency and punch it: this is not suitable for meta-tracing.
+			\end{paragraph-here}
+
+			\begin{paragraph-here}
+				This problem requires a significant amount of research to solve.
+			\end{paragraph-here}
 
 
 	\section{Memory Issues with Self-Hosting}
