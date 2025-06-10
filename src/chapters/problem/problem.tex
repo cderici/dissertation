@@ -175,6 +175,8 @@
 				- Expansion is now part of user program runtime. We detailed in [[chapter - pycket]].
 
 				- And the language needs to be loaded (prev section)
+
+			[This is basically a connector paragraph that takes the reader's hand from the previous section and pulls him into this one.]
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
@@ -212,24 +214,63 @@
 			\label{section:branchy}
 
 		\begin{paragraph-here}
-			Investigating issues on a program that big is crazy. Therefore, we'll work with smaller nuanced programs.
+			As we detailed in \chapterRef{chapter:pycket}, Racket expander is quite large.
+			Investigating issues on a program that big is crazy. Therefore, we'll work with smaller nuanced programs to zero in on this issue.
 		\end{paragraph-here}
 
+		\begin{figure}[htbp] % let LaTeX decide where it fits best
+		\centering
+		\includegraphics[width=\linewidth]{\inputFigPath{problem}{branchy-introduce-code.png}}
+		\caption{Branchy: a synthetic program designed to be branch-heavy and data-dependent.}
+		\label{fig:branchy-introduce-code}
+		\end{figure}
+
+
 		\begin{paragraph-here}
-			Introduce branchy.
+			Introduce branchy. How?
+
+			Branchy is a synthetic program that is designed to be branch-heavy, interpreter-style, and data-dependent.
+
+			Show the source code of branchy, and explain how it works over a simple example.
 		\end{paragraph-here}
+
+		\footnote{Full code of branchy is available at \url{https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt}.}
 
 		\begin{paragraph-here}
 			Branchiness of a source code by itself doesn't make sense. We need a computation for talking about branchiness. This is where the data-dependency comes from.
 		\end{paragraph-here}
 
+		% I may need to get creative about how to present this.
+
 		\begin{show-experiment}
-			Demonstrate the effects of data dependency. Some programs are blazing fast because of the data.
-			Compare traces of the effects of lucky data vs unlucky data.
+			Run branchy with an input that takes like 5 different branches repeatedly.
+
+			Show the path it takes in the source code. And show the trace it generates.
 		\end{show-experiment}
 
 		\begin{paragraph-here}
-			Interleaving paragraphs to talk about various experiments with branchy.
+			Discuss that this trace is unique to this input, therefore not reusable unless the input keeps being the same.
+		\end{paragraph-here}
+
+		\begin{show-experiment}
+			Now run branchy with an input that repeatedly takes a straight path.
+
+			Show the path it takes in the source code. And show the trace it generates.
+		\end{show-experiment}
+
+		\begin{paragraph-here}
+			See how fast it goes. It's still unique to this input, therefore not reusable.
+			Let's run it with a more realistic input, creating a computation that's closer to what we'd see in the Racket macro expander expanding a Racket module.
+		\end{paragraph-here}
+
+		\begin{show-experiment}
+			Now run branchy with a random input. This is basically what happens in the expander.
+
+			Show the path it takes in the source code. And show the trace it generates.
+		\end{show-experiment}
+
+		\begin{paragraph-here}
+			So what do we want to see in a trace for computations on branchy? Discuss branching in the tracing JITs, with guards and bridges. Do we want a trace per branch? Do we want a one giant trace that has all the branches in it?
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
