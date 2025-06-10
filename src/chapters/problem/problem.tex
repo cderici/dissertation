@@ -214,30 +214,38 @@
 			\label{section:branchy}
 
 		\begin{paragraph-here}
+			When you have an interpreter-style, data-dependent, branchy recursion, the control flow goes in a wide veriety of ways, driven by the data. JIT records one linear path per trace, so it naturally specializes the code to *the path that happened to be taken while tracing*. If the data lateer triggers another branch, the JIT will bail out and begin a new trace for that branch. Over time, you end up with a combinatorial explosion of specialized traces, where each path is overspecialized for the branch decisions that were taken during tracing, but the program's real control flow covers many different data-dependent paths.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}
 			As we detailed in \chapterRef{chapter:pycket}, Racket expander is quite large.
 			Investigating issues on a program that big is crazy. Therefore, we'll work with smaller nuanced programs to zero in on this issue.
 		\end{paragraph-here}
 
-		\begin{figure}[htbp] % let LaTeX decide where it fits best
-		\centering
-		\includegraphics[width=\linewidth]{\inputFigPath{problem}{branchy-introduce-code.png}}
-		\caption{Branchy: a synthetic program designed to be branch-heavy and data-dependent.}
-		\label{fig:branchy-introduce-code}
-		\end{figure}
 
+		\inputSub{problem}{branchy-source}
+
+
+
+		Introduce branchy\footnote{Full code of branchy is available at \url{https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt}.}.
 
 		\begin{paragraph-here}
-			Introduce branchy. How?
+			 \figref{fig:branchy-introduce-code}
 
 			Branchy is a synthetic program that is designed to be branch-heavy, interpreter-style, and data-dependent.
 
 			Show the source code of branchy, and explain how it works over a simple example.
 		\end{paragraph-here}
 
-		\footnote{Full code of branchy is available at \url{https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt}.}
+		\begin{paragraph-here}
+			Branchiness of a source code by itself doesn't make sense. We need a computation for talking about branchiness. Like, "how branchy is this code?" does not make sense. If that was what we were talking about, I'd say the branchiness was just the average depth of the tree of decisions, or some other shit. But that doesn't make sense, because even if the program is a super complicated "if" with a million depth, I can give it an input that just falls into the first case of that "if" repeatedly, and it'll be a blazing fast trace.
+		\end{paragraph-here}
 
 		\begin{paragraph-here}
-			Branchiness of a source code by itself doesn't make sense. We need a computation for talking about branchiness. This is where the data-dependency comes from.
+			This is where the data-dependency comes from. How many questions do we need to answer before reaching a decision for a given input? That's how many guards there will be in a trace.
+
+			 the "loops inside the input" also plays a major role. It makes it significantly different to run inputs like '(3 3 3 3 3....) vs '(1 3 5 2 5 3 4 ... random)
+			 We'll come back to this loops inside the input in the next section when we talk about what loops we're trying to trace and capture.
 		\end{paragraph-here}
 
 		% I may need to get creative about how to present this.
@@ -270,7 +278,25 @@
 		\end{show-experiment}
 
 		\begin{paragraph-here}
-			So what do we want to see in a trace for computations on branchy? Discuss branching in the tracing JITs, with guards and bridges. Do we want a trace per branch? Do we want a one giant trace that has all the branches in it?
+			So what do we want to see in a trace for computations on branchy? Discuss branching in the tracing JITs, with guards and bridges.
+
+			Do we want a trace per branch? Do we want a one giant trace that has all the branches in it?
+
+			 Imagine you're the tracer, and you see this path:
+
+			18-8-3-5-4-18-8-3-5-4-18-8-3-5-4..... you'd detect this loop and tie it all to create a trace `18-8-3-5-4`. That trace is only useful for the input 3, so the more 3s you have in your input, the faster your program will go.
+
+			what if you see a path like this (3-0-7-3-0-7....):
+
+			18-8-3-5-4-18-8-3-1-18-8-3-5-6-7-18-8-3-5-4-18-8-3-1-18-8-3-5-6-7-......
+
+			now which loop is better for the tracer?
+			- is it `18-8-3-5-4-18-8-3-1-18-8-3-5-6-7` ? over-specialized to input 3-0-7.
+			- or is it `18-8-3-5` ? the common prefix for all the inputs? Can we build a prefix-tree in the interpreter to help find this (like the call-graph helping to find general loops)?
+			- separate loops for each branch, like `18-8-3-5-4`, `18-8-3-1`, `18-8-3-5-6-7`...
+
+			Is a large trace always bad? I imagine, mostly. On one hand, we're turning a larger portion of the runtime into machine code, so as long as the computation spends time on that path, we'll use more machine code, which should speed up the whole program. However, on the other hand, oversized traces also become over-specialized, which dramatically reduces their re-usability, which in turn reduces the ROI on that trace.
+
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
