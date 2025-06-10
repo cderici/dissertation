@@ -73,12 +73,79 @@
 		\end{paragraph-here}
 -
 		\begin{paragraph-here}
-			That can be costly ?? can we get numbers of modules need to be loaded for langs?
+			That can be costly. For example 89 Racket modules need to be loaded for `\#lang racket/base`.
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
 			Self-hosting adds THIS-MUCH extra work on the front-end.
+
+			The bracketed numbers from the raw log are shown here as Extra (ms); in Pycket’s timing output they typically represent CPU or GC milliseconds counted separately from the wall-clock time.
 		\end{paragraph-here}
+
+		\begin{table}[ht]
+		\centering
+		\begin{tabular}{@{}lrrr@{}}
+			\toprule
+			Phase & Time (ms) & Extra (ms) & Calls \\ \midrule
+			boot                           &     16 &    0 & -- \\
+			instantiate-linklet            &    868 &   33 & 7\,875 \\
+			regexp-linklet                 &     37 &    8 & 1 \\
+			thread-linklet                 &     17 &    6 & 1 \\
+			make-instance                  &     39 &    5 & 13\,405 \\
+			pycket-boot-linklet            &      0 &    0 & 1 \\
+			startup                        &    156 &   53 & 1 \\
+			\quad expander-linklet         &    135 &   53 & 1 \\
+			\quad json-load                &      0 &    0 & -- \\
+			\quad json-to-ast              &      0 &    0 & -- \\
+			\quad fasl-linklet             &      2 &    0 & 1 \\
+			\quad set-params               &     18 &    0 & 1 \\ \midrule
+			compile                        &  1\,603 &  298 & -- \\
+			\quad compile-linklet          &    106 &   38 & 680 \\
+			\quad compile-sexp-to-ast      &    773 &  125 & 685 \\
+			\quad compile-normalize        &    211 &   27 & 2\,026 \\
+			\quad compile-assign-convert   &    512 &  108 & 5\,533 \\ \midrule
+			\textbf{total}                 &  2\,740 &  403 & -- \\
+			\bottomrule
+		\end{tabular}
+		\caption{Boot without using any compiled code}
+		\label{tab:boot-no-compiled}
+		\end{table}
+
+
+		\begin{table}[ht]
+		\centering
+		\begin{tabular}{@{}lrrr@{}}
+			\toprule
+			Phase & Time (ms) & Extra (ms) & Calls \\ \midrule
+			boot                           &     15 &    0 & -- \\
+			instantiate-linklet            &    903 &   40 & 684 \\
+			regexp-linklet                 &     20 &    4 & 1 \\
+			thread-linklet                 &     12 &    4 & 1 \\
+			make-instance                  &      2 &    0 & 845 \\
+			pycket-boot-linklet            &      0 &    0 & 1 \\
+			startup                        &    129 &   38 & 1 \\
+			\quad expander-linklet         &    109 &   38 & 1 \\
+			\quad json-load                &      0 &    0 & -- \\
+			\quad json-to-ast              &      0 &    0 & -- \\
+			\quad fasl-linklet             &      1 &    0 & 1 \\
+			\quad set-params               &     18 &    0 & 1 \\ \midrule
+			read                           &    146 &   29 & -- \\
+			\quad fasl$\rightarrow$s-exp   &    144 &   29 & 74 \\
+			\quad s-exp$\rightarrow$ast    &      2 &    0 & 74 \\
+			\quad assign-convert-deser.    &      0 &    0 & -- \\ \midrule
+			compile                        &  1\,439 &  313 & -- \\
+			\quad compile-linklet          &      0 &    0 & 9 \\
+			\quad compile-sexp-to-ast      &    836 &  128 & 764 \\
+			\quad compile-normalize        &      0 &    0 & 28 \\
+			\quad compile-assign-convert   &    603 &  185 & 11\,763 \\ \midrule
+			\textbf{total}                 &  2\,673 &  428 & -- \\
+			\bottomrule
+		\end{tabular}
+		\caption{Boot using compiled code}
+		\label{tab:boot-no-compiled}
+		\end{table}
+
+
 
 		\begin{show-experiment}
 			Across all benchmarks, show the time spent on the frontend, without using compiled.
@@ -95,6 +162,18 @@
 		\begin{paragraph-here}
 			For example, Pycket can use compiled code via `use-compiled-code`
 		\end{paragraph-here}
+
+		\begin{table}[ht]
+		\centering
+		\begin{tabular}{@{}lrrr@{}}
+			\toprule
+			Mode & Real (s) & User (s) & Sys (s) \\ \midrule
+			With compiled code       &   6.015 &   5.667 & 0.348 \\
+			No compiled code  & 127.660 & 125.071 & 2.582 \\ \bottomrule
+		\end{tabular}
+		\caption{Elapsed time for loading \texttt{\#lang racket/base} in Pycket, with and without compiled code.}
+		\label{tab:a-rkt-timing}
+		\end{table}
 
 		\begin{show-experiment}
 			Show the time spent on the frontend, using compiled code.
