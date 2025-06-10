@@ -61,7 +61,7 @@
    title=\textsc{#1},      % small-caps heading
    before skip=1em, after skip=1em}
 
-\NewTColorBox{chapterpoint}{O{Chapter Main Point}}
+\NewTColorBox{chaptersynopsis}{O{Chapter Synopsis}}
   {enhanced,
     colback=white,            % interior left plain
     colframe=purple!70!black,  % visible red border
@@ -70,8 +70,12 @@
     width=\linewidth,         % full text width
     enlarge top by=0.5\baselineskip,
     enlarge bottom by=0.5\baselineskip,
+    fontupper=\small,
     title=\textsc{#1},      % small-caps heading
-    before skip=1em, after skip=1em}
+    before skip=1em,
+    after skip=1em,
+    after=\par\newpage
+  }
 
 
 
