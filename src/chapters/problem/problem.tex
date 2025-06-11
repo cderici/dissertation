@@ -3,6 +3,7 @@
 	\label{chapter:problem}
 
 	\begin{chaptersynopsis}
+		\footnotesize
 		Self-hosting on a meta-tracing JIT compiler introduces several performance issues.
 
 		Sections:
@@ -158,7 +159,7 @@
 			As expected, using pre-compiled \texttt{.zo} artifacts for Racket modules makes the \emph{compiled-code} path dramatically faster: the \texttt{init-lib} phase's wall-clock time falls from about 127s when loading source to roughly 3.4s with compiled code, while avoiding compilation saves large heap allocations, therefore the GC time drops from 8.5s to a few hundred milliseconds.
 
 		\paragraph{}%
-			Regardless of the source of each module, every macro expansion of user code ultimately depends on the performance of the underlying expander. Pycket's ability to inline into, and sometimes across, expander helpers opens new optimization opportunities, but it also means that deficiencies in the expander's own implementation now directly affect application start-up. The next sections discuss those interactions in detail.
+			Regardless of the source of each module, every macro expansion of user code ultimately depends on the performance of the underlying expander. Pycket's ability to inline into, and sometimes across, expander helpers opens new optimization opportunities, but it also means that deficiencies in the expander's own performance now directly affect application start-up. The next sections discuss those interactions in detail.
 
 	\section{The Nature of the Beast: Tracing Data-Dependent Computation}
 	\label{section:nature-of-the-beast}
@@ -169,139 +170,108 @@
 			Computations that are critical to self-hosting—such as program expansion—seem poorly suited to meta-tracing because they contain no hot loops for the tracer to capture.
 		\end{sectionpoint}
 
-		\begin{paragraph-here}
-			Expander's performance plays a critical role in all aspects of self-hosting.
-
-				- Expansion is now part of user program runtime. We detailed in [[chapter - pycket]].
-
-				- And the language needs to be loaded (prev section)
-
-			[This is basically a connector paragraph that takes the reader's hand from the previous section and pulls him into this one.]
-		\end{paragraph-here}
-
-		\begin{paragraph-here}
-			Expander is an interpreter-style, branch-heavy code that outputs expanded user program.
-		\end{paragraph-here}
-
-		\begin{paragraph-here}
-			Specializing JIT for high-level Racket code is non-trivial, Pycket can't use hints (e.g.\ \verb|@jit.unroll_safe|).
-		\end{paragraph-here}
+		\paragraph{}%
+			The \emph{Racket macro expander}, loaded inside Pycket as the \emph{expander linklet}, now runs in the same process as every user program; its performance therefore lies on the critical path, because (i) expansion itself contributes directly to end-to-end latency, as detailed in \chapterRef{chapter:pycket}, and (ii) the entire language hierarchy must be loaded and initialized first, as shown in \sectionRef{section:module-and-language-loading}.
 
 		\paragraph{}%
-		This problem is immediately observable on Pycket self-hosting Racket
-		through the expander linklet, because the interpreter style programs
-		with complex control-flow paths are quite central in self-hosting a
-		language (e.g. expand, fasl etc.). Additionally, since the Pycket's
-		level of language abstraction is increased one step further, the
-		generated traces are much larger, which creates a pressure for the
-		JIT's compiler and optimizer. As a result, in the run-time the JIT
-		spends a lot of time compiling and optimizing traces, but often bails
-		out and interprets the code instead of using the traces, which defeats
-		the purpose of using a tracing JIT.
+			Conceptually the expander is a tree-walking interpreter from higher level Racket languages to the \racketcode{\#\%kerrnel} language. Its control flow walks a rich lattice of macros and compile-time bindings, yielding deeply branch-heavy control flow whose exact shape depends on the user's program and the libraries it imports. [CITE] Pycket's meta-tracing JIT therefore meets high-level Racket functions whose behavior cannot be trivially predicted at trace time; unlike the low-level CEK interpreter these helpers cannot be decorated with hints such as \texttt{@jit.unroll\_safe}, and their extensive allocation and branching patterns frustrate the usual trace-specialization heuristics. Therefore the traces generated for these high-level abstractions are substantially larger; the JIT spends significant time tracing and optimizing these paths only to encounter unpredictable branches, bail out, and fall back to interpretation—negating much of the anticipated speed-up.
 
-		\begin{paragraph-here}
-			We'll introduce some meta-hints in [[chapter - solution]] to help identify and avoid branchy code.
-		\end{paragraph-here}
-
-		\begin{paragraph-here}
-			Let's first talk about tracing branch-heavy computations, then whatever.
-		\end{paragraph-here}
+		\paragraph{}%
+			In \chapterRef{chapter:solution} we propose a lightweight meta-hint mechanism that aims to help with this issue by helping to detect hot branches during interpretation and guiding the tracer away from branch-heavy code paths, mitigating the trace compilation churn and the explosion of overspecialized traces. In the remainder of this section, we examine in detail how the meta-tracer in Pycket behaves on branch-heavy computations.
 
 		\subsection{Tracing Branch-Heavy Computation}
 			\begin{mainpoint}
 				Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces.
-		\end{mainpoint}
-			\label{section:branchy}
+			\end{mainpoint}
+				\label{section:branchy}
 
-		\begin{paragraph-here}
-			When you have an interpreter-style, data-dependent, branchy recursion, the control flow goes in a wide veriety of ways, driven by the data. JIT records one linear path per trace, so it naturally specializes the code to *the path that happened to be taken while tracing*. If the data lateer triggers another branch, the JIT will bail out and begin a new trace for that branch. Over time, you end up with a combinatorial explosion of specialized traces, where each path is overspecialized for the branch decisions that were taken during tracing, but the program's real control flow covers many different data-dependent paths.
-		\end{paragraph-here}
+			\begin{paragraph-here}
+				When you have an interpreter-style, data-dependent, branchy recursion, the control flow goes in a wide variety of ways, driven by the data. JIT records one linear path per trace, so it naturally specializes the code to \emph{the path that happened to be taken while tracing}. If the data later triggers another branch, the JIT will bail out and begin a new trace for that branch. Over time, you end up with a combinatorial explosion of specialized traces, where each path is overspecialized for the branch decisions that were taken during tracing, but the program's real control flow covers many different data-dependent paths.
+			\end{paragraph-here}
 
-		\begin{paragraph-here}
-			As we detailed in \chapterRef{chapter:pycket}, Racket expander is quite large.
-			Investigating issues on a program that big is crazy. Therefore, we'll work with smaller nuanced programs to zero in on this issue.
-		\end{paragraph-here}
+			\begin{paragraph-here}
+				As we detailed in \chapterRef{chapter:pycket}, Racket expander is quite large.
+				Investigating issues on a program that big is crazy. Therefore, we'll work with smaller nuanced programs to zero in on this issue.
+			\end{paragraph-here}
 
+			\inputSub{problem}{branchy-source}
 
-		\inputSub{problem}{branchy-source}
+			Introduce branchy\footnote{Full code of branchy is available at \url{https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt}.}.
 
+			\begin{paragraph-here}
+				\figref{fig:branchy-introduce-code}
 
+				Branchy is a synthetic program that is designed to be branch-heavy, interpreter-style, and data-dependent.
 
-		Introduce branchy\footnote{Full code of branchy is available at \url{https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt}.}.
+				Show the source code of branchy, and explain how it works over a simple example.
+			\end{paragraph-here}
 
-		\begin{paragraph-here}
-			 \figref{fig:branchy-introduce-code}
+			\begin{paragraph-here}
+				Branchiness of a source code by itself doesn't make sense. We need a computation for talking about branchiness. Like, "how branchy is this code?" does not make sense. If that was what we were talking about, I'd say the branchiness was just the average depth of the tree of decisions, or some other shit. But that doesn't make sense, because even if the program is a super complicated "if" with a million depth, I can give it an input that just falls into the first case of that "if" repeatedly, and it'll be a blazing fast trace.
+			\end{paragraph-here}
 
-			Branchy is a synthetic program that is designed to be branch-heavy, interpreter-style, and data-dependent.
+			\begin{paragraph-here}
+				This is where the data-dependency comes from. How many questions do we need to answer before reaching a decision for a given input? That's how many guards there will be in a trace.
 
-			Show the source code of branchy, and explain how it works over a simple example.
-		\end{paragraph-here}
+				the "loops inside the input" also plays a major role. It makes it significantly different to run inputs like '(3 3 3 3 3....) vs '(1 3 5 2 5 3 4 ... random)
+				We'll come back to this loops inside the input in the next section when we talk about what loops we're trying to trace and capture.
+			\end{paragraph-here}
 
-		\begin{paragraph-here}
-			Branchiness of a source code by itself doesn't make sense. We need a computation for talking about branchiness. Like, "how branchy is this code?" does not make sense. If that was what we were talking about, I'd say the branchiness was just the average depth of the tree of decisions, or some other shit. But that doesn't make sense, because even if the program is a super complicated "if" with a million depth, I can give it an input that just falls into the first case of that "if" repeatedly, and it'll be a blazing fast trace.
-		\end{paragraph-here}
+			% I may need to get creative about how to present this.
 
-		\begin{paragraph-here}
-			This is where the data-dependency comes from. How many questions do we need to answer before reaching a decision for a given input? That's how many guards there will be in a trace.
+			\begin{show-experiment}
+				Run branchy with an input that takes like 5 different branches repeatedly.
 
-			 the "loops inside the input" also plays a major role. It makes it significantly different to run inputs like '(3 3 3 3 3....) vs '(1 3 5 2 5 3 4 ... random)
-			 We'll come back to this loops inside the input in the next section when we talk about what loops we're trying to trace and capture.
-		\end{paragraph-here}
+				Show the path it takes in the source code. And show the trace it generates.
+			\end{show-experiment}
 
-		% I may need to get creative about how to present this.
+			\begin{figure}[htbp] % let LaTeX decide where it fits best
+				\centering
+				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-long-path-trace-guards}}
+				\caption{RPython trace for Branchy ran with all 0 input}
+				\label{fig:branchy-long-path-trace}
+			\end{figure}
 
-		\begin{show-experiment}
-			Run branchy with an input that takes like 5 different branches repeatedly.
+			\begin{paragraph-here}
+				Discuss that this trace is unique to this input, therefore not reusable unless the input keeps being the same.
+			\end{paragraph-here}
 
-			Show the path it takes in the source code. And show the trace it generates.
-		\end{show-experiment}
+			\begin{paragraph-here}
+				Consider an input with a shorter path, like all 20s. The trace will be shorter, but it's still unique to this input, therefore not reusable.
+				Let's run it with a more realistic input, creating a computation that's closer to what we'd see in the Racket macro expander expanding a Racket module.
+			\end{paragraph-here}
 
-		\begin{paragraph-here}
-			Discuss that this trace is unique to this input, therefore not reusable unless the input keeps being the same.
-		\end{paragraph-here}
+			\begin{show-experiment}
+				Now run branchy with a random input. This is basically what happens in the expander.
 
-		\begin{show-experiment}
-			Now run branchy with an input that repeatedly takes a straight path.
+				Show the path it takes in the source code. And show the trace it generates.
+			\end{show-experiment}
 
-			Show the path it takes in the source code. And show the trace it generates.
-		\end{show-experiment}
+			\begin{paragraph-here}
+				So what do we want to see in a trace for computations on branchy? Discuss branching in the tracing JITs, with guards and bridges.
 
-		\begin{paragraph-here}
-			See how fast it goes. It's still unique to this input, therefore not reusable.
-			Let's run it with a more realistic input, creating a computation that's closer to what we'd see in the Racket macro expander expanding a Racket module.
-		\end{paragraph-here}
+				Do we want a trace per branch? Do we want a one giant trace that has all the branches in it?
 
-		\begin{show-experiment}
-			Now run branchy with a random input. This is basically what happens in the expander.
+				Imagine you're the tracer, and you see this path:
 
-			Show the path it takes in the source code. And show the trace it generates.
-		\end{show-experiment}
+				18-8-3-5-4-18-8-3-5-4-18-8-3-5-4..... you'd detect this loop and tie it all to create a trace `18-8-3-5-4`. That trace is only useful for the input 3, so the more 3s you have in your input, the faster your program will go.
 
-		\begin{paragraph-here}
-			So what do we want to see in a trace for computations on branchy? Discuss branching in the tracing JITs, with guards and bridges.
+				what if you see a path like this (3-0-7-3-0-7....):
 
-			Do we want a trace per branch? Do we want a one giant trace that has all the branches in it?
+				18-8-3-5-4-18-8-3-1-18-8-3-5-6-7-18-8-3-5-4-18-8-3-1-18-8-3-5-6-7-......
 
-			 Imagine you're the tracer, and you see this path:
+				now which loop is better for the tracer?
+				- is it `18-8-3-5-4-18-8-3-1-18-8-3-5-6-7` ? over-specialized to input 3-0-7.
+				- or is it `18-8-3-5` ? the common prefix for all the inputs? Can we build a prefix-tree in the interpreter to help find this (like the call-graph helping to find general loops)?
+				- separate loops for each branch, like `18-8-3-5-4`, `18-8-3-1`, `18-8-3-5-6-7`...
 
-			18-8-3-5-4-18-8-3-5-4-18-8-3-5-4..... you'd detect this loop and tie it all to create a trace `18-8-3-5-4`. That trace is only useful for the input 3, so the more 3s you have in your input, the faster your program will go.
+				Is a large trace always bad? I imagine, mostly. On one hand, we're turning a larger portion of the runtime into machine code, so as long as the computation spends time on that path, we'll use more machine code, which should speed up the whole program. However, on the other hand, oversized traces also become over-specialized, which dramatically reduces their re-usability, which in turn reduces the ROI on that trace.
 
-			what if you see a path like this (3-0-7-3-0-7....):
+			\end{paragraph-here}
 
-			18-8-3-5-4-18-8-3-1-18-8-3-5-6-7-18-8-3-5-4-18-8-3-1-18-8-3-5-6-7-......
-
-			now which loop is better for the tracer?
-			- is it `18-8-3-5-4-18-8-3-1-18-8-3-5-6-7` ? over-specialized to input 3-0-7.
-			- or is it `18-8-3-5` ? the common prefix for all the inputs? Can we build a prefix-tree in the interpreter to help find this (like the call-graph helping to find general loops)?
-			- separate loops for each branch, like `18-8-3-5-4`, `18-8-3-1`, `18-8-3-5-6-7`...
-
-			Is a large trace always bad? I imagine, mostly. On one hand, we're turning a larger portion of the runtime into machine code, so as long as the computation spends time on that path, we'll use more machine code, which should speed up the whole program. However, on the other hand, oversized traces also become over-specialized, which dramatically reduces their re-usability, which in turn reduces the ROI on that trace.
-
-		\end{paragraph-here}
-
-		\begin{paragraph-here}
-			You lose more when slow than you gain when fast. If you're 10x slower on half of the benchmarks, and 10x faster than the other half, then you're 5.05x slower overall.
-		\end{paragraph-here}
+			\begin{paragraph-here}
+				You lose more when slow than you gain when fast. If you're 10x slower on half of the benchmarks, and 10x faster than the other half, then you're 5.05x slower overall.
+			\end{paragraph-here}
 
 		\subsection{Performance of Program Expansion}
 			% regexp stuff
