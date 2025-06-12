@@ -280,29 +280,27 @@
 
 			\begin{sectionpoint}
 				Computations that are critical to self-hosting—such as program expansion—seem poorly suited to meta-tracing because they contain no hot loops for the tracer to capture. There is no loop.
-
 			\end{sectionpoint}
 
 			\begin{paragraph-here}
-				Moving on to a more real-world program: regexp.
+				Moving on to a more real-world program: regexp. Getting deeper into the nature of the problem itself.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}
-				Working on regexp is great for us, extrapolating which reveals what happens in the expander at larger scale.
+				Working on regexp is great for us, extrapolating which reveals what happens in the expander at larger scale. Because It's an interpreter-style data-driven branch-heavy code.
 			\end{paragraph-here}
 
-
 			\begin{paragraph-here}
-				It's an interpreter-style data-driven branch-heavy code.
-			\end{paragraph-here}
-
-
-			\begin{paragraph-here}
-				We have an RPython implementation, same with what we have in regexp linklet, so 1:1 comparison yay.
+				Pycket already has an efficient regexp implementation in RPython to compare against, implementing the same thing with what we have in the regexp linklet, so 1:1 comparison yay.
 
 				Even regexp linklet is very complex to distill the nature of the issue concretely.
 			\end{paragraph-here}
 
+			\begin{paragraph-here}
+				As a running example, we can take a look at the performance differences between the regexp linklet and the RPython implementation over a simple example of matching $\mathtt{\#}$\racketcode{rx"defg"} against a large string containing \racketcode{"aaa...defg...aaa"} in the middle.
+			\end{paragraph-here}
+
+			\inputSub{problem}{regexp-overall-runtime}
 
 			\begin{paragraph-here}
 				Introduce a synthetic regexp implementation (Figure 17 in proposal)
@@ -311,14 +309,14 @@
 			\inputSub{problem}{reg-match-figure}
 
 			\paragraph{}%
-			The reason that we chose the regular expression matcher as an example
-			in \figref{fig:regexp} is that Pycket already has an efficient regexp
-			implementation in RPython to compare against. As a simple experiment
+			 As a simple experiment
 			to demonstrate the issue, we run both regexp implementations (the one
 			in the \figref{fig:regexp} and the RPython implementation) to match
-			$\mathtt{\#}$\racketcode{rx"defg"} against a large string containing
-			\racketcode{"defg"} in the middle and measure the time
-			performances. \figref{fig:regexp-trace} shows both the trace we get
+			 and measure the time
+			performances.
+
+
+			\figref{fig:regexp-trace} shows both the trace we get
 			from the RPython implementation and the program we run. To run the
 			simple implementation in \figref{fig:regexp}, we modify this program
 			to use the \racketcode{reg-match} in instead of the
@@ -351,7 +349,6 @@
 			is a very simple regular expression matcher. It is highly simplified
 			and some of the rules are removed for space.
 
-			%
 			\paragraph{}%
 			Tracing this program running with an input regexp, say
 			$\mathtt{\#}$\racketcode{rx"defg"}, trying to match it against an
