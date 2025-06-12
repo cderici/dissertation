@@ -177,17 +177,16 @@
 			Conceptually the expander is a tree-walking interpreter from higher level Racket languages to the \racketcode{\#\%kerrnel} language. Its control flow walks a rich lattice of macros and compile-time bindings, yielding deeply branch-heavy control flow whose exact shape depends on the user's program and the libraries it imports. [CITE] Pycket's meta-tracing JIT therefore meets high-level Racket functions whose behavior cannot be trivially predicted at trace time; unlike the low-level CEK interpreter these helpers cannot be decorated with hints such as \texttt{@jit.unroll\_safe}, and their extensive allocation and branching patterns frustrate the usual trace-specialization heuristics. Therefore the traces generated for these high-level abstractions are substantially larger; the JIT spends significant time tracing and optimizing these paths only to encounter unpredictable branches, bail out, and fall back to interpretation—negating much of the anticipated speed-up.
 
 		\paragraph{}%
-			In \chapterRef{chapter:solution} we propose a lightweight meta-hint mechanism that aims to help with this issue by helping to detect hot branches during interpretation and guiding the tracer away from branch-heavy code paths, mitigating the trace compilation churn and the explosion of overspecialized traces. In the remainder of this section, we examine in detail how the meta-tracer in Pycket behaves on branch-heavy computations.
+			In interpreter-style, data-dependent recursion the control flow fans out across many branches driven by the program's input, yet a tracing JIT captures only the \emph{single} linear path taken while tracing and specializes the resulting code to that exact sequence of decisions. When new input steers execution down a different branch the JIT must abort, start another trace, and specialize again. Over time this produces a combinatorial explosion of narrow, redundant traces—each optimal for the data that birthed it but useless for most other paths—inflating compilation time, thrashing the trace cache, and frequently forcing the runtime to fall back on interpretation.
+
+		\paragraph{}%
+			In \chapterRef{chapter:solution} we propose a lightweight meta-hint mechanism that aims to help with this by helping to detect hot branches during interpretation and guiding the tracer away from branch-heavy code paths, mitigating the trace compilation churn and the explosion of overspecialized traces. In the remainder of this section, we examine in detail how the meta-tracer in Pycket behaves on branch-heavy computations.
 
 		\subsection{Tracing Branch-Heavy Computation}
 			\begin{mainpoint}
 				Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces.
 			\end{mainpoint}
 				\label{section:branchy}
-
-			\begin{paragraph-here}
-				When you have an interpreter-style, data-dependent, branchy recursion, the control flow goes in a wide variety of ways, driven by the data. JIT records one linear path per trace, so it naturally specializes the code to \emph{the path that happened to be taken while tracing}. If the data later triggers another branch, the JIT will bail out and begin a new trace for that branch. Over time, you end up with a combinatorial explosion of specialized traces, where each path is overspecialized for the branch decisions that were taken during tracing, but the program's real control flow covers many different data-dependent paths.
-			\end{paragraph-here}
 
 			\begin{paragraph-here}
 				As we detailed in \chapterRef{chapter:pycket}, Racket expander is quite large.
@@ -201,54 +200,58 @@
 			\begin{paragraph-here}
 				\figref{fig:branchy-introduce-code}
 
-				Branchy is a synthetic program that is designed to be branch-heavy, interpreter-style, and data-dependent.
-
-				Show the source code of branchy, and explain how it works over a simple example.
+				Branchy is a synthetic program that is designed to be branch-heavy, interpreter-style, and data-dependent. Some inputs take a long path through the branches of what looks like a decision tree, while other inputs take a short path out of the loop. Therefore, depennding on the list of numbers given, the meta-tracing JIT will have different experiences in tracing. For example, while an input list such as \racketcode{'(0 0 0 0 0 0 0 ...)} repeatedly takes the path \emph{18-8-3-1} before making the recursive call, an input list such as \racketcode{'(20 20 20 20 20 ....)} takes a shorter path of \emph{18}.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}
-				Branchiness of a source code by itself doesn't make sense. We need a computation for talking about branchiness. Like, "how branchy is this code?" does not make sense. If that was what we were talking about, I'd say the branchiness was just the average depth of the tree of decisions, or some other shit. But that doesn't make sense, because even if the program is a super complicated "if" with a million depth, I can give it an input that just falls into the first case of that "if" repeatedly, and it'll be a blazing fast trace.
+				Static source code being branch-heavy, therefore, does not make much sense. We need a computation for talking about branchiness. Like, "how branchy is this code?". If that was what we were talking about, I'd say the branchiness was just the average depth of the tree of decisions. But that doesn't make sense, because even if the program is a super complicated "if" with a million depth, I can give it an input that just falls into the first case of that "if" repeatedly, and it'll be a blazing fast trace.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}
-				This is where the data-dependency comes from. How many questions do we need to answer before reaching a decision for a given input? That's how many guards there will be in a trace.
-
-				the "loops inside the input" also plays a major role. It makes it significantly different to run inputs like '(3 3 3 3 3....) vs '(1 3 5 2 5 3 4 ... random)
-				We'll come back to this loops inside the input in the next section when we talk about what loops we're trying to trace and capture.
+				This is where the data-dependency comes from. How many questions do we need to answer before reaching a decision for a given input? That's how many guards there will be in a trace. Recall that the tracing JIT will put guards in the trace for every assumption that was made during tracing, those need to be asserted for the rest of the compiled machine code to remain valid for the given input.
 			\end{paragraph-here}
-
-			% I may need to get creative about how to present this.
-
-			\begin{show-experiment}
-				Run branchy with an input that takes like 5 different branches repeatedly.
-
-				Show the path it takes in the source code. And show the trace it generates.
-			\end{show-experiment}
 
 			\begin{figure}[htbp] % let LaTeX decide where it fits best
 				\centering
-				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-long-path-trace-guards}}
-				\caption{RPython trace for Branchy ran with all 0 input}
+				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-long-path-trace-guards.png}}
+				\caption{RPython trace for Branchy ran with all 0 input taking a long 18-8-3-1 path.}
 				\label{fig:branchy-long-path-trace}
 			\end{figure}
 
 			\begin{paragraph-here}
-				Discuss that this trace is unique to this input, therefore not reusable unless the input keeps being the same.
+				\figref{fig:branchy-long-path-trace} shows an excerpt of the trace generated for Branchy running on input that's repeated zeros '(0 0 0 0 0 ...), taking the path \emph{18-8-3-1} on Branchy that's shown in \figref{fig:branchy-introduce-code}. We can observe that each decision is translated into a guard in the trace, thereby specializing more and more at each step into the trace to this particular input. This trace that's traced, compiled, and optimized (i.e. time invested) is not usable for any input other than '(0 0 0 0 0 0).
 			\end{paragraph-here}
 
 			\begin{paragraph-here}
-				Consider an input with a shorter path, like all 20s. The trace will be shorter, but it's still unique to this input, therefore not reusable.
+				the "loops inside the input" therefore also plays a major role. It makes it significantly different to run inputs like '(3 3 3 3 3....) vs '(1 3 5 1 3 5 1 3 5) vs '(random ...).
+				We'll come back to this loops inside the input in the next section \sectionRef{section:there-is-no-loop} when we talk about what loops we're trying to trace and capture.
+			\end{paragraph-here}
+
+			\begin{paragraph-here}
+				Consider an input with a shorter path, like all 20s. The trace will be shorter, but it's still unique to this input, therefore still not reusable.
 				Let's run it with a more realistic input, creating a computation that's closer to what we'd see in the Racket macro expander expanding a Racket module.
+				Running branchy with a random input. This is basically what happens in the expander being given a user program. We can observe in \figref{fig:branchy-short-trace-summary} that Branchy with a repeating short path has only 2 traces, with a fraction of a second spent on trace compilation, recording \~470 operations, where in \figref{fig:branchy-random-trace-summary} shows that tracing Branchy that's running on a random input spends orders of magnitude more time on trace compilation, generates about \~40 loops and \~250 bridges containing \~31k operations. Note that both computations generate data-specialized non-reusable traces, it's just that it's not too too bad when the input contains a predictable loop.
 			\end{paragraph-here}
 
-			\begin{show-experiment}
-				Now run branchy with a random input. This is basically what happens in the expander.
+			\begin{figure}[htbp] % let LaTeX decide where it fits best
+				\centering
+				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-short-trace-summary.png}}
+				\caption{Tracing Branchy on a repeating input of '(20 20 20 20 20 ...) yields only 2 loops with a very short amount of time spent on trace compilation.}
+				\label{fig:branchy-short-trace-summary}
+			\end{figure}
 
-				Show the path it takes in the source code. And show the trace it generates.
-			\end{show-experiment}
+			\begin{figure}[htbp] % let LaTeX decide where it fits best
+				\centering
+				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-random-trace-summary.png}}
+				\caption{Tracing Branchy with a random input spends orders of magnitude resources to produce that much useless stuff.}
+				\label{fig:branchy-random-trace-summary}
+			\end{figure}
+
 
 			\begin{paragraph-here}
-				So what do we want to see in a trace for computations on branchy? Discuss branching in the tracing JITs, with guards and bridges.
+				This begs the question, what sort of trace do we want to see for this kind of computation?
+
+				Discuss branching in the tracing JITs, with guards and bridges.
 
 				Do we want a trace per branch? Do we want a one giant trace that has all the branches in it?
 
@@ -270,10 +273,11 @@
 			\end{paragraph-here}
 
 			\begin{paragraph-here}
-				You lose more when slow than you gain when fast. If you're 10x slower on half of the benchmarks, and 10x faster than the other half, then you're 5.05x slower overall.
+				This is the reason that tracing JITs became unpopular. You lose more when slow than you gain when fast. If you're 10x slower on half of the benchmarks, and 10x faster than the other half, then you're 5.05x slower overall. [CITE]
 			\end{paragraph-here}
 
 		\subsection{Performance of Program Expansion}
+			\label{section:there-is-no-loop}
 			% regexp stuff
 
 			\begin{sectionpoint}
