@@ -1,9 +1,9 @@
-\begin{figure}[tb]
+\begin{figure}[!h]
 \centering
 \begin{tikzpicture}[remember picture,
 every node/.style={font=\sffamily\scriptsize},
 callout/.style={draw,circle,red!80!black,thick,
-                inner sep=0pt,minimum size=13pt}]
+                inner sep=0pt,minimum size=13pt},scale=0.8, every node/.style={transform shape}]
 %----------------------------------------------------
 % 1 ▸ Code listing (unchanged, pure ASCII)
 \node[anchor=north west] (code) at (0,0) {%
@@ -68,8 +68,6 @@ callout/.style={draw,circle,red!80!black,thick,
 \end{scope}
 %----------------------------------------------------
 \end{tikzpicture}
-\caption{Branchy: a synthetic program designed to be branch-heavy and data-dependent.%
-\ Numbers mark branch points; under-lined expressions are the three
-exits from one iteration.}
+\caption{Branchy: a branch-heavy program designed to exhibit data-dependent behavior.}
 \label{fig:branchy-introduce-code}
 \end{figure}

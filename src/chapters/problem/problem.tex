@@ -87,7 +87,7 @@
 			Consequently, the complete transitive closure of the language's module graph has to be loaded and expanded ahead of the user program. For a language such as \texttt{\#lang racket/base} that closure already contains roughly 90 leaf modules; larger domain-specific languages may exceed that number. In the original, non-self-hosting Pycket this preparatory step was executed by the external \texttt{racket} binary, so its cost was invisible to the JIT. Now it is part of the measured runtime.
 
 		\paragraph{}%
-			\tableRef{tab:boot-no-compiled} quantifies that cost of a cold boot when \emph{no} pre-compiled (\texttt{.zo}) artifacts are present, loading the \texttt{\#lang racket/base}. The loading of the bootstrapping linklets, their compilation into linklet objects and their instantiation, as well as instantiating all the Racket modules for the \texttt{\#lang racket/base} (\emph{init-lib}) together dominate the 2.7s wall-clock time. Note that the compilation of a linklet involves constructing AST nodes for every object that was in the s-expression, and the A-normalization and assignment conversion passes. Moreover, because these steps are internal to the interpreter and not part of the user code, these milliseconds are almost entirely spent in the interpreter.
+			\tableRef{table:boot-no-compiled} quantifies that cost of a cold boot when \emph{no} pre-compiled (\texttt{.zo}) artifacts are present, loading the \texttt{\#lang racket/base}. The loading of the bootstrapping linklets, their compilation into linklet objects and their instantiation, as well as instantiating all the Racket modules for the \texttt{\#lang racket/base} (\emph{init-lib}) together dominate the 2.7s wall-clock time. Note that the compilation of a linklet involves constructing AST nodes for every object that was in the s-expression, and the A-normalization and assignment conversion passes. Moreover, because these steps are internal to the interpreter and not part of the user code, these milliseconds are almost entirely spent in the interpreter.
 
 		\begin{table}[ht]
 		\centering
@@ -114,14 +114,14 @@
 			\bottomrule
 		\end{tabular}
 		\caption{Boot without using any compiled code}
-		\label{tab:boot-no-compiled}
+		\label{table:boot-no-compiled}
 		\end{table}
 
 		\paragraph{}%
 			Before self-hosting, none of that overhead appeared: Pycket received a fully-expanded core program, and the JIT could concentrate on the hot loops of \emph{user} code. The new architecture gives Pycket full visibility into the macro expander, the module system, and the reader, and more, but that transparency comes with an up-front cost.
 
 		\paragraph{}%
-			One obvious advantage of this transparency is to reuse compiled code. By setting \racketcode{use-compiled-file-paths} and \racketcode{read-accept-compiled} (Racket-level) parameters, Pycket instructs the expander to prefer \texttt{.zo} files over \texttt{.rkt} sources. Doing so eliminates the most expensive compile-time passes (cf.\ the disappearance of \texttt{compile-linklet}, \texttt{assign-convert}, and \texttt{normalize} in Table\,\ref{tab:boot-compiled}), yet it also shifts work: module bodies must be deserialized (\racketcode{fasl->s-exp}) and validated, and the resulting syntax objects still have to be parsed into ASTs suitable for Pycket's evaluator.
+			One obvious advantage of this transparency is to reuse compiled code. By setting \racketcode{use-compiled-file-paths} and \racketcode{read-accept-compiled} (Racket-level) parameters, Pycket instructs the expander to prefer \texttt{.zo} files over \texttt{.rkt} sources. Doing so eliminates the most expensive compile-time passes (cf.\ the disappearance of \texttt{compile-linklet}, \texttt{assign-convert}, and \texttt{normalize} in \tableRef{table:boot-compiled}), yet it also shifts work: module bodies must be deserialized (\racketcode{fasl->s-exp}) and validated, and the resulting syntax objects still have to be parsed into ASTs suitable for Pycket's evaluator.
 
 		\begin{table}[ht]
 		\centering
@@ -152,7 +152,7 @@
 			\bottomrule
 		\end{tabular}
 		\caption{Boot using compiled code}
-		\label{tab:boot-compiled}
+		\label{table:boot-compiled}
 		\end{table}
 
 		\paragraph{}%
@@ -188,93 +188,91 @@
 			\end{mainpoint}
 				\label{section:branchy}
 
-			\begin{paragraph-here}
-				As we detailed in \chapterRef{chapter:pycket}, Racket expander is quite large.
-				Investigating issues on a program that big is crazy. Therefore, we'll work with smaller nuanced programs to zero in on this issue.
-			\end{paragraph-here}
+			\paragraph{}%
+				As detailed in \chapterRef{chapter:pycket}, the Racket expander--containing the macro expander, module system, and more--is notably large and intricate. Investigating tracing JIT behavior directly within such a sizable and complex program can be impractical. Thus, we analyze the tracing behavior using smaller, controlled examples to isolate and clearly observe specific issues.\footnote{Full code and alternative definitions of Branchy is available at \url{https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt}.}
 
 			\inputSub{problem}{branchy-source}
 
-			Introduce branchy\footnote{Full code of branchy is available at \url{https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt}.}.
+			\paragraph{}%
+				\figref{fig:branchy-introduce-code} introduces \emph{Branchy}, a synthetic benchmark intentionally designed to exhibit interpreter-style, branch-heavy, and data-dependent behavior. Each iteration processes an element from an input list through nested conditional branches resembling a decision tree. Certain inputs produce consistently deep paths through this branching structure, while others immediately exit via shallow paths. For instance, an input list such as \racketcode{'(0 0 0 ...)} repeatedly traverses the longer path sequence \emph{18-8-3-1}, whereas \racketcode{'(20 20 20 ...)} consistently follows the shorter path labeled \emph{18}.
 
-			\begin{paragraph-here}
-				\figref{fig:branchy-introduce-code}
+			\paragraph{}%
+				It is important to note that describing static source code itself as "branch-heavy" can be misleading. The critical notion here is the data-dependent nature of branch decisions during runtime. A program could possess deeply nested conditional structures yet exhibit minimal runtime branching if the input consistently chooses shallow branches. Therefore, the "branchiness" of a computation is an empirical property, characterized by the frequency and complexity of branching decisions made during an actual evaluation over an input.
 
-				Branchy is a synthetic program that is designed to be branch-heavy, interpreter-style, and data-dependent. Some inputs take a long path through the branches of what looks like a decision tree, while other inputs take a short path out of the loop. Therefore, depennding on the list of numbers given, the meta-tracing JIT will have different experiences in tracing. For example, while an input list such as \racketcode{'(0 0 0 0 0 0 0 ...)} repeatedly takes the path \emph{18-8-3-1} before making the recursive call, an input list such as \racketcode{'(20 20 20 20 20 ....)} takes a shorter path of \emph{18}.
-			\end{paragraph-here}
+			\paragraph{}%
+				This data-dependency manifests explicitly through the guards placed by a tracing JIT. During tracing, each conditional encountered generates a corresponding guard, asserting assumptions made about the input data at trace time. Consequently, more complex branching decisions lead directly to more numerous and more specialized guards. A trace containing multiple guards becomes highly specific to the particular input data observed during tracing, thereby limiting its reusability.
 
-			\begin{paragraph-here}
-				Static source code being branch-heavy, therefore, does not make much sense. We need a computation for talking about branchiness. Like, "how branchy is this code?". If that was what we were talking about, I'd say the branchiness was just the average depth of the tree of decisions. But that doesn't make sense, because even if the program is a super complicated "if" with a million depth, I can give it an input that just falls into the first case of that "if" repeatedly, and it'll be a blazing fast trace.
-			\end{paragraph-here}
-
-			\begin{paragraph-here}
-				This is where the data-dependency comes from. How many questions do we need to answer before reaching a decision for a given input? That's how many guards there will be in a trace. Recall that the tracing JIT will put guards in the trace for every assumption that was made during tracing, those need to be asserted for the rest of the compiled machine code to remain valid for the given input.
-			\end{paragraph-here}
-
-			\begin{figure}[htbp] % let LaTeX decide where it fits best
+			\begin{figure}[h] % let LaTeX decide where it fits best
 				\centering
-				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-long-path-trace-guards.png}}
-				\caption{RPython trace for Branchy ran with all 0 input taking a long 18-8-3-1 path.}
+				\includegraphics[width=0.5\linewidth]{\inputFigPath{problem}{branchy-long-path-trace-guards.png}}
+				\caption{RPython trace for Branchy running all-zero input taking a long 18-8-3-1 path.}
 				\label{fig:branchy-long-path-trace}
 			\end{figure}
 
-			\begin{paragraph-here}
-				\figref{fig:branchy-long-path-trace} shows an excerpt of the trace generated for Branchy running on input that's repeated zeros '(0 0 0 0 0 ...), taking the path \emph{18-8-3-1} on Branchy that's shown in \figref{fig:branchy-introduce-code}. We can observe that each decision is translated into a guard in the trace, thereby specializing more and more at each step into the trace to this particular input. This trace that's traced, compiled, and optimized (i.e. time invested) is not usable for any input other than '(0 0 0 0 0 0).
-			\end{paragraph-here}
+			\paragraph{}%
+				\figref{fig:branchy-long-path-trace} presents an excerpt from a trace of Branchy executed with an all-zero input, repeatedly following the deep path sequence \emph{18-8-3-1}. Each decision along this path generates a guard that must hold true at runtime; failure of any guard causes the trace to exit prematurely and fallback to the interpreter or trigger another trace. The resulting trace, while optimized and compiled, is excessively specialized, limiting its utility exclusively to identical inputs.
 
-			\begin{paragraph-here}
-				the "loops inside the input" therefore also plays a major role. It makes it significantly different to run inputs like '(3 3 3 3 3....) vs '(1 3 5 1 3 5 1 3 5) vs '(random ...).
-				We'll come back to this loops inside the input in the next section \sectionRef{section:there-is-no-loop} when we talk about what loops we're trying to trace and capture.
-			\end{paragraph-here}
+			\paragraph{}%
+				Thus, the internal structure of the input data significantly influences tracing outcomes. Repetitive input patterns, such as \racketcode{'(3 3 3 3 ...)}, allow trace reuse, thereby amortizing the overhead of tracing and compiling. However, highly repetitive inputs like these are uncommon in realistic workloads. Conversely, more varied or random inputs, such as \racketcode{'(1 3 5 1 3 5 ...)}, significantly reduce trace reuse. This phenomenon of internal "loops" within the input data will be revisited in greater detail in \sectionRef{section:there-is-no-loop} when we discuss the nature of loops the tracer attempts to capture.
 
-			\begin{paragraph-here}
-				Consider an input with a shorter path, like all 20s. The trace will be shorter, but it's still unique to this input, therefore still not reusable.
-				Let's run it with a more realistic input, creating a computation that's closer to what we'd see in the Racket macro expander expanding a Racket module.
-				Running branchy with a random input. This is basically what happens in the expander being given a user program. We can observe in \figref{fig:branchy-short-trace-summary} that Branchy with a repeating short path has only 2 traces, with a fraction of a second spent on trace compilation, recording \~470 operations, where in \figref{fig:branchy-random-trace-summary} shows that tracing Branchy that's running on a random input spends orders of magnitude more time on trace compilation, generates about \~40 loops and \~250 bridges containing \~31k operations. Note that both computations generate data-specialized non-reusable traces, it's just that it's not too too bad when the input contains a predictable loop.
-			\end{paragraph-here}
-
-			\begin{figure}[htbp] % let LaTeX decide where it fits best
+			\begin{figure}[h] % let LaTeX decide where it fits best
 				\centering
-				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-short-trace-summary.png}}
-				\caption{Tracing Branchy on a repeating input of '(20 20 20 20 20 ...) yields only 2 loops with a very short amount of time spent on trace compilation.}
-				\label{fig:branchy-short-trace-summary}
+				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-trace-graphs.png}}
+				\caption{Tracing branch-heavy computation with arbitrary branches results in a combinatorial explosion of recorded loops and bridges.}
+				\label{fig:branchy-trace-graphs}
 			\end{figure}
 
-			\begin{figure}[htbp] % let LaTeX decide where it fits best
-				\centering
-				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-random-trace-summary.png}}
-				\caption{Tracing Branchy with a random input spends orders of magnitude resources to produce that much useless stuff.}
-				\label{fig:branchy-random-trace-summary}
-			\end{figure}
+			\paragraph{}%
+				\figref{fig:branchy-trace-graphs} and \tableRef{table:branchy-backend-summaries} illustrate this effect quantitatively. For inputs with highly repetitive branching decisions (e.g., all 20s), the meta-tracer records only two loops and three bridges, requiring a negligible fraction of runtime spent on trace compilation. However, even these traces remain highly specialized to the particular repetitive path taken, significantly limiting their reusability in more general cases where input variation occurs. In contrast, random inputs, more representative of realistic macro expander behavior, induce a combinatorial explosion: 39 loops, 248 bridges, and substantially more traced operations, resulting in significant overhead in trace compilation and optimization.
+
+			\begin{table}[!h]
+			\centering
+			\small
+			\begin{tabular}{@{}lcc@{}}
+				\toprule
+				& \textbf{Repeating Branches} & \textbf{Random Branches} \\
+				\midrule
+				\textbf{Tracing (s)}                 & \textbf{0.004566} & \textbf{0.153118} \\
+				Backend (s)                 & 0.001239 & 0.044965 \\
+				TOTAL (s)                            & 1.185808 & 2.242329 \\ \\
+				ops                                   & 2130 & 147895 \\
+				heapcached ops                        & 572 & 41615 \\
+				\textbf{recorded ops}                & \textbf{462} & \textbf{31202} \\
+				\quad calls                                 & 12 & 380 \\
+				guards                                & 128 & 7391 \\
+				opt ops                               & 243 & 11448 \\
+				opt guards                            & 75 & 3768 \\
+				opt guards shared                     & 46 & 2553 \\
+				forcings                              & 0 & 0 \\
+				abort: trace too long                 & 0 & 0 \\
+				abort: compiling                      & 0 & 0 \\
+				abort: vable escape                   & 0 & 0 \\
+				abort: bad loop                       & 0 & 0 \\
+				abort: force quasi-immut              & 0 & 0 \\
+				abort: segmenting trace               & 0 & 0 \\
+				virtualizables forced                 & 0 & 0 \\
+				nvirtuals                    & 74 & 1982 \\
+				nvholes                               & 8 & 126 \\
+				nvreused                              & 36 & 907 \\
+				vecopt tried                          & 0 & 0 \\
+				vecopt success                        & 0 & 0 \\
+				\textbf{Total \# loops}               & \textbf{2} & \textbf{39} \\
+				\textbf{Total \# bridges}             & \textbf{3} & \textbf{248} \\
+				Freed \# loops                        & 0 & 0 \\
+				Freed \# bridges                      & 0 & 0 \\
+				\bottomrule
+			\end{tabular}
+			\caption{JIT back-end summaries for branch-heavy computations taking repeating vs random branches.}
+			\label{table:branchy-backend-summaries}
+			\end{table}
 
 
-			\begin{paragraph-here}
-				This begs the question, what sort of trace do we want to see for this kind of computation?
+			\paragraph{}%
+				This observation naturally raises the question of what constitutes an ideal tracing strategy for interpreter-style, branch-heavy computations. Should a tracing JIT generate one highly specialized trace per unique branching pattern, incurring substantial memory and compilation overhead but achieving maximum runtime efficiency for those exact inputs? Or is it preferable to construct broader, less specialized traces containing multiple branches, potentially reducing memory footprint but introducing runtime overhead from unnecessary paths? Consider a repeated branching pattern such as \emph{18-8-3-5-4-18-8-3-5-4-...}; capturing the entire pattern into one trace may yield high specialization, whereas identifying a shorter common prefix (e.g., \emph{18-8-3-5}) might increase trace reuse at the cost of less specialization. However, for our specific scenario regarding self-hosting, neither tracing strategy sufficiently justifies the resources expended by meta-tracing during runtime. As we will elaborate in the next section, this inefficiency arises because program expansion occurs at compile-time, where the control flow lacks meaningful loops to capture—each computation path is effectively static and resembles the linear decision-making of a regular-expression matcher.
 
-				Discuss branching in the tracing JITs, with guards and bridges.
 
-				Do we want a trace per branch? Do we want a one giant trace that has all the branches in it?
-
-				Imagine you're the tracer, and you see this path:
-
-				18-8-3-5-4-18-8-3-5-4-18-8-3-5-4..... you'd detect this loop and tie it all to create a trace `18-8-3-5-4`. That trace is only useful for the input 3, so the more 3s you have in your input, the faster your program will go.
-
-				what if you see a path like this (3-0-7-3-0-7....):
-
-				18-8-3-5-4-18-8-3-1-18-8-3-5-6-7-18-8-3-5-4-18-8-3-1-18-8-3-5-6-7-......
-
-				now which loop is better for the tracer?
-				- is it `18-8-3-5-4-18-8-3-1-18-8-3-5-6-7` ? over-specialized to input 3-0-7.
-				- or is it `18-8-3-5` ? the common prefix for all the inputs? Can we build a prefix-tree in the interpreter to help find this (like the call-graph helping to find general loops)?
-				- separate loops for each branch, like `18-8-3-5-4`, `18-8-3-1`, `18-8-3-5-6-7`...
-
-				Is a large trace always bad? I imagine, mostly. On one hand, we're turning a larger portion of the runtime into machine code, so as long as the computation spends time on that path, we'll use more machine code, which should speed up the whole program. However, on the other hand, oversized traces also become over-specialized, which dramatically reduces their re-usability, which in turn reduces the ROI on that trace.
-
-			\end{paragraph-here}
-
-			\begin{paragraph-here}
-				This is the reason that tracing JITs became unpopular. You lose more when slow than you gain when fast. If you're 10x slower on half of the benchmarks, and 10x faster than the other half, then you're 5.05x slower overall. [CITE]
-			\end{paragraph-here}
+			\paragraph{}%
+				This fundamental tension explains the limited adoption of tracing JITs in practice in the last decade [CITE HERE]. Highly specialized traces yield considerable speed-ups only for workloads closely matching traced paths, while deviating workloads incur substantial tracing overhead without corresponding benefits. Consequently, the average-case performance may significantly degrade, exemplified by the observation that a tracing JIT that is ten times faster on half of a benchmark suite but ten times slower on the other half is, overall, more than five times slower in practice~\cite{mozblog}.
 
 		\subsection{Performance of Program Expansion}
 			\label{section:there-is-no-loop}
