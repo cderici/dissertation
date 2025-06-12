@@ -292,103 +292,66 @@
 
 			\begin{paragraph-here}
 				Pycket already has an efficient regexp implementation in RPython to compare against, implementing the same thing with what we have in the regexp linklet, so 1:1 comparison yay.
-
-				Even regexp linklet is very complex to distill the nature of the issue concretely.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}
-				As a running example, we can take a look at the performance differences between the regexp linklet and the RPython implementation over a simple example of matching $\mathtt{\#}$\racketcode{rx"defg"} against a large string containing \racketcode{"aaa...defg...aaa"} in the middle.
+				As a running example, we can take a look at the performance differences between the regexp linklet and the RPython implementation over a simple example of matching $\mathtt{\#}$\racketcode{rx"defg"} against a large string containing \racketcode{"aaa...defg...aaa"} in the middle. \figref{fig:regexp-example-defg} shows both the trace we get from the RPython implementation and the program we run. The gist of this computation is the literal search in the string for
+			the \racketcode{"defg"} pattern. As we see in the figure,  this is captured in a tight loop in the
+			main trace for the RPython implementation.
+			\end{paragraph-here}
+
+			\inputSub{problem}{regexp-example-defg}
+
+			\begin{paragraph-here}
+				In \figref{fig:regexp-overall-comparison} we can observe that with the handwritten RPython implementation is about 30x faster than Racket, and about 50x faster than Pycket using the regexp implementation in the regexp linklet. This is because the handwritten RPython regexp
+			implementation utilizes interpreter hints to control the unrolling and
+			encourages the allocation removal optimizations through type
+			specializations, as well as uses smart techniques such as caching and contexts.
 			\end{paragraph-here}
 
 			\inputSub{problem}{regexp-overall-runtime}
 
 			\begin{paragraph-here}
-				Introduce a synthetic regexp implementation (Figure 17 in proposal)
-			\end{paragraph-here}
-
-			\inputSub{problem}{reg-match-figure}
-
-			\paragraph{}%
-			 As a simple experiment
-			to demonstrate the issue, we run both regexp implementations (the one
-			in the \figref{fig:regexp} and the RPython implementation) to match
-			 and measure the time
-			performances.
-
-
-			\figref{fig:regexp-trace} shows both the trace we get
-			from the RPython implementation and the program we run. To run the
-			simple implementation in \figref{fig:regexp}, we modify this program
-			to use the \racketcode{reg-match} in instead of the
-			\racketcode{regexp-match}. When we run both with the same inputs, we
-			observe 2x slowdown on the simple implementation. Part of the reason
-			is the use of clever techniques that are specific to the regexp
-			implementation on RPython such as caching and using contexts etc. The
-			bigger part of the problem, however, lies in the difference between
-			the traces that are generated for this computation.
-
-			\paragraph{}%
-			The gist of this computation is the literal search in the string for
-			the \racketcode{"defg"} pattern. As can be seen in
-			\figref{fig:regexp-trace}, this is captured in a tight loop in the
-			main trace for the RPython implementation. The RPython regexp
-			implementation utilizes interpreter hints to control the unrolling and
-			encourages the allocation removal optimizations through type
-			specializations. On the other hand, tThe trace we get for the Racket
+				The advantage of the RPython implementation on the interpreter can also be seen by turning off the JIT. When we turn off the jit for this example on both Pycket using RPython and using the regexp linklet, we observe a 6x slowdown on the RPython but two orders of magnitude slowdown on the one that's using the regexp linklet. This means that we benefit substantially more by using JIT when we evaluate Racket code, rather than being clever on the RPython implementation. Fastest time, however, is faster on the RPython implementation, because it is able to capture the nature of the computation better than the one that's using regexp linklet. And that's because of all the bail outs due to misdirections and overspecialized traces that are recorded but never used, etc. This can be observed in [figure trace Python regexp], illustrating that tThe trace we get for the Racket
 			implementation for the same program is quite large due to aggressive
 			inlining comes with tracing and includes large amounts of
-			allocation/deallocation. For space concerns in this document we defer
-			presenting the large traces to the dissertation.
-
-			\paragraph{}%
-			Tracing interpreter-style programs with complex control-flow paths is
-			a known weakness of JIT compilers. The large number of indirections
-			not only cripple the JIT optimizations but also causes the loops to be
-			segmented into many highly data driven traces. For
-			example, consider the following program in \figref{fig:regexp}, which
-			is a very simple regular expression matcher. It is highly simplified
-			and some of the rules are removed for space.
-
-			\paragraph{}%
-			Tracing this program running with an input regexp, say
-			$\mathtt{\#}$\racketcode{rx"defg"}, trying to match it against an
-			input string produces a trace that follows the control-flow path of
-			the program for that input, making tracing quite wasteful because for
-			any other input regexp, say $\mathtt{\#}$\racketcode{rx"a*"} which
-			follows an entirely different path on the program, the JIT produces,
-			compiles and optimizes yet another trace for that input, unable to use
-			the previously generated trace. This problem not only increases the
-			warmup time but also produces traces that are unlikely to be
-			frequently re-used.
-
-			\begin{show-experiment}
-				Similar experiments with some data making it go super fast and some super slow.
-			\end{show-experiment}
-
-			\begin{paragraph-here}
-				Interleaving paragraphs to talk about various experiments with regexp, showing traces.
+			allocation/deallocation, which creates a GC pressure that we'll talk about in the next section.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}
-				Maybe a paragraph to tie up this discussion with relating to the real Racket expander.
+				The data-dependency shows up here as well. Since the trace we're talking about is for the input $\mathtt{\#}$\racketcode{rx"defg"}. And, unsurprisingly the $\mathtt{\#}$\racketcode{rx"a*"} regexp would follow an entirely different path on the program.
+				[Tying up the discussion to Racket expander for a segue into the last part of this section where we talk about the nature of the issue]
+				In a program expansion like in Racket's expander, the program would be bombarded with different types of cases, resulting in the tracer spending tons of time trying to capture meaningful traces, while failing to reuse most of them.
 			\end{paragraph-here}
 
-			(We move here into the very nature of the self-hosting on a meta-tracing JIT)
+			[We move here into the very nature of the self-hosting on a meta-tracing JIT]
 
 			\begin{paragraph-here}
-				Let's recall what problem meta-tracing solved.
+				Recall that PyPy solves the problem of tracing the loops within a user program, rather than in the interpreter that's interpreting it \cite{pypy-main}. They essentially pushed the problem of capturing the essence of the computation into machine code one abstraction level above.
 			\end{paragraph-here}
 
+			\begin{figure}[h] % let LaTeX decide where it fits best
+				\centering
+				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{theres-no-loop.png}}
+				\caption{We put a branchy expander in front of the interpreter.}
+				\label{fig:theres-no-loop}
+			\end{figure}
+
 			\begin{paragraph-here}
-				Self-hosting is a different problem from what meta-tracing solves. (Find figure I made before-or make it again).
+				 \figref{fig:theres-no-loop} shows what we have done by putting Racket's expander as the front-end of the interpreter. So the interpreter interprets the program that expands the user program.
+				So what's the essence of the computation that we're trying to capture here? When talking about program expansion, we're not anymore actually trying to capture the hot paths of the user program, because we're in an earlier stage of evaluation, there's no loops to run (except the convoluted loops within the expander itself), in our case, the user program is just a stream of numbers and symbols.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}
 				Tie it up with data dependency and punch it: this is not suitable for meta-tracing.
+
+				Expanding (transforming a program) is no different than fasl, or regexp matching. Therefore just as "data-dependent" as everything we were talking about so far. This is actually more apparent in the regexp example, because imagine you're matching a simple regexp against a string that contains a for loop, you don't actually care about what happens in the loop there, what you care is the order of symbols, etc. Note again that the loops in the user program will still be captured by Pycket's meta-interpreted CEK machine core, after it's expanded by our branchy expander. We'll talk about the effects of this expansion onto the tracing of the final fully expanded program in \sectionRef{section:cross-benchmarks}.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}
 				This problem requires a significant amount of research to solve.
+
+				So the problem of capturing the essence or hot paths of the computation in the user program that the PyPy guys pushed further in the stack of abstraction levels got pulled back, or rather we have moved into the abstraction level that that problem is currently at.
 			\end{paragraph-here}
 
 
@@ -457,7 +420,7 @@
 			Warmup breakdowns
 		\end{show-experiment}
 
-		\inputSub{problem}{sample-trace}
+
 
 	% Runtime Performance of Tracing Data-Dependent Branchy Code
 

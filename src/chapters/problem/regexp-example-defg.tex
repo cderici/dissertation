@@ -26,10 +26,10 @@ jump(i11, p1, p4, i8, descr="124248256")
 \end{lstlisting}
 \end{minipage}
 
-		\vspace{0.8em} % small vertical gap
+	\vspace{0.8em} % small vertical gap
 
-		% ---------- Racket driver code -----------------------------------
-		\begin{minipage}{0.9\textwidth}
+	% ---------- Racket driver code -----------------------------------
+	\begin{minipage}{0.9\textwidth}
 \begin{lstlisting}[language=racket]
 #lang racket/base
 
@@ -42,11 +42,11 @@ jump(i11, p1, p4, i8, descr="124248256")
 
 (time
 (for ([i (in-range iter)])
-	(regexp-match reg-r str-big)))
+(regexp-match reg-r str-big)))
 \end{lstlisting}
-		\end{minipage}
+	\end{minipage}
 
-		\caption{\small Trace of Pycket’s regexp (in RPython) matching
-				{\tt\#rx"defg"}.}
-		\label{fig:regexp-trace}
-	\end{figure}
+	\caption{\small Trace of Pycket's regexp (in RPython) matching
+			{\tt\#rx"defg"}.}
+	\label{fig:regexp-example-defg}
+\end{figure}
