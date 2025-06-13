@@ -1,0 +1,34 @@
+\begin{figure}[!h] % let LaTeX decide where it fits best
+  \centering
+
+  \vspace{1.5em}
+  \begin{tikzpicture}[
+      font=\small,
+      box/.style = {draw, rounded corners, align=center,
+                    minimum width=32mm, minimum height=12mm, fill=gray!8},
+      arr/.style = {-stealth, thick},
+      ann/.style = {font=\footnotesize, inner sep=1pt}
+    ]
+
+    % Nodes -------------------------------------------------------------
+    \node[box] (branchy) {Branchy\\Expander};
+    \node[box, right=35mm of branchy] (user) {User Program\\(for-loop $\times100$)};
+    \node[box, below=20mm of branchy]  (interp) {Interpreter\\(CEK)};
+    \node[box, right=35mm of interp]   (jit) {Tracing JIT};
+
+    % Arrows ------------------------------------------------------------
+    \draw[arr] (branchy.south) -- (interp.north);
+    \draw[arr] (user.west)    -- (branchy.east)
+        node[ann, midway, above=1mm] {expand};
+    \draw[arr] (interp.east)   -- (jit.west);
+    \draw[arr, dashed] (user.south west)    -- (interp.north east)
+        node[ann, midway, above=2mm] {pypy};
+
+    % \draw[arr, dashed] (interp.north east) to[out=90,in=-135] ++(5mm,5mm)
+    %     node[ann, above] {hints};
+
+  \end{tikzpicture}
+  %----------------------------------------%
+  \caption{Self-hosting naturally brings a new abstraction level to what meta-tracing solved tracing for.}
+  \label{fig:theres-no-loop}
+\end{figure}
