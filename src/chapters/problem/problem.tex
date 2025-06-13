@@ -27,7 +27,7 @@
 	\end{chaptersynopsis}
 
 	\paragraph{}%
-	 	Self-hosting introduces performance issues on a language runtime in several ways. Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces; self-hosting raises memory-usage concerns; and computations that are critical to self-hosting—such as program expansion—seem to be poorly suited to meta-tracing because they contain no hot loops for the tracer to capture. Although the exact symptoms may vary with the design of a given runtime and the hosted language, the underlying issues remain the same on every meta-tracing system.
+	 	Self-hosting introduces performance issues on a language runtime in several ways. Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces; self-hosting raises memory-usage concerns; and computations that are critical to self-hosting —such as program expansion—seem to be poorly suited to meta-tracing because they contain no hot loops for the tracer to capture. Although the exact symptoms may vary with the design of a given runtime and the hosted language, the underlying issues remain the same on every meta-tracing system.
 
 	\paragraph{}%
 	 	In this chapter we study in detail and demonstrate the impact of these performance issues on a concrete system, namely \emph{Racket on Pycket}. Recall from \chapterRef{chapter:pycket} that the original Pycket front-end invoked the stand-alone Racket executable to load core libraries, as well as the -\verb|#lang|-language, and fully expand the user program before handing the expanded \verb|#%kernel| form to its CEK back-end. The new self-hosting front-end instead runs the expander entirely inside Pycket: it evaluates the bootstrapping linklets that implement the expander, uses them to expand the user program, and then evaluates the resulting core program—all on the CEK back-end from the outset. This architectural shift brings clear benefits, but it also introduces fresh costs.
@@ -44,21 +44,21 @@
 	\section{Pycket's Performance Characteristics}
 	\label{section:pycket-performance-characteristics}
 
-	\begin{sectionpoint}
-		Pycket is generally fast, but self-hosting exposes performance issues.
-	\end{sectionpoint}
+	% \begin{sectionpoint}
+	% 	Pycket is generally fast, but self-hosting exposes performance issues.
+	% \end{sectionpoint}
 
 	\paragraph{}%
 		With an extensive suite of micro- and macro-benchmarks plus larger real-world experiments, the existing Pycket implementation consistently demonstrates competitive performance when executing Racket code. It benefits from the generic optimizations provided by the RPython framework—including common-subexpression elimination, copy propagation, constant folding, loop-invariant code motion, malloc removal, and the inlining that naturally arises from tracing \cite{loop-aware:12,hotpath:06,malloc-removal:11}. It also benefits from interpreter-specific improvements such as environment pruning, data-structure specialization, strategy objects, and gradual-typing features like hidden classes. Nevertheless, earlier studies revealed workloads on which Pycket lags behind every other system—namely “almost exclusively recursive programs with data-dependent control flow in the style of an interpreter over an AST” \cite{pycketmain,pycketmain2}. Investigating these cases launched the present line of research.
 
 	\paragraph{}%
-		Pycket's baseline shows that when programs feature tight, well-behaved loops—numeric kernels, tail-recursive traversals, or higher-order combinators—the tracer quickly identifies the hot paths and specialization pays off. Across the Larceny and R6RS suites, for example, Pycket typically matches or exceeds Chez Scheme's throughput while starting up in a fraction of the time required by ahead-of-time native compilers; inside a trace, most primitive operations collapse to a handful of low-level nodes and even polymorphic arithmetic becomes monomorphic.
+		Pycket's baseline shows that when programs feature tight, well-behaved loops—numeric kernels, tail-recursive traversals, or higher-order combinators—the tracer quickly identifies the hot paths and specialization pays off. Across the Larceny and R6RS suites, for example, Pycket typically matches or exceeds Chez Scheme's throughput while starting up in a fraction of the time required by ahead-of-time native compilers; inside a trace, most primitive operations collapse to a handful of low-level nodes and even polymorphic arithmetic becomes monomorphic \cite{pycketmain2}.
 
 	\paragraph{}%
 		The picture changes when control flow branches unpredictably or when large interpreter-like dispatch loops dominate execution. Here Pycket must juggle deep continuation structures, environment chains, and dynamically typed tag checks, all of which inflate trace size and lengthen warm-up. Garbage-collector telemetry (in \sectionRef{section:memory}) further shows that such workloads allocate an order of magnitude more temporary objects per unit time than steady-state numeric code, stressing the nursery and triggering full collections. These observations motivate the detailed analysis that follows.
 
 	\paragraph{}%
-		To develop the core issue we first recall from \ref{chapter:pycket} how Pycket currently detects loops. While for the low-level languages such as in a byte-code interpreter a program counter is used to detect loops, in Pycket the focus is on function applications, since Pycket works on program ASTs and the only AST that may create a loop is an application. Whether it is a basic counter or a compound state, the idea is that a loop is registered as soon as a program state transitions to one of the previous states. As reported in the previous studies, Pycket utilizes two techniques, namely the two-state tracking and the use of a dynamic call-graph. In both techniques the idea is to eliminate the “false-loops” among all the observed trace headers (i.e. potential start of a loop). The two-state tracking encodes the trace headers as a pair of a lambda body and its call-site, and the call-graph method detects cycles on a call-graph that's dynamically generated within the interpreter to handle extra levels of indirection. These approaches together are proven to be very effective in tracing code with a heavy use of shared control-flow indirections, such as the contract system \cite{pycketmain,pycketmain2}.
+		To develop the core issue we first recall from \chapterRef{chapter:pycket} how Pycket currently detects loops. While for the low-level languages such as in a byte-code interpreter a program counter is used to detect loops, in Pycket the focus is on function applications, since Pycket works on program ASTs and the only AST that may create a loop is an application. Whether it is a basic counter or a compound state, the idea is that a loop is registered as soon as a program state transitions to one of the previous states. As reported in the previous studies, Pycket utilizes two techniques, namely the two-state tracking and the use of a dynamic call-graph. In both techniques the idea is to eliminate the “false-loops” among all the observed trace headers (i.e. potential start of a loop). The two-state tracking encodes the trace headers as a pair of a lambda body and its call-site, and the call-graph method detects cycles on a call-graph that's dynamically generated within the interpreter to handle extra levels of indirection. These approaches together are proven to be very effective in tracing code with a heavy use of shared control-flow indirections, such as the contract system \cite{pycketmain,pycketmain2}.
 
 	\paragraph{}%
 		A second crucial component is the relevant RPython back-end optimizations. For example, loop-invariant code motion (LICM) performed by the JIT \cite{loop-aware:12}. LICM hoists interpreter-state destructuring into a preamble, leaving a compact peeled iteration that forms the loop body. If a side trace (a \emph{bridge}) can jump directly into this peeled iteration, the runtime avoids re-executing hoisted operations and gains a substantial speed-up.
@@ -70,14 +70,14 @@
 		Earlier versions of Pycket mitigated some of this mismatch by allowing the JIT to allocate just enough additional data to reconcile the states. Escape analysis and malloc-removal often virtualize those allocations \cite{malloc-removal:11,loop-aware:12}. A small heuristic therefore permits the JIT to materialize objects that would otherwise stay virtual, trading a bit of space for a jump into the peeled iteration; thus yielding roughly a 4 \% speed-up for gradually typed programs with no measurable overhead \cite{pycketmain2}.
 
 	\paragraph{}%
-		Any functionality that Pycket now imports as Racket code\footnote{i.e., bootstrapping linklets} would, in a handwritten RPython interpreter, exploit meta-interpreter hints-such as \verb|@jit.unroll_safe|-to guide the JIT back-end. Because the imported modules arrive as opaque ASTs, Pycket cannot inject such hints, so the tracer sees long interpreter-style dispatch loops without guidance. Moreover, introducing the linklet layer lets Pycket execute large Racket programs—including the 2642-function expander—entirely inside the JIT. Bootstrapping the \emph{racket/base} language alone instantiates more than a hundred modules before user code starts. Although micro-benchmarks are unaffected (the back-end is unchanged), these large workloads exacerbate all the aforementioned issues. In short, the very extensibility that makes self-hosting attractive also deprives the meta-tracer of inside information, limiting trace quality and prolonging warm-up.
+		Any functionality that Pycket now imports as Racket code\footnote{i.e., bootstrapping linklets} would, in a handwritten RPython interpreter, exploit meta-interpreter hints-such as \verb|@jit.unroll_safe|-to guide the JIT back-end. Because the imported modules arrive as opaque ASTs, Pycket cannot inject such hints, so the tracer sees long interpreter-style dispatch loops without guidance. Moreover, introducing the linklet layer lets Pycket execute large Racket programs—including the 2642-function expander—entirely inside the JIT. Bootstrapping the \emph{racket/base} language alone instantiates close to a hundred modules before user code starts. Although micro-benchmarks are unaffected (the back-end is unchanged), these large workloads exacerbate all the aforementioned issues. In short, the very extensibility that makes self-hosting attractive also deprives the meta-tracer of inside information, limiting trace quality and prolonging warm-up.
 
 	\section{Module and Language Loading}
 	\label{section:module-and-language-loading}
 
-		\begin{sectionpoint}
-			Self-hosting introduces a "boot and language expansion" overhead, which Pycket didn't have before.
-		\end{sectionpoint}
+		% \begin{sectionpoint}
+		% 	Self-hosting introduces a "boot and language expansion" overhead, which Pycket didn't have before.
+		% \end{sectionpoint}
 
 		\paragraph{}%
 			A Racket runtime has to \emph{expand} the language of the user program—most prominently the language declared on the \#lang line—\emph{before} it can even begin to expand the user's source; the expander should be able to resolve every identifier that the program may reference, and doing so requires loading, and instantiating the language's own modules so that their bindings are available.
@@ -86,11 +86,9 @@
 		\paragraph{}%
 			Consequently, the complete transitive closure of the language's module graph has to be loaded and expanded ahead of the user program. For a language such as \texttt{\#lang racket/base} that closure already contains roughly 90 leaf modules; larger domain-specific languages may exceed that number. In the original, non-self-hosting Pycket this preparatory step was executed by the external \texttt{racket} binary, so its cost was invisible to the JIT. Now it is part of the measured runtime.
 
-		\paragraph{}%
-			\tableRef{table:boot-no-compiled} quantifies that cost of a cold boot when \emph{no} pre-compiled (\texttt{.zo}) artifacts are present, loading the \texttt{\#lang racket/base}. The loading of the bootstrapping linklets, their compilation into linklet objects and their instantiation, as well as instantiating all the Racket modules for the \texttt{\#lang racket/base} (\emph{init-lib}) together dominate the 2.7s wall-clock time. Note that the compilation of a linklet involves constructing AST nodes for every object that was in the s-expression, and the A-normalization and assignment conversion passes. Moreover, because these steps are internal to the interpreter and not part of the user code, these milliseconds are almost entirely spent in the interpreter.
-
-		\begin{table}[ht]
+		\begin{table}[!h]
 		\centering
+		\small
 		\begin{tabular}{@{}lrrr@{}}
 			\toprule
 			Phase & Time (ms) & GC (ms) & Calls \\ \midrule
@@ -118,13 +116,20 @@
 		\end{table}
 
 		\paragraph{}%
-			Before self-hosting, none of that overhead appeared: Pycket received a fully-expanded core program, and the JIT could concentrate on the hot loops of \emph{user} code. The new architecture gives Pycket full visibility into the macro expander, the module system, and the reader, and more, but that transparency comes with an up-front cost.
+			\tableRef{table:boot-no-compiled} quantifies that cost of a cold boot when \emph{no} pre-compiled (\texttt{.zo}) artifacts are present, loading the \texttt{\#lang racket/base}. The loading of the bootstrapping linklets, their compilation into linklet objects and their instantiation, as well as instantiating all the Racket modules for the \texttt{\#lang racket/base} (\emph{init-lib}) together dominate the 2.7s wall-clock time. Note that the compilation of a linklet involves constructing AST nodes for every object that was in the s-expression, and the A-normalization and assignment conversion passes. Moreover, because these steps are internal to the interpreter and not part of the user code, these milliseconds are almost entirely spent in the interpreter.
 
 		\paragraph{}%
-			One obvious advantage of this transparency is to reuse compiled code. By setting \racketcode{use-compiled-file-paths} and \racketcode{read-accept-compiled} (Racket-level) parameters, Pycket instructs the expander to prefer \texttt{.zo} files over \texttt{.rkt} sources. Doing so eliminates the most expensive compile-time passes (cf.\ the disappearance of \texttt{compile-linklet}, \texttt{assign-convert}, and \texttt{normalize} in \tableRef{table:boot-compiled}), yet it also shifts work: module bodies must be deserialized (\racketcode{fasl->s-exp}) and validated, and the resulting syntax objects still have to be parsed into ASTs suitable for Pycket's evaluator.
+			Before self-hosting, none of that overhead appeared: Pycket received a fully-expanded core program, and the JIT could concentrate on the hot loops of \emph{user} code. The new architecture gives Pycket full visibility into the macro expander, the module system, the reader, and more, but that transparency comes with an up-front cost.
 
-		\begin{table}[ht]
+		\paragraph{}%
+			One obvious advantage of this transparency is to reuse compiled code. By setting up some (Racket-level) parameters such as \racketcode{use-compiled-file-paths} and \racketcode{read-accept-compiled}, Pycket instructs the expander to prefer \texttt{.zo} files over \texttt{.rkt} sources. Doing so eliminates the most expensive compile-time passes (cf.\ the disappearance of \texttt{compile-linklet}, \texttt{assign-convert}, and \texttt{normalize} in \tableRef{table:boot-compiled}), yet it also shifts work: module bodies must be deserialized (\racketcode{fasl->s-exp}) and validated, and the resulting syntax objects still have to be parsed into ASTs suitable for Pycket's evaluator.
+
+		\paragraph{}%
+			Shown in \tableRef{table:boot-compiled}, as expected, using pre-compiled \texttt{.zo} artifacts for Racket modules makes the \emph{compiled-code} path dramatically faster: the \texttt{init-lib} phase's wall-clock time falls from about 127s when loading source to roughly 3.4s with compiled code, while avoiding compilation saves large heap allocations, therefore the GC time drops from 8.5s to a few hundred milliseconds.
+
+		\begin{table}[!h]
 		\centering
+		\small
 		\begin{tabular}{@{}lrrr@{}}
 			\toprule
 			Phase & Time (ms) & GC (ms) & Calls \\ \midrule
@@ -156,25 +161,22 @@
 		\end{table}
 
 		\paragraph{}%
-			As expected, using pre-compiled \texttt{.zo} artifacts for Racket modules makes the \emph{compiled-code} path dramatically faster: the \texttt{init-lib} phase's wall-clock time falls from about 127s when loading source to roughly 3.4s with compiled code, while avoiding compilation saves large heap allocations, therefore the GC time drops from 8.5s to a few hundred milliseconds.
-
-		\paragraph{}%
 			Regardless of the source of each module, every macro expansion of user code ultimately depends on the performance of the underlying expander. Pycket's ability to inline into, and sometimes across, expander helpers opens new optimization opportunities, but it also means that deficiencies in the expander's own performance now directly affect application start-up. The next sections discuss those interactions in detail.
 
 	\section{The Nature of the Beast: Tracing Data-Dependent Computation}
 	\label{section:nature-of-the-beast}
 
-		\begin{sectionpoint}
-			Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces.
+		% \begin{sectionpoint}
+		% 	Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces.
 
-			Computations that are critical to self-hosting—such as program expansion—seem poorly suited to meta-tracing because they contain no hot loops for the tracer to capture.
-		\end{sectionpoint}
+		% 	Computations that are critical to self-hosting—such as program expansion—seem poorly suited to meta-tracing because they contain no hot loops for the tracer to capture.
+		% \end{sectionpoint}
 
 		\paragraph{}%
 			The \emph{Racket macro expander}, loaded inside Pycket as the \emph{expander linklet}, now runs in the same process as every user program; its performance therefore lies on the critical path, because (i) expansion itself contributes directly to end-to-end latency, as detailed in \chapterRef{chapter:pycket}, and (ii) the entire language hierarchy must be loaded and initialized first, as shown in \sectionRef{section:module-and-language-loading}.
 
 		\paragraph{}%
-			Conceptually the expander is a tree-walking interpreter from higher level Racket languages to the \racketcode{\#\%kerrnel} language. Its control flow walks a rich lattice of macros and compile-time bindings, yielding deeply branch-heavy control flow whose exact shape depends on the user's program and the libraries it imports. [CITE] Pycket's meta-tracing JIT therefore meets high-level Racket functions whose behavior cannot be trivially predicted at trace time; unlike the low-level CEK interpreter these helpers cannot be decorated with hints such as \texttt{@jit.unroll\_safe}, and their extensive allocation and branching patterns frustrate the usual trace-specialization heuristics. Therefore the traces generated for these high-level abstractions are substantially larger; the JIT spends significant time tracing and optimizing these paths only to encounter unpredictable branches, bail out, and fall back to interpretation—negating much of the anticipated speed-up.
+			Conceptually the expander is a tree-walking interpreter from higher level Racket languages to the \racketcode{\#\%kerrnel} language. Its control flow walks a rich lattice of macros and compile-time bindings, yielding deeply branch-heavy control flow whose exact shape depends on the user's program and the libraries it imports. Pycket's meta-tracing JIT therefore meets high-level Racket functions whose behavior cannot be trivially predicted at trace time; unlike the low-level CEK interpreter these helpers cannot be decorated with hints such as \texttt{@jit.unroll\_safe}, and their extensive allocation and branching patterns frustrate the usual trace-specialization heuristics. Therefore the traces generated for these high-level abstractions are substantially larger; the JIT spends significant time tracing and optimizing these paths only to encounter unpredictable branches, bail out, and fall back to interpretation—negating much of the anticipated speed-up.
 
 		\paragraph{}%
 			In interpreter-style, data-dependent recursion the control flow fans out across many branches driven by the program's input, yet a tracing JIT captures only the \emph{single} linear path taken while tracing and specializes the resulting code to that exact sequence of decisions. When new input steers execution down a different branch the JIT must abort, start another trace, and specialize again. Over time this produces a combinatorial explosion of narrow, redundant traces—each optimal for the data that birthed it but useless for most other paths—inflating compilation time, thrashing the trace cache, and frequently forcing the runtime to fall back on interpretation.
@@ -183,18 +185,18 @@
 			In \chapterRef{chapter:solution} we propose a lightweight meta-hint mechanism that aims to help with this by helping to detect hot branches during interpretation and guiding the tracer away from branch-heavy code paths, mitigating the trace compilation churn and the explosion of overspecialized traces. In the remainder of this section, we examine in detail how the meta-tracer in Pycket behaves on branch-heavy computations.
 
 		\subsection{Tracing Branch-Heavy Computation}
-			\begin{mainpoint}
-				Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces.
-			\end{mainpoint}
-				\label{section:branchy}
+			% \begin{mainpoint}
+			% 	Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces.
+			% \end{mainpoint}
+			\label{section:branchy}
 
 			\paragraph{}%
-				As detailed in \chapterRef{chapter:pycket}, the Racket expander--containing the macro expander, module system, and more--is notably large and intricate. Investigating tracing JIT behavior directly within such a sizable and complex program can be impractical. Thus, we analyze the tracing behavior using smaller, controlled examples to isolate and clearly observe specific issues.\footnote{Full code and alternative definitions of Branchy is available at \url{https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt}.}
+				As detailed in \chapterRef{chapter:pycket}, the Racket expander--containing the macro expander, module system, and more--is notably large and intricate. Investigating tracing JIT behavior directly within such a sizable and complex program can be impractical. Thus, we analyze the tracing behavior using smaller, controlled examples to isolate and clearly observe specific issues.
 
 			\inputSub{problem}{branchy-source}
 
 			\paragraph{}%
-				\figref{fig:branchy-introduce-code} introduces \emph{Branchy}, a synthetic benchmark intentionally designed to exhibit interpreter-style, branch-heavy, and data-dependent behavior. Each iteration processes an element from an input list through nested conditional branches resembling a decision tree. Certain inputs produce consistently deep paths through this branching structure, while others immediately exit via shallow paths. For instance, an input list such as \racketcode{'(0 0 0 ...)} repeatedly traverses the longer path sequence \emph{18-8-3-1}, whereas \racketcode{'(20 20 20 ...)} consistently follows the shorter path labeled \emph{18}.
+				\figref{fig:branchy-introduce-code} introduces \emph{Branchy}\footnote{Full code and alternative definitions of Branchy is available at https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt.}, a synthetic benchmark intentionally designed to exhibit interpreter-style, branch-heavy, and data-dependent behavior. Each iteration processes an element from an input list through nested conditional branches resembling a decision tree. Certain inputs produce consistently deep paths through this branching structure, while others immediately exit via shallow paths. For instance, an input list such as \racketcode{'(0 0 0 ...)} repeatedly traverses the longer path sequence \emph{18-8-3-1}, whereas \racketcode{'(20 20 20 ...)} consistently follows the shorter path labeled \emph{18}.
 
 			\paragraph{}%
 				It is important to note that describing static source code itself as "branch-heavy" can be misleading. The critical notion here is the data-dependent nature of branch decisions during runtime. A program could possess deeply nested conditional structures yet exhibit minimal runtime branching if the input consistently chooses shallow branches. Therefore, the "branchiness" of a computation is an empirical property, characterized by the frequency and complexity of branching decisions made during an actual evaluation over an input.
@@ -204,8 +206,8 @@
 
 			\begin{figure}[h] % let LaTeX decide where it fits best
 				\centering
-				\includegraphics[width=0.5\linewidth]{\inputFigPath{problem}{branchy-long-path-trace-guards.png}}
-				\caption{RPython trace for Branchy running all-zero input taking a long 18-8-3-1 path.}
+				\includegraphics[width=0.6\linewidth]{\inputFigPath{problem}{branchy-long-path-trace-guards.png}}
+				\caption{RPython trace for Branchy running all-zero input taking a long 18-8-3-1 path. [PLACEHOLDER IMAGE]}
 				\label{fig:branchy-long-path-trace}
 			\end{figure}
 
@@ -217,8 +219,8 @@
 
 			\begin{figure}[h] % let LaTeX decide where it fits best
 				\centering
-				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{branchy-trace-graphs.png}}
-				\caption{Tracing branch-heavy computation with arbitrary branches results in a combinatorial explosion of recorded loops and bridges.}
+				\includegraphics[width=0.8\linewidth]{\inputFigPath{problem}{branchy-trace-graphs.png}}
+				\caption{Tracing branch-heavy computation with arbitrary branches results in a combinatorial explosion of recorded loops and bridges. [PLACEHOLDER IMAGE]}
 				\label{fig:branchy-trace-graphs}
 			\end{figure}
 
@@ -243,33 +245,20 @@
 				opt ops                               & 243 & 11448 \\
 				opt guards                            & 75 & 3768 \\
 				opt guards shared                     & 46 & 2553 \\
-				forcings                              & 0 & 0 \\
-				abort: trace too long                 & 0 & 0 \\
-				abort: compiling                      & 0 & 0 \\
-				abort: vable escape                   & 0 & 0 \\
-				abort: bad loop                       & 0 & 0 \\
-				abort: force quasi-immut              & 0 & 0 \\
-				abort: segmenting trace               & 0 & 0 \\
-				virtualizables forced                 & 0 & 0 \\
 				nvirtuals                    & 74 & 1982 \\
 				nvholes                               & 8 & 126 \\
 				nvreused                              & 36 & 907 \\
-				vecopt tried                          & 0 & 0 \\
-				vecopt success                        & 0 & 0 \\
 				\textbf{Total \# loops}               & \textbf{2} & \textbf{39} \\
 				\textbf{Total \# bridges}             & \textbf{3} & \textbf{248} \\
-				Freed \# loops                        & 0 & 0 \\
-				Freed \# bridges                      & 0 & 0 \\
 				\bottomrule
 			\end{tabular}
-			\caption{JIT back-end summaries for branch-heavy computations taking repeating vs random branches.}
+			\caption{JIT back-end summaries for branch-heavy computations taking repeating vs random branches. Redacted fields are all zero for both cases.}
 			\label{table:branchy-backend-summaries}
 			\end{table}
 
 
 			\paragraph{}%
 				This observation naturally raises the question of what constitutes an ideal tracing strategy for interpreter-style, branch-heavy computations. Should a tracing JIT generate one highly specialized trace per unique branching pattern, incurring substantial memory and compilation overhead but achieving maximum runtime efficiency for those exact inputs? Or is it preferable to construct broader, less specialized traces containing multiple branches, potentially reducing memory footprint but introducing runtime overhead from unnecessary paths? Consider a repeated branching pattern such as \emph{18-8-3-5-4-18-8-3-5-4-...}; capturing the entire pattern into one trace may yield high specialization, whereas identifying a shorter common prefix (e.g., \emph{18-8-3-5}) might increase trace reuse at the cost of less specialization. However, for our specific scenario regarding self-hosting, neither tracing strategy sufficiently justifies the resources expended by meta-tracing during runtime. As we will elaborate in the next section, this inefficiency arises because program expansion occurs at compile-time, where the control flow lacks meaningful loops to capture—each computation path is effectively static and resembles the linear decision-making of a regular-expression matcher.
-
 
 			\paragraph{}%
 				This fundamental tension explains the limited adoption of tracing JITs in practice in the last decade [CITE HERE]. Highly specialized traces yield considerable speed-ups only for workloads closely matching traced paths, while deviating workloads incur substantial tracing overhead without corresponding benefits. Consequently, the average-case performance may significantly degrade, exemplified by the observation that a tracing JIT that is ten times faster on half of a benchmark suite but ten times slower on the other half is, overall, more than five times slower in practice~\cite{mozblog}.
@@ -278,82 +267,61 @@
 			\label{section:there-is-no-loop}
 			% regexp stuff
 
-			\begin{sectionpoint}
-				Computations that are critical to self-hosting—such as program expansion—seem poorly suited to meta-tracing because they contain no hot loops for the tracer to capture. There is no loop.
-			\end{sectionpoint}
+			% \begin{sectionpoint}
+			% 	Computations that are critical to self-hosting—such as program expansion—seem poorly suited to meta-tracing because they contain no hot loops for the tracer to capture. There is no loop.
+			% \end{sectionpoint}
 
-			\begin{paragraph-here}
-				Moving on to a more real-world program: regexp. Getting deeper into the nature of the problem itself.
-			\end{paragraph-here}
+			\paragraph{}%
+				Moving beyond synthetic examples, we now shift our attention to a practical, real-world use-case: regular expressions. By examining a realistic and widely used computational pattern, we deepen our understanding of the performance challenges meta-tracing encounters in more typical interpreter-style computations. Regular expression matching offers a valuable analog to program expansion, as it shares the interpreter-style, data-driven, branch-heavy computational nature inherent in real-world expansions. Through analyzing regular expressions, we can extrapolate critical insights into how Pycket's meta-tracer handles such complex branch structures when processing large-scale expansions.
 
-			\begin{paragraph-here}
-				Working on regexp is great for us, extrapolating which reveals what happens in the expander at larger scale. Because It's an interpreter-style data-driven branch-heavy code.
-			\end{paragraph-here}
+			\paragraph{}%
+				Fortunately, Pycket already includes a robust, efficient regular expression implementation in RPython, providing a direct benchmark. This allows us to precisely measure performance by comparing it against the identical functionality implemented in the regexp linklet, facilitating a clear, one-to-one performance analysis.
 
-			\begin{paragraph-here}
-				Pycket already has an efficient regexp implementation in RPython to compare against, implementing the same thing with what we have in the regexp linklet, so 1:1 comparison yay.
-			\end{paragraph-here}
-
-			\begin{paragraph-here}
-				As a running example, we can take a look at the performance differences between the regexp linklet and the RPython implementation over a simple example of matching $\mathtt{\#}$\racketcode{rx"defg"} against a large string containing \racketcode{"aaa...defg...aaa"} in the middle. \figref{fig:regexp-example-defg} shows both the trace we get from the RPython implementation and the program we run. The gist of this computation is the literal search in the string for
-			the \racketcode{"defg"} pattern. As we see in the figure,  this is captured in a tight loop in the
-			main trace for the RPython implementation.
-			\end{paragraph-here}
 
 			\inputSub{problem}{regexp-example-defg}
 
-			\begin{paragraph-here}
-				In \figref{fig:regexp-overall-comparison} we can observe that with the handwritten RPython implementation is about 30x faster than Racket, and about 50x faster than Pycket using the regexp implementation in the regexp linklet. This is because the handwritten RPython regexp
-			implementation utilizes interpreter hints to control the unrolling and
-			encourages the allocation removal optimizations through type
-			specializations, as well as uses smart techniques such as caching and contexts.
-			\end{paragraph-here}
+			\paragraph{}%
+				To illustrate concretely, we consider matching the simple regular expression $\mathtt{\#}$\racketcode{rx"defg"} against a large string containing the substring \racketcode{"aaa...defg...aaa"} positioned centrally, as shown in \figref{fig:regexp-example-defg}.
+
+			\inputSub{problem}{regexp-example-trace}
+
+			\paragraph{}%
+				As shown in \figref{fig:regexp-example-trace}, the critical operation is essentially a linear literal search through the string. The RPython implementation successfully identifies and optimizes this pattern into a tight, efficient loop trace, highlighting its capability to leverage loop invariants and avoid unnecessary allocations.
 
 			\inputSub{problem}{regexp-overall-runtime}
 
-			\begin{paragraph-here}
-				The advantage of the RPython implementation on the interpreter can also be seen by turning off the JIT. When we turn off the jit for this example on both Pycket using RPython and using the regexp linklet, we observe a 6x slowdown on the RPython but two orders of magnitude slowdown on the one that's using the regexp linklet. This means that we benefit substantially more by using JIT when we evaluate Racket code, rather than being clever on the RPython implementation. Fastest time, however, is faster on the RPython implementation, because it is able to capture the nature of the computation better than the one that's using regexp linklet. And that's because of all the bail outs due to misdirections and overspecialized traces that are recorded but never used, etc. This can be observed in [figure trace Python regexp], illustrating that tThe trace we get for the Racket
-			implementation for the same program is quite large due to aggressive
-			inlining comes with tracing and includes large amounts of
-			allocation/deallocation, which creates a GC pressure that we'll talk about in the next section.
-			\end{paragraph-here}
+			\paragraph{}%
+				The comparative results, shown in \figref{fig:regexp-overall-comparison}, highlight significant performance disparities: the handwritten RPython implementation on Pycket achieves roughly a 30-fold improvement over standard Racket and approximately a 50-fold improvement compared to Pycket using the regexp linklet. This substantial advantage arises because the RPython implementation explicitly leverages interpreter hints, type specialization to optimize allocation strategies, and domain-specific optimization techniques like caching and contexts. Collectively, these optimizations allow the RPython implementation to efficiently manage control flow and memory usage.
 
-			\begin{paragraph-here}
-				The data-dependency shows up here as well. Since the trace we're talking about is for the input $\mathtt{\#}$\racketcode{rx"defg"}. And, unsurprisingly the $\mathtt{\#}$\racketcode{rx"a*"} regexp would follow an entirely different path on the program.
-				[Tying up the discussion to Racket expander for a segue into the last part of this section where we talk about the nature of the issue]
-				In a program expansion like in Racket's expander, the program would be bombarded with different types of cases, resulting in the tracer spending tons of time trying to capture meaningful traces, while failing to reuse most of them.
-			\end{paragraph-here}
+			[figure trace Python regexp]
 
-			[We move here into the very nature of the self-hosting on a meta-tracing JIT]
+			\paragraph{}%
+				The advantages inherent in the RPython implementation are further highlighted by analyzing performance \emph{without} JIT compilation. Turning off the JIT for both versions reveals insightful patterns: the RPython implementation slows down approximately six-fold, whereas Pycket using the regexp linklet suffers a two-order magnitude performance degradation. This difference emphasizes how JIT compilation substantially benefits the evaluation of Racket code. However, the absolute fastest runtime remains with the RPython implementation, reflecting its superior capacity to capture the computation's essence and avoid pitfalls such as mispredicted branches and overspecialized trace bailouts. This issue is evident in the extensive, allocation-heavy traces generated for the Racket-based implementation (as seen in [figure trace Python regexp]), significantly increasing garbage collection overhead, an issue explored further in the following section.
 
-			\begin{paragraph-here}
-				Recall that PyPy solves the problem of tracing the loops within a user program, rather than in the interpreter that's interpreting it \cite{pypy-main}. They essentially pushed the problem of capturing the essence of the computation into machine code one abstraction level above.
-			\end{paragraph-here}
+			\paragraph{}%
+				Data dependency is again prominent in our analysis. The trace behavior specifically observed for the input $\mathtt{\#}$\racketcode{rx"defg"} differs entirely when matching a pattern like $\mathtt{\#}$\racketcode{rx"a*"}, underscoring the inherent variability in program paths that meta-tracing attempts to capture. Extending this observation to the broader context of Racket's expander, we anticipate a similar scenario but exacerbated by complexity: a diverse stream of varied cases bombarding the tracer, which attempts yet fails to efficiently reuse specialized traces due to the rapidly shifting data-dependent execution paths.
+
+			\paragraph{}%
+				Recall that PyPy addresses tracing challenges by identifying and tracing loops directly in the user program rather than at the interpreter level. Essentially, PyPy elevates the abstraction level at which the essential computational patterns are captured in machine code~\cite{pypy-main}.
 
 			\begin{figure}[h] % let LaTeX decide where it fits best
 				\centering
 				\includegraphics[width=0.7\linewidth]{\inputFigPath{problem}{theres-no-loop.png}}
-				\caption{We put a branchy expander in front of the interpreter.}
+				\caption{We put a branchy expander in front of the interpreter.[PLACEHOLDER IMAGE]}
 				\label{fig:theres-no-loop}
 			\end{figure}
 
-			\begin{paragraph-here}
-				 \figref{fig:theres-no-loop} shows what we have done by putting Racket's expander as the front-end of the interpreter. So the interpreter interprets the program that expands the user program.
-				So what's the essence of the computation that we're trying to capture here? When talking about program expansion, we're not anymore actually trying to capture the hot paths of the user program, because we're in an earlier stage of evaluation, there's no loops to run (except the convoluted loops within the expander itself), in our case, the user program is just a stream of numbers and symbols.
-			\end{paragraph-here}
+			\paragraph{}%
+				\figref{fig:theres-no-loop} shows the architectural impact of integrating Racket's expander directly in front of Pycket's interpreter. With this design, the interpreter evaluates an expansion program rather than a conventional user-level program. Thus, when tracing the expander stage, the meta-tracer seeks hot loops within a higher abstraction layer—where loops are fundamentally sparse or overly complicated, and typical programs become mere streams of heterogeneous inputs, severely limiting opportunities for beneficial loop specialization.
 
-			\begin{paragraph-here}
-				Tie it up with data dependency and punch it: this is not suitable for meta-tracing.
+			\paragraph{}%
+				Transforming or expanding a program shares fundamental characteristics with regular expression matching or FASL parsing—each being equally data-dependent. The essence of the computation lies in the ordered manipulation and parsing of symbolic structures rather than semantics within the input. [We need something here that explains expanding/transforming a user program that contains a loop is an entirely different computation to a tracing JIT than interpreting it]  The loops within a fully expanded user program remain efficiently capturable by Pycket's meta-traced CEK machine core. We will discuss the implications of this multi-level tracing scenario and its resulting performance characteristics further in \sectionRef{section:cross-benchmarks}.
 
-				Expanding (transforming a program) is no different than fasl, or regexp matching. Therefore just as "data-dependent" as everything we were talking about so far. This is actually more apparent in the regexp example, because imagine you're matching a simple regexp against a string that contains a for loop, you don't actually care about what happens in the loop there, what you care is the order of symbols, etc. Note again that the loops in the user program will still be captured by Pycket's meta-interpreted CEK machine core, after it's expanded by our branchy expander. We'll talk about the effects of this expansion onto the tracing of the final fully expanded program in \sectionRef{section:cross-benchmarks}.
-			\end{paragraph-here}
+			\paragraph{}%
+  				Transforming or expanding a program shares fundamental characteristics with regular expression matching or FASL parsing—each being equally data-dependent. The essence of these computations lies primarily in the ordered manipulation and parsing of symbolic structures rather than in executing the semantics within those structures. Importantly, expanding or transforming a user program that contains loops represents a fundamentally different computational pattern to a tracing JIT than simply interpreting those loops. When interpreting loops, the meta-tracing JIT can trace iterations and capture hot paths. In contrast, program expansion involves repeatedly branching and manipulating data structures, rarely exhibiting consistent iteration patterns suitable for effective tracing. Nevertheless, the loops within a fully expanded user program remain efficiently capturable by Pycket's meta-traced CEK machine core. We will discuss the implications of this multi-level tracing scenario and its resulting performance characteristics further in \sectionRef{section:cross-benchmarks}.
 
-			\begin{paragraph-here}
-				This problem requires a significant amount of research to solve.
-
-				So the problem of capturing the essence or hot paths of the computation in the user program that the PyPy guys pushed further in the stack of abstraction levels got pulled back, or rather we have moved into the abstraction level that that problem is currently at.
-			\end{paragraph-here}
-
+			\paragraph{}%
+				Clearly, addressing this challenge requires extensive research and careful consideration. Whereas PyPy strategically relocates the computational tracing to a higher abstraction, effectively shifting the complexity upward, the self-hosting Pycket encounters these tracing difficulties directly within the interpreter expansion layer—precisely where the core issue inherently arises. At the heart of this challenge is the fundamental violation of the second assumption underlying tracing JITs, as previously discussed in \chapterRef{chapter:rpython}. The second assumption—that multiple iterations of the same loop are likely to traverse similar code paths—is directly contradicted by the highly data-dependent, branch-heavy nature of interpreter-style computations such as those found in the expander. This inherent violation explains why such computations, although critical for self-hosting, remain particularly ill-suited to meta-tracing and tracing JITs in general.
 
 	\section{Memory Issues with Self-Hosting}
 	\label{section:memory}

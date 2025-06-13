@@ -1,0 +1,31 @@
+\begin{figure}[!htbp]
+	\centering
+
+	\begin{minipage}{0.3\textwidth}
+		\begin{lstlisting}[language=rptrace, basicstyle=\ttfamily\scriptsize]
+    # start of the trace (preamble)
+    label(i0, p1)
+    i3  = int_add(i0, 1)
+    p4  = getfield_gc_r(p1)
+    i5  = strgetitem(p4, i0)
+    i7  = int_eq(i5, 100)
+    guard_false(i7)
+    i8  = getfield_gc_i(p1)
+    i9  = int_lt(i3, i8)
+    guard_true(i9)
+    # peeled-iteration (inner loop)
+    label(i3, p1, p4, i8)
+    i11 = int_add(i3, 1)
+    i12 = strgetitem(p4, i3)
+    i14 = int_eq(i12, 100)
+    guard_false(i14)
+    i15 = int_lt(i11, i8)
+    guard_true(i15)
+    # jump
+    jump(i11, p1, p4, i8)
+		\end{lstlisting}
+	\end{minipage}
+\caption{\small Trace of Pycket's regexp (in RPython) matching
+		{\tt\#rx"defg"}.}
+\label{fig:regexp-example-trace}
+\end{figure}
