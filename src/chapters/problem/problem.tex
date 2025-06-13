@@ -286,14 +286,14 @@
 			\inputSub{problem}{regexp-example-trace}
 
 			\paragraph{}%
-				As shown in \figref{fig:regexp-example-trace}, the critical operation is essentially a linear literal search through the string. The RPython implementation successfully identifies and optimizes this pattern into a tight, efficient loop trace, highlighting its capability to leverage loop invariants and avoid unnecessary allocations.
+				As shown in \figref{fig:regexp-example-trace}, the critical operation is essentially a linear literal search through the string. The RPython implementation successfully identifies and optimizes this pattern into a tight, efficient loop trace, highlighting its capability to leverage loop invariants and avoid unnecessary allocations. \figref{fig:regexp-linklet-big-trace} shows the trace for most used loop in Pycket using the regexp linklet implementation. The most notable difference is the size of the trace, with 191 operations vs 21, and significantly many parameters in the optimized loop demonstrates the generic and loose nature of the trace, as opposed to the tight loop that the RPython implementation was able to capture.
 
-			\inputSub{problem}{regexp-overall-runtime}
+			\inputSub{problem}{regexp-linklet-big-trace}
 
 			\paragraph{}%
 				The comparative results, shown in \figref{fig:regexp-overall-comparison}, highlight significant performance disparities: the handwritten RPython implementation on Pycket achieves roughly a 30-fold improvement over standard Racket and approximately a 50-fold improvement compared to Pycket using the regexp linklet. This substantial advantage arises because the RPython implementation explicitly leverages interpreter hints, type specialization to optimize allocation strategies, and domain-specific optimization techniques like caching and contexts. Collectively, these optimizations allow the RPython implementation to efficiently manage control flow and memory usage.
 
-			[figure trace Python regexp]
+			\inputSub{problem}{regexp-overall-runtime}
 
 			\paragraph{}%
 				The advantages inherent in the RPython implementation are further highlighted by analyzing performance \emph{without} JIT compilation. Turning off the JIT for both versions reveals insightful patterns: the RPython implementation slows down approximately six-fold, whereas Pycket using the regexp linklet suffers a two-order magnitude performance degradation. This difference emphasizes how JIT compilation substantially benefits the evaluation of Racket code. However, the absolute fastest runtime remains with the RPython implementation, reflecting its superior capacity to capture the computation's essence and avoid pitfalls such as mispredicted branches and overspecialized trace bailouts. This issue is evident in the extensive, allocation-heavy traces generated for the Racket-based implementation (as seen in [figure trace Python regexp]), significantly increasing garbage collection overhead, an issue explored further in the following section.

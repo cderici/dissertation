@@ -1,0 +1,61 @@
+\begin{figure}[!htbp]
+	\centering
+
+	\begin{minipage}{1\textwidth}
+\begin{lstlisting}[language=rptrace,basicstyle=\ttfamily\scriptsize]
+# Loop with 191 ops
+# start of the trace (preamble)
+label(p0, p1)
+guard_class(p0)
+p3  = getfield_gc_r(p0)        ; ConsEnvSize1._vals_0
+guard_nonnull(p3)
+i5  = instance_ptr_eq(p3, ConstPtr(ptr4))
+guard_true(i5)
+guard_class(p1)
+p7  = getfield_gc_r(p1)        ; LetCont.counting_ast
+guard_value(p7, ConstPtr(ptr8))
+p9  = getfield_gc_r(p1)        ; Cont.env
+guard_not_invalidated()
+p10 = getfield_gc_r(p1)        ; Cont.prev
+guard_class(p9)
+p12 = getfield_gc_r(p9)        ; ConsEnv.prev
+guard_class(p12)
+p14 = getfield_gc_r(p12)       ; W_Closure1AsEnv.caselam
+guard_value(p14, ConstPtr(ptr15))
+i16 = getfield_gc_i(p9)        ; ConsEnvSize1Fixed.vals_fixed_0
+i18 = int_add_ovf(i16, 1)
+guard_no_overflow()
+# ... ~120 guards / field loads elided
+# ... checks on start-range, lazy-bytes, regexp state, etc.
+
+# peeled-iteration (inner loop)
+label(p20, p12, i18, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, p61, i73, p72, p25, i82, p81, p43)
+guard_not_invalidated()
+i89 = int_add_ovf(i18, 1)
+guard_no_overflow()
+guard_nonnull_class(p20, ForwardLink) ; Continuation mark walk
+# ... more guards elided
+
+i92 = int_sub_ovf(i89, i70)    ; compute new byte offset
+guard_no_overflow()
+i94 = int_lt(i92, 0)           ; bounds check (low)
+guard_false(i94)
+i95 = int_ge(i92, i73)         ; bounds check (high)
+guard_false(i95)
+i96 = getarrayitem_gc_i(p72, i92) ; in_3[pos]
+i97 = int_ge(i96, i82)         ; second-vector bound
+guard_false(i97)
+i98 = getarrayitem_gc_i(p81, i96) ; # indexing into mutable-byte vectors
+i100 = int_eq(1, i98)          ; (eq? 1 byte)
+guard_false(i100)
+# more "not-AppRand784" range checks ...
+
+i101 = arraylen_gc(p43)
+jump(p20, p12, i89, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, p61, i73, p72, p25, i82, p81, p43)
+\end{lstlisting}
+
+	\end{minipage}
+\caption{\small Trace of Pycket using the regexp linklet, matching
+		{\tt\#rx"defg"}.}
+\label{fig:regexp-linklet-big-trace}
+\end{figure}
