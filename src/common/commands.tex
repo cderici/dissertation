@@ -13,6 +13,7 @@
 \newcommand{\figref}[1]{Figure~\ref{#1}}
 \newcommand{\chapterRef}[1]{Chapter~\ref{#1}}
 \newcommand{\sectionRef}[1]{Section~\ref{#1}}
+\newcommand\secref[1]{Section~\ref{#1}}
 \newcommand{\tableRef}[1]{Table~\ref{#1}}
 % Inline racket
 \newcommand{\racketcode}[1]{\lstinline[basicstyle=\ttfamily\small,language=racket]{#1}}
@@ -20,6 +21,20 @@
 \newcommand{\smartQL}{“}
 \newcommand{\smartQR}{” }
 
+\def\dash {\text{-}}
+\def\la {\bm{L_\alpha}}
+\def\lb {\bm{L_\beta}}
+
+% reduction stuff
+\newcommand{\redinput}[1]{EP\;\llbracket #1 \rrbracket, \rho, \sigma\;}
+\newcommand{\redoutput}[3]{EP\;\llbracket #1 \rrbracket, #2, #3\;}
+
+\newcommand{\rcinput}[1]{EP\;\llbracket E\;\llbracket #1 \rrbracket \rrbracket, \rho, \sigma\;}
+\newcommand{\rcoutput}[3]{EP\;\llbracket E\;\llbracket #1 \rrbracket \rrbracket, #2, #3\;}
+\def\rcrel {&\longrightarrow_{\beta r}\;}
+
+\def\where {\textbf{where}\;}
+\def\rel {&\longrightarrow_{\beta p}\;}
 
 %———————————————————————————————————————————————————————
 %  PART ENTRIES IN THE TABLE OF CONTENT
