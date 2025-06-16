@@ -3,21 +3,20 @@
 	\label{chapter:solution}
 
 	\begin{chaptersynopsis}
-		We have identified solution approaches that are worthy of further investigation.
+		We have identified solution approaches that are worthy of further investigation for improving self-hosting performance.
 
 		You either try to avoid branch-heavy code, or you try to get better at meta-tracing branch-heavy code.
 	\end{chaptersynopsis}
 
-	\section{Avoiding Branchy Code Evaluation}
+	\section{Guiding Tracer Away from Branch-Heavy Computation}
 		\begin{mainpoint}
 			Trying to detect branch-heavy computations and help the tracer forgo them seems like a promising idea.
 
-			Partial evaluation, as generally a common technique in tracing JITs to improve performance, is not a great idea for meta-tracing.
 		\end{mainpoint}
 		\subsection{Hot Branch Detection - Meta-hints}
-		\subsection{Partial Evaluation}
 
-	\section{Getting Better at Branch-Heavy Code Evaluation}
+
+	\section{Mitigating Memory Pressure in Branch-Heavy Computation}
 		\begin{mainpoint}
 			The nature of this type of computation makes it a fundamental problem for meta-tracing (aforementioned in earlier chapters). There's not much to do to get better at this.
 
