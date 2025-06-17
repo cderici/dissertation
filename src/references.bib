@@ -25,6 +25,23 @@
   file = {C:\Users\caner\Zotero\storage\2RGFN3VC\Bolz et al. - Meta-tracing makes a fast Racket.pdf}
 }
 
+@article{hayashizakiImprovingPerformanceTracebased2011,
+  title = {Improving the Performance of Trace-Based Systems by False Loop Filtering},
+  author = {Hayashizaki, Hiroshige and Wu, Peng and Inoue, Hiroshi and Serrano, Mauricio J. and Nakatani, Toshio},
+  year = {2011},
+  month = mar,
+  journal = {ACM SIGPLAN Notices},
+  volume = {46},
+  number = {3},
+  pages = {405--418},
+  issn = {0362-1340, 1558-1160},
+  doi = {10.1145/1961296.1950412},
+  urldate = {2025-03-27},
+  abstract = {Trace-based compilation is a promising technique for language compilers and binary translators. It offers the potential to expand the compilation scopes that have traditionally been limited by method boundaries.             Detecting repeating cyclic execution paths and capturing the detected repetitions into traces is a key requirement for trace selection algorithms to achieve good optimization and performance with small amounts of code. One important class of repetition detection is cyclic-path-based repetition detection, where a cyclic execution path (a path that starts and ends at the same instruction address) is detected as a repeating cyclic execution path.             However, we found many cyclic paths that are not repeating cyclic execution paths, which we call false loops. A common class of false loops occurs when a method is invoked from multiple call-sites. A cycle is formed between two invocations of the method from different call-sites, but which does not represent loops or recursion. False loops can result in shorter traces and smaller compilation scopes, and degrade the performance.             We propose false loop filtering, an approach to reject false loops in the repetition detection step of trace selection, and a technique called false loop filtering by call-stack-comparison, which rejects a cyclic path as a false loop if the call stacks at the beginning and the end of the cycle are different.             We applied false loop filtering to our trace-based Java™ JIT compiler that is based on IBM's J9 JVM. We found that false loop filtering achieved an average improvement of 16\% and 10\% for the DaCapo benchmark when applied to two baseline trace selection algorithms, respectively, with up to 37\% improvement for individual benchmarks. In the end, with false loop filtering, our trace-based JIT achieves a performance comparable to that of the method-based J9 JVM/JIT using the corresponding optimization level.},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\QQGFA4RB\Hayashizaki et al. - 2011 - Improving the performance of trace-based systems by false loop filtering.pdf}
+}
+
 @inproceedings{hotpath:06,
   title = {{{HotpathVM}}: {{An Effective JIT Compiler}} for {{Resource-constrained Devices}}},
   shorttitle = {{{HotpathVM}}},
@@ -43,21 +60,20 @@
   file = {C:\Users\caner\Zotero\storage\MUT26PBM\Gal et al. - 2006 - HotpathVM An Effective JIT Compiler for Resource-.pdf}
 }
 
-@inproceedings{izawaAmalgamatingDifferentJIT2020,
-  title = {Amalgamating {{Different JIT Compilations}} in a {{Meta-tracing JIT Compiler Framework}}},
+@inproceedings{izawaAmalgamatingDifferentJIT2020b,
+  title = {Amalgamating Different {{JIT}} Compilations in a Meta-Tracing {{JIT}} Compiler Framework},
   booktitle = {Proceedings of the 16th {{ACM SIGPLAN International Symposium}} on {{Dynamic Languages}}},
   author = {Izawa, Yusuke and Masuhara, Hidehiko},
   year = {2020},
   month = nov,
-  eprint = {2011.03516},
-  primaryclass = {cs},
   pages = {1--15},
+  publisher = {ACM},
+  address = {Virtual USA},
   doi = {10.1145/3426422.3426977},
-  urldate = {2025-05-28},
-  abstract = {Many modern virtual machines, such as JVMs, .NET Framework, and V8, employ a just-in-time (JIT) compiler to achieve their high-performance. There are two major compilation strategies; trace-based compilation and method-based compilation. They have their own advantages and disadvantages, so we presume that applying suitable strategies for different program parts is essential for faster execution. This paper proposes a new approach called the meta-hybrid JIT compiler framework, which combined the two strategies in a single meta-JIT compiler framework. We implemented the BacCaml framework for proof-of-concept. We also report that some programs actually ran faster by the hybrid compilation in our experiments.},
-  archiveprefix = {arXiv},
-  keywords = {Computer Science - Programming Languages},
-  file = {C\:\\Users\\caner\\Zotero\\storage\\4NSDVM5Y\\Izawa and Masuhara - 2020 - Amalgamating Different JIT Compilations in a Meta-tracing JIT Compiler Framework.pdf;C\:\\Users\\caner\\Zotero\\storage\\XCC3HBTP\\2011.html}
+  urldate = {2025-06-13},
+  isbn = {978-1-4503-8175-8},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\WAKJ6FNQ\Izawa and Masuhara - 2020 - Amalgamating different JIT compilations in a meta-tracing JIT compiler framework.pdf}
 }
 
 @misc{izawaLightweightMethodGenerating2025,
@@ -118,6 +134,23 @@
   file = {C:\Users\caner\Zotero\storage\RG2D8I54\you-lose-more-when-slow-than-you-gain-when-fast.html}
 }
 
+@inproceedings{practical-partial,
+  title = {Practical Partial Evaluation for High-Performance Dynamic Language Runtimes},
+  booktitle = {Proceedings of the 38th {{ACM SIGPLAN Conference}} on {{Programming Language Design}} and {{Implementation}}},
+  author = {W{\"u}rthinger, Thomas and Wimmer, Christian and Humer, Christian and W{\"o}{\ss}, Andreas and Stadler, Lukas and Seaton, Chris and Duboscq, Gilles and Simon, Doug and Grimmer, Matthias},
+  year = {2017},
+  month = jun,
+  pages = {662--676},
+  publisher = {ACM},
+  address = {Barcelona Spain},
+  doi = {10.1145/3062341.3062381},
+  urldate = {2025-06-17},
+  abstract = {Most high-performance dynamic language virtual machines duplicate language semantics in the interpreter, compiler, and runtime system. This violates the principle to not repeat yourself. In contrast, we define languages solely by writing an interpreter. The interpreter performs specializations, e.g., augments the interpreted program with type information and profiling information. Compiled code is derived automatically using partial evaluation while incorporating these specializations. This makes partial evaluation practical in the context of dynamic languages: It reduces the size of the compiled code while still compiling all parts of an operation that are relevant for a particular program. When a speculation fails, execution transfers back to the interpreter, the program re-specializes in the interpreter, and later partial evaluation again transforms the new state of the interpreter to compiled code. We evaluate our approach by comparing our implementations of JavaScript, Ruby, and R with best-inclass specialized production implementations. Our generalpurpose compilation system is competitive with production systems even when they have been heavily optimized for the one language they support. For our set of benchmarks, our speedup relative to the V8 JavaScript VM is 0.83x, relative to JRuby is 3.8x, and relative to GNU R is 5x.},
+  isbn = {978-1-4503-4988-8},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\8V8IYVQT\Würthinger et al. - 2017 - Practical partial evaluation for high-performance dynamic language runtimes.pdf}
+}
+
 @inproceedings{pycketmain,
   title = {Pycket: {{A Tracing JIT}} for a {{Functional Language}}},
   shorttitle = {Pycket},
@@ -168,4 +201,60 @@
   abstract = {We attempt to apply the technique of Tracing JIT Compilers in the context of the PyPy project, i.e., to programs that are interpreters for some dynamic languages, including Python. Tracing JIT compilers can greatly speed up programs that spend most of their time in loops in which they take similar code paths. However, applying an unmodified tracing JIT to a program that is itself a bytecode interpreter results in very limited or no speedup. In this paper we show how to guide tracing JIT compilers to greatly improve the speed of bytecode interpreters. One crucial point is to unroll the bytecode dispatch loop, based on two kinds of hints provided by the implementer of the bytecode interpreter. We evaluate our technique by applying it to two PyPy interpreters: one is a small example, and the other one is the full Python interpreter.},
   isbn = {978-1-60558-541-3},
   file = {C:\Users\caner\Zotero\storage\ZW64A5W8\Bolz et al. - 2009 - Tracing the Meta-level PyPy's Tracing JIT Compile.pdf}
+}
+
+@inproceedings{trace-vs-PE,
+  title = {Tracing vs. Partial Evaluation: Comparing Meta-Compilation Approaches for Self-Optimizing Interpreters},
+  shorttitle = {Tracing vs. Partial Evaluation},
+  booktitle = {Proceedings of the 2015 {{ACM SIGPLAN International Conference}} on {{Object-Oriented Programming}}, {{Systems}}, {{Languages}}, and {{Applications}} - {{OOPSLA}} 2015},
+  author = {Marr, Stefan and Ducasse, St{\'e}phane},
+  year = {2015},
+  pages = {821--839},
+  publisher = {ACM Press},
+  address = {Pittsburgh, PA, USA},
+  doi = {10.1145/2814270.2814275},
+  urldate = {2019-03-28},
+  isbn = {978-1-4503-3689-5},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\U6CTI5AY\Marr and Ducasse - 2015 - Tracing vs. partial evaluation comparing meta-com.pdf}
+}
+
+@inproceedings{traceMonkey,
+  title = {Trace-Based {{Just-in-time Type Specialization}} for {{Dynamic Languages}}},
+  booktitle = {Proceedings of the 30th {{ACM SIGPLAN Conference}} on {{Programming Language Design}} and {{Implementation}}},
+  author = {Gal, Andreas and Eich, Brendan and Shaver, Mike and Anderson, David and Mandelin, David and Haghighat, Mohammad R. and Kaplan, Blake and Hoare, Graydon and Zbarsky, Boris and Orendorff, Jason and Ruderman, Jesse and Smith, Edwin W. and Reitmaier, Rick and Bebenita, Michael and Chang, Mason and Franz, Michael},
+  year = {2009},
+  series = {{{PLDI}} '09},
+  pages = {465--478},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/1542476.1542528},
+  urldate = {2019-11-28},
+  abstract = {Dynamic languages such as JavaScript are more difficult to compile than statically typed ones. Since no concrete type information is available, traditional compilers need to emit generic code that can handle all possible type combinations at runtime. We present an alternative compilation technique for dynamically-typed languages that identifies frequently executed loop traces at run-time and then generates machine code on the fly that is specialized for the actual dynamic types occurring on each path through the loop. Our method provides cheap inter-procedural type specialization, and an elegant and efficient way of incrementally compiling lazily discovered alternative paths through nested loops. We have implemented a dynamic compiler for JavaScript based on our technique and we have measured speedups of 10x and more for certain benchmark programs.},
+  isbn = {978-1-60558-392-1},
+  keywords = {dynamically typed languages,trace-based compilation},
+  file = {C:\Users\caner\Zotero\storage\FWYDACR5\Gal et al. - 2009 - Trace-based Just-in-time Type Specialization for D.pdf}
+}
+
+@inproceedings{truffle-graal,
+  title = {One {{VM}} to Rule Them All},
+  booktitle = {Proceedings of the 2013 {{ACM}} International Symposium on {{New}} Ideas, New Paradigms, and Reflections on Programming \& Software - {{Onward}}! '13},
+  author = {W{\"u}rthinger, Thomas and Wimmer, Christian and W{\"o}{\ss}, Andreas and Stadler, Lukas and Duboscq, Gilles and Humer, Christian and Richards, Gregor and Simon, Doug and Wolczko, Mario},
+  year = {2013},
+  pages = {187--204},
+  publisher = {ACM Press},
+  address = {Indianapolis, Indiana, USA},
+  doi = {10.1145/2509578.2509581},
+  urldate = {2019-11-25},
+  abstract = {Building high-performance virtual machines is a complex and expensive undertaking; many popular languages still have low-performance implementations. We describe a new approach to virtual machine (VM) construction that amortizes much of the effort in initial construction by allowing new languages to be implemented with modest additional effort. The approach relies on abstract syntax tree (AST) interpretation where a node can rewrite itself to a more specialized or more general node, together with an optimizing compiler that exploits the structure of the interpreter. The compiler uses speculative assumptions and deoptimization in order to produce efficient machine code. Our initial experience suggests that high performance is attainable while preserving a modular and layered architecture, and that new highperformance language implementations can be obtained by writing little more than a stylized interpreter.},
+  isbn = {978-1-4503-2472-4},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\7JJNARJ3\Würthinger et al. - 2013 - One VM to rule them all.pdf}
+}
+
+@article{vandercammenEssenceMetaTracingJIT,
+  title = {The {{Essence}} of {{Meta-Tracing JIT Compilers}}},
+  author = {Vandercammen, Maarten},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\9Q858YLX\Vandercammen - The Essence of Meta-Tracing JIT Compilers.pdf}
 }

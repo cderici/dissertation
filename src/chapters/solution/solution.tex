@@ -23,7 +23,12 @@
     \end{paragraph-here}
 
     \begin{paragraph-here}
-      Partial evaluation is a common go-to in optimizing tracing in JIT compilers, but in our case it's horrendous.
+      Partial evaluation is a common go-to in optimizing tracing in JIT compilers, but in our case it's bad because specialization hits branch-heavy computation the hardest.
+
+
+      As we talk more in \secref{section:related-work}, \cite{truffle-graal} used partial evaluation to remove interpreter dispatch overhead.
+    \cite{practical-partial} classifies partial evaluation as a standard optimization strategy in dynamic language JIT compilers, showing great performance for JavaScript, Ruby, and R.
+    \cite{traceMonkey} also performs runtime specialization to try to remove interpreter overhead. \cite{trace-vs-PE} even explicitly recognizes partial evaluation as an alternative to tracing, recognizing both as  two “suitable meta-compilation techniques” for building language-independent JITs.
     \end{paragraph-here}
 
     \begin{paragraph-here}
@@ -54,7 +59,7 @@
     \end{paragraph-here}
 
     \begin{paragraph-here}
-      Therefore, if we can help tracer avoid the computations that lead to that gigantic non-reusable traces trap, then we'll remove the part of self-hosting that slows down the system.
+      Therefore, if we can help tracer avoid the computations that lead to that gigantic non-reusable traces trap, then we'll remove the part of self-hosting that slows down the system (by running the biggest branchiest code in the runtime--the expander--faster.).
     \end{paragraph-here}
 
     \begin{todo}
@@ -67,17 +72,11 @@
     \end{paragraph-here}
 
     \begin{show-experiment}
-      Take a benchmark from CrossBenchmarks (last section of) [[chapter - problem]], that has some performance gap between NP and OP (OP is way better than NP).
-
-      Apply this technique to that benchmark and show that the gap closes/disappears.
-    \end{show-experiment}
-
-    \begin{show-experiment}
-      Apply this technique to every benchmark where NP is worse than OP, and see what happens.
+      Apply this to branchy and show that it works.
     \end{show-experiment}
 
     \begin{paragraph-here}
-      Talk about experiments, further breakdown if needed.
+      Talk about the experiment, further breakdown if needed.
     \end{paragraph-here}
 
 	\section{Mitigating Memory Pressure in Branch-Heavy Computation}
