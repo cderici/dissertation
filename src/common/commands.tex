@@ -25,6 +25,15 @@
 \def\la {\bm{L_\alpha}}
 \def\lb {\bm{L_\beta}}
 
+\newcommand{\confstk}[4]{\langle #1,\;#2,\;#3,\;#4\rangle}
+\newcommand{\confcek}[4]{\langle #1,\;#2,\;#3,\;#4\rangle}
+\newcommand{\Rule}[2]{\overset{\textsc{#1}}{\underset{\text{\tiny #2}}{\longrightarrow}}}
+\newcommand{\sfm}[1]{\ifmmode\mathsf{#1}\else\textsf{#1}\fi}
+\newcommand{\stk}{\sfm{stk}}
+\newcommand{\cek}{\sfm{cek}}
+\newcommand{\eps}{\varepsilon}      % empty continuation token
+
+
 % reduction stuff
 \newcommand{\redinput}[1]{EP\;\llbracket #1 \rrbracket, \rho, \sigma\;}
 \newcommand{\redoutput}[3]{EP\;\llbracket #1 \rrbracket, #2, #3\;}

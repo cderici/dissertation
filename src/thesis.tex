@@ -15,6 +15,10 @@
 \usepackage{rotating}  %for rotated, landscape images
 \usepackage[most]{tcolorbox} %for my todo boxes
 
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
 % For trace listings
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}   % for pdfLaTeX users
@@ -42,6 +46,12 @@
 %\usepackage{tgtermes}
 % Linux Biolinum Bold
 \usepackage{times}
+
+\newtheorem{theorem}{Theorem}[section] % reset each \section
+\newtheorem{lemma}[theorem]{Lemma} % share the counter
+% \newtheorem{corollary}[theorem]{Corollary}
+% \newtheorem{definition}[theorem]{Definition}
+
 
 \input{common/config.tex}
 

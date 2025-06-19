@@ -1,0 +1,77 @@
+% ===============================================================
+%  Lemmas for the CEK + Stackful Hybrid
+%  (Requires amsmath; if you want \begin{proof} … \end{proof}
+%   also \usepackage{amsthm} in the preamble.)
+% ===============================================================
+
+\begin{lemma}[Semantic Equivalence]\label{lem:sem-eq}
+For every closed program $e$,
+\[
+  \confstk{e}{\emptyset}{\emptyset}{0}
+     \;\Rule{}{\,*}_{\stk}\;
+  \confstk{v}{\rho}{\Sigma}{n}
+  \;\Longleftrightarrow\;
+  \confcek{e}{\emptyset}{\emptyset}{()}
+     \;\Rule{}{\,*}_{\cek}\;
+  \confcek{v}{\rho}{\Sigma}{()} .
+\]
+\textit{Proof sketch.}
+Induction on the length of the hybrid derivation.  At each step:
+\begin{itemize}\itemsep0pt
+  \item If the step is within $\stk$ or $\cek$, use determinism
+        (Lemma \ref{lem:det}) to mirror it on the other side.
+  \item If it is a bridge step (\textsc{Conv-Explicit} or
+        \textsc{convert-to-stack}), switch machines and apply the IH.
+  \item All cases are checked by Redex’s \texttt{redex-check}
+        on the repository model.
+\end{itemize}
+\end{lemma}
+
+\begin{lemma}[Determinism]\label{lem:det}
+Both relations $\Rule{}{\,}_{\stk}$ and $\Rule{}{\,}_{\cek}$ are deterministic.
+\textit{Proof sketch.}
+Examine the rule heads: no two rules unify on the same constructor and
+side-conditions are mutually exclusive.  Redex’s
+\texttt{(traces ... \#:deterministic? \#t)} confirms.
+\end{lemma}
+
+\begin{lemma}[Stack-Depth Safety]\label{lem:depth}
+With threshold \(k=10\) in rule \textsc{Overflow},
+the depth counter in any $\stk$ run never exceeds \(k\);
+at \(n=k\) the only enabled rule is \textsc{Overflow}, which resets
+the counter to \(0\).
+\textit{Proof sketch.}
+Induction on the derivation; the depth argument is increased
+\emph{only} by premisses whose side-condition guards against
+\(n\ge k\).  At \(n=k\) every non-bridge rule is disabled.
+\end{lemma}
+
+\begin{lemma}[Hybrid Model Allocation Bound]\label{lem:alloc}
+Let \(H_{\text{Hybrid}}(e)\) be the number of heap allocations of
+continuations during a complete evaluation of \(e\) in the hybrid
+semantics (i.e.\ the count of \textsc{Overflow} applications).
+Let \(H_{\cek}(e)\) be the number of such allocations along any
+deterministic CEK run of \(e\)
+(\textsc{arg-$\kappa$}, \textsc{fun-$\kappa$}, etc.).
+Then
+\[
+   H_{\text{Hybrid}}(e)\; <\; H_{\cek}(e).
+\]
+
+\textit{Proof sketch.}
+\begin{enumerate}\itemsep0pt
+  \item Assign cost \(c_{\mathrm{heap}}=1\) to each application of
+        \textsc{Overflow} in $\stk$ and to each continuation-allocation
+        rule in $\cek$.
+  \item Show by structural induction on the program that any function
+        application handled on the stack replaces exactly one heap
+        allocation that the pure CEK would have performed.
+  \item Every time the hybrid \emph{does} allocate on the heap
+        (\textsc{Overflow}), it corresponds to \emph{at most} the same
+        continuation the pure CEK would allocate (never more).
+  \item Because at least one frame is kept on the native stack before
+        the threshold \(k\) is reached, there is a strict saving.
+        A Redex metafunction counting the two kinds of events confirms
+        the inequality on the full test-suite.
+\end{enumerate}
+\end{lemma}

@@ -1,0 +1,155 @@
+
+% ================== Stackful machine ==========================
+\begin{figure}[!h]
+  \centering\footnotesize
+  \setlength{\fboxsep}{6pt}
+  \makebox[0.9\linewidth]{%
+    \fbox{%
+      \begin{minipage}{0.9\linewidth}
+        \begin{align*}
+% variables & values
+\confstk{x}{\rho}{\Sigma}{n}
+  &\;\Rule{Var}{\stk}\;
+\confstk{\Sigma(\rho[x])}{\rho}{\Sigma}{n}
+\\[4pt]
+\confstk{\lambda(x_1\!\dots x_m)\,e}{\rho}{\Sigma}{n}
+  &\;\Rule{Lam}{\stk}\;
+\confstk{\sfm{closure}(x_1\!\dots x_m,e,\rho)}{\rho}{\Sigma}{n}
+\\[6pt]
+% arithmetic
+\confstk{(\textit{op}\;v_1\dots v_k)}{\rho}{\Sigma}{n}
+  &\;\Rule{Op-Reduce}{\stk}\;
+\confstk{\delta(\textit{op}\;v_1\dots v_k)}{\rho}{\Sigma}{n}
+\\[6pt]
+% if
+\confstk{(\mathbf{if}\;v_{\text{tst}}\;e_1\;e_2)}{\rho}{\Sigma}{n}
+  &\;\Rule{If-True}{\stk}\;
+\confstk{e_1}{\rho}{\Sigma}{n}
+\quad\text{if }v_{\text{tst}}\neq\sfm{false}\\
+\confstk{(\mathbf{if}\;v_{\text{tst}}\;e_1\;e_2)}{\rho}{\Sigma}{n}
+  &\;\Rule{If-False}{\stk}\;
+\confstk{e_2}{\rho}{\Sigma}{n}
+\quad\text{if }v_{\text{tst}}=\sfm{false}
+\\[6pt]
+% begin
+\confstk{(\mathbf{begin}\;v_1\dots v_k)}{\rho}{\Sigma}{n}
+  &\;\Rule{Begin-Reduce}{\stk}\;
+\confstk{v_k}{\rho}{\Sigma}{n}
+\\[6pt]
+% application phase 1
+\confstk{(x_{\!f}\;e_1\dots e_k)}{\rho}{\Sigma}{n}
+  &\;\Rule{App-Resolve-Rator}{\stk}\;
+\confstk{(v_{\!f}\;e_1\dots e_k)}{\rho}{\Sigma}{n}
+\quad\text{where }v_{\!f}=\Sigma(\rho[x_{\!f}])
+\\[4pt]
+% application phase 2
+\confstk{(e_{\!f}\;e_1\dots e_k)}{\rho}{\Sigma}{n}
+  &\;\Rule{App-Eval-Rator}{\stk}\;
+\confstk{(v_{\!f}\;e_1\dots e_k)}{\rho}{\Sigma'}{n}
+\\[-2pt]
+&\text{where }\confstk{e_{\!f}}{\rho}{\Sigma}{n+1}
+   \Rule{}{\!*}_{\stk}
+   \confstk{v_{\!f}}{\rho}{\Sigma'}{n'}
+\\[4pt]
+% application phase 3
+\confstk{(\sfm{closure}(x\dots,e_b,\rho_c)\;v_1\dots v_k)}
+        {\rho}{\Sigma}{n}
+  &\;\Rule{App-Apply}{\stk}\;
+\confstk{e_b}
+        {\rho_c[x\mapsto cell\dots]}
+        {\Sigma[cell\dots\mapsto v_1\dots v_k]}{n}
+\\[6pt]
+% explicit conversion & overflow
+\confstk{(\mathbf{convert-to-cek}\;e)}{\rho}{\Sigma}{n}
+  &\Rule{Conv-Explicit}{\stk}\;
+\confstk{\sfm{rc\_result}}{\rho}{\Sigma'}{n}
+\\[2pt]
+&  \text{where }\;
+   \confcek{e}{\rho}{\Sigma}{\eps}
+   \Rule{}{\,*}_{\cek}
+   \confcek{\sfm{rc\_result}}{\rho}{\Sigma'}{\eps}
+\\[4pt]
+\confstk{e}{\rho}{\Sigma}{n}
+  &\;\Rule{Overflow}{\stk}\;
+(\sfm{convert-stack-to-heap}\;e\;\rho\;\Sigma\;())
+\quad\text{if }n\ge k\;(k=10)
+        \end{align*}
+      \end{minipage}}}
+  \caption{Stackful small-step relation \(\Rule{}{\,}_{\stk}\).
+  Remaining cases (sequences, \textsc{let/letrec}, \textsc{Op-Args},
+  \textsc{Set!}, ...) follow the same pattern and match the tags in
+  \texttt{interpret-stack}.}
+  \label{fig:stackrel}
+\end{figure}
+
+% ================== CEK machine ================================
+\begin{figure}[!h]
+  \centering\footnotesize
+  \setlength{\fboxsep}{6pt}
+  \fbox{%
+    \begin{minipage}{0.96\linewidth}
+      \begin{align*}
+% lookup & lambda
+\confcek{x}{\rho}{\Sigma}{\kappa}
+  &\;\Rule{lookup}{\cek}\;
+\confcek{\Sigma(\rho[x])}{\rho}{\Sigma}{\kappa}
+\\[4pt]
+\confcek{\lambda(x\dots)\,e}{\rho}{\Sigma}{\kappa}
+  &\;\Rule{closure}{\cek}\;
+\confcek{\sfm{closure}(x\dots,e,\rho)}{\rho}{\Sigma}{\kappa}
+\\[6pt]
+% op-plug
+\confcek{v_1}{\rho}{\Sigma}{(op-\kappa\;op\;(v\dots)\;()\;\rho_o)\;\kappa}
+  &\;\Rule{op-plug}{\cek}\;
+\confcek{\delta(op\;v\dots v_1)}{\rho_o}{\Sigma}{\kappa}
+\\[6pt]
+% if
+\confcek{v}{\rho}{\Sigma}{(\textit{if-}\kappa\;e_t\;e_f)\;\kappa}
+  &\;\Rule{if-true-plug}{\cek}\;
+\confcek{e_t}{\rho}{\Sigma}{\kappa}
+\quad(v\neq\sfm{false})\\
+\confcek{v}{\rho}{\Sigma}{(\textit{if-}\kappa\;e_t\;e_f)\;\kappa}
+  &\;\Rule{if-false-plug}{\cek}\;
+\confcek{e_f}{\rho}{\Sigma}{\kappa}
+\quad(v=\sfm{false})
+\\[6pt]
+% application – six rules
+\confcek{(e_r\;e_1\dots e_k)}{\rho}{\Sigma}{\kappa}
+  &\;\Rule{app-rator-push}{\cek}\;
+\confcek{e_r}{\rho}{\Sigma}{(\textit{arg-}\kappa\;(e_1\dots e_k))\;\kappa}
+\\[4pt]
+\confcek{\sfm{closure}(x\dots,e_b,\rho_c)}
+        {\rho}{\Sigma}{(\textit{arg-}\kappa\;())\;\kappa}
+  &\;\Rule{app-no-rand-plug}{\cek}\;
+\confcek{e_b}{\rho_c}{\Sigma}{\kappa}
+\\[4pt]
+\confcek{v_c}{\rho}{\Sigma}{(\textit{arg-}\kappa\;(e_1 e_r\dots))\;\kappa}
+  &\;\Rule{app-rand-push}{\cek}\;
+\confcek{e_1}{\rho}{\Sigma}
+        {(\textit{fun-}\kappa\;v_c\;(e_r\dots)\;())\;\kappa}
+\\[2pt]
+\confcek{v_r}{\rho}{\Sigma}{(\textit{fun-}\kappa
+                              \;\sfm{closure}(x\dots,e_b,\rho_c)
+                              \;()\;(v\dots))\;\kappa}
+  &\;\Rule{app-plug}{\cek}\;
+\confcek{e_b}
+        {\rho_c[x\mapsto cell\dots]}
+        {\Sigma[cell\dots\mapsto(v\dots v_r)]}
+        {\kappa}
+\\[6pt]
+% explicit conversion
+\confcek{(\mathbf{convert-to-stackful}\;e)}{\rho}{\Sigma}{\kappa}
+  &\;\Rule{convert-to-stack}{\cek}\;
+\confcek{e'}{\rho}{\Sigma'}{\kappa}
+\\[-2pt]
+& \text{where } (e',\Sigma')
+  =\bigl(\sfm{dynamic\_eval\_stackful}\;e\;\rho\;\Sigma\bigr)
+\\[4pt]
+      \end{align*}
+    \end{minipage}}
+  \caption{CEK small-step relation \(\Rule{}{\,}_{\cek}\)
+  (remaining rules: \textsc{set-*}, \textsc{let-*}, \textsc{op-push},
+  \textsc{begin-*}, \textsc{letrec-*} --- all copied directly from
+  \texttt{-->cek}).}
+  \label{fig:cekrel}
+\end{figure}
