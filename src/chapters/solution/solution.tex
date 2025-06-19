@@ -2,65 +2,48 @@
 
 	\label{chapter:solution}
 
-    \begin{chaptersynopsis}
-      We have identified solution approaches that are worthy of further investigation for improving self-hosting performance.
+  \begin{chaptersynopsis}
+    We have identified solution approaches that are worthy of further investigation for improving self-hosting performance.
 
-      You either try to avoid branch-heavy code, or you try to get better at it.
-    \end{chaptersynopsis}
+    You either try to avoid branch-heavy code, or you try to get better at it.
+  \end{chaptersynopsis}
 
-    \begin{paragraph-here}
-      Branch-heavy computation and memory problems seem to be the central player in self-hosting performance.
+  \paragraph{}%
+    Branch-heavy computation and memory problems appear central to the performance challenges encountered when self-hosting on a meta-tracing JIT compiler. As demonstrated extensively in \chapterRef{chapter:problem}, the predominant performance degradation arises from intricate branching patterns during macro expansion and associated runtime computations, which significantly inflate both trace sizes and GC overhead.
 
-      Show evidence from [[chapter - problem]]
-    \end{paragraph-here}
+  \paragraph{}%
+    Addressing these core issues has the potential to transform self-hosting from a theoretical convenience into a practical and robust methodology for building language runtimes. By reducing the impact of branch-heavy computations and controlling memory usage, we can achieve consistent performance benefits from meta-tracing JIT compilers.
 
-    \begin{paragraph-here}
-      This suggests that solving these issues could make self-hosting a practical and reliable method for building language runtimes.
-    \end{paragraph-here}
+  \paragraph{}%
+    The fundamental nature of self-hosting entails extensive branching, especially during the macro expansion phase. In Racket's case, macro expansion inherently involves deeply nested pattern-matching and conditional branching \cite{icfp2019}. Similarly, the limitations of meta-tracing JIT compilers like RPython when handling interpreters with complex control-flow patterns—such as extensive branching and recursion—are extensively documented in Bolz's dissertation \cite{bolzPhDThesis}. Additionally, Bolz et al.'s work further emphasizes how intricate branching within interpreters can lead to trace explosion and limited reuse \cite{pypy-main}. More generally, literature on compiler bootstrapping and self-hosting underscores that these processes inherently involve extensive branching and recursive computations, making simplification intrinsically challenging \cite{appelCompilingContinuations2007}. Consequently, while simplifying these computations might theoretically seem feasible, practical evidence and prior research consistently indicate intrinsic limitations in reducing branch complexity within self-hosting environments.
 
-    \begin{paragraph-here}
-      The nature of branch-heavy computation on a tracing JIT makes self-hosting fundamentally problematic on meta-tracing (aforementioned in earlier chapters). There's not much to be done to make self-hosting less branch-heavy (cite?).
 
-      (Need some citations to show self-hosting/bootstrapping a language is fundamentally done via branch-heavy computations.)
-    \end{paragraph-here}
+  \paragraph{}%
+    Partial evaluation is a common optimization in tracing JIT compilers. For example, \cite{truffle-graal} uses it to collapse interpreter dispatch, and \cite{practical-partial} reports good results across JavaScript, Ruby, and R.  \cite{traceMonkey} applies a closely related form of runtime specialization, while \cite{trace-vs-PE} treats both tracing and partial evaluation as general meta-compilation techniques.
 
-    \paragraph{}%
-      Partial evaluation is a common optimization in tracing JIT compilers. For example, \cite{truffle-graal} uses it to collapse interpreter dispatch, and \cite{practical-partial} reports good results across JavaScript, Ruby, and R.  \cite{traceMonkey} applies a closely related form of runtime specialization, while \cite{trace-vs-PE} treats both tracing and partial evaluation as general meta-compilation techniques.
+  \paragraph{}%
+    Despite these successes, applying partial evaluation to Pycket's embedded Racket macro expander would be detrimental, particularly due to the branch-heavy nature of macro expansion. In Pycket, the Racket macro expander is loaded as ordinary Racket code through the \textit{expander linklet} and evaluated at boot time. Partially evaluating this code would transform a single, general-purpose expander into many \emph{program-specific} expanders. Given the macro expander's reliance on deeply nested, pattern-matching conditionals, the specialized traces would inline substantial amounts of branching logic. This process in a meta-tracing system results in trace explosion, diminished reuse across different programs, and frequent trace invalidation once trace-size thresholds are reached—behavior already documented extensively in PyPy’s meta-tracer.
 
-    \paragraph{}%
-      Despite these successes, applying partial evaluation to Pycket's embedded Racket macro expander would be detrimental, particularly due to the branch-heavy nature of macro expansion. In Pycket the Racket macro expander is loaded as ordinary Racket code through the \textit{expander linklet} and evaluated at boot time. Partially evaluating this code would turn a single, general-purpose expander into many \emph{program-specific} expanders. Because macro expansion is dominated by deeply nested, pattern-matching conditionals, the specialized traces would inline large amounts of branch logic. In a meta-tracing system this leads to trace explosion, poor cross-program reuse, and frequent invalidation once trace-size limits are exceeded—behavior already documented in PyPy’s meta-tracer.
+  \paragraph{}%
+    Furthermore, since macro expansion typically occurs infrequently (usually once per module load), any upfront overhead incurred by partial evaluation would not be amortized by repeated execution, diminishing its potential performance benefits. Given these factors, we opted not to implement partial evaluation in our current setup. Implementing such specialization within the RPython framework would entail development efforts comparable to building Pycket itself from scratch, rendering it impractical as an exploratory optimization.
 
-    \paragraph{}%
-      Furthermore, since macro expansion typically occurs infrequently (usually once per module load), any upfront overhead incurred by partial evaluation would not be amortized by repeated execution, diminishing its potential performance benefits. Given these factors, we opted not to implement partial evaluation in our current setup. Implementing such specialization within the RPython framework would entail development efforts comparable to building Pycket itself from scratch, rendering it impractical as an exploratory optimization.
-
-    \begin{paragraph-here}
-      This chapter breaks down how we can improve the performance of branch-heavy computation on meta-tracing JIT, and proposes some directions for solving the issues.
-
-        - First section talks about how to steer the JIT away from tracing computations that might result in large non-reusable traces.
-
-        - Second section proposes a method to help reduce the memory pressure that comes with self-hosting.
-
-      As we discussed in [[chapter - problem]], this requires further research, however, we do provide some preliminary evidences towards the efficacy of the proposed solutions to show that they are worthy of further investigation.
-    \end{paragraph-here}
-
+  \paragraph{}%
+    In this chapter, we explore targeted strategies to enhance performance specifically for branch-heavy computations on meta-tracing JIT compilers and propose viable directions for addressing these central performance challenges. First, we discuss techniques to guide the JIT compiler away from generating extensive, non-reusable traces that degrade performance. Second, we propose methods aimed explicitly at mitigating memory pressure—a critical bottleneck in self-hosting environments. While recognizing the preliminary nature of our current evidence, as discussed in detail in \chapterRef{chapter:problem}, we nonetheless demonstrate the potential efficacy of these approaches, providing motivation for further research and investigation.
 
 	\section{Guiding Tracer Away from Branch-Heavy Computation}
 		\begin{mainpoint}
 			Trying to detect branch-heavy computations and help the tracer forgo them seems like a promising idea.
 		\end{mainpoint}
 
+    \paragraph{}%
+      A critical observation from \chapterRef{chapter:problem} is that the majority of performance overhead in self-hosting on meta-tracing JIT compilers stems from generating large, intricate, and often non-reusable traces during macro expansion phases. These expansive traces significantly degrade runtime performance due to the frequency and complexity of branching operations inherent in macro expanders.
 
-    \begin{paragraph-here}
-      Most of the added cost in self-hosting on a meta-tracing JIT comes from spending a whole lot of time in producing gigantic non-reusable traces in the program expansion phase, talked in [[chapter - problem]].
-    \end{paragraph-here}
+    \paragraph{}%
+      Importantly, as indicated in the performance analyses conducted in \chapterRef{chapter:problem}, once the expansion phase is completed, the runtime performance of self-hosted Pycket becomes comparable to the original Pycket implementation (without self-hosting). This highlights that the macro expansion phase, characterized by its branching complexity, is a key bottleneck to achieving overall runtime efficiency.
 
-    \begin{paragraph-here}
-      We also mention in [[chapter - problem]] that when we do get passed the expansion, we have performance almost equivalent to the Original Pycket (without self-hosting) -- shown in last section in [[chapter - problem]].
-    \end{paragraph-here}
+    \paragraph{}%
+      Thus, guiding the tracer away from computations that yield large, non-reusable traces represents a targeted strategy to mitigate this bottleneck. Specifically, if the JIT compiler can effectively avoid or limit tracing the macro expansion's heavily branched computations, the most costly part of the self-hosting runtime can be significantly accelerated. This strategy is not intended to eliminate branching itself but rather aims to selectively bypass or simplify the generation of traces that cause the most severe performance penalties.
 
-    \begin{paragraph-here}
-      Therefore, if we can help tracer avoid the computations that lead to that gigantic non-reusable traces trap, then we'll remove the part of self-hosting that actually slows down the system (by running the biggest branchiest code in the runtime--the expander--faster.).
-    \end{paragraph-here}
 
     \begin{paragraph-here}
       Explain the technical details of how we do it. Trace splitting, sticking, and splicing using a separate driver.
@@ -83,50 +66,28 @@
        In [[chapter - problem]] memory section, we went into detail about the life in the heap and what's going on wiht the GC. Here's a brief summary.
     \end{paragraph-here}
 
-    \begin{paragraph-here}
-      To address this issue (without modifying the underlying framework nor the GC), we propose to use a stackful interpreter to decrease the continuation allocations on the heap. The stackful interpreter here is a simple recursive interpreter for evaluating Racket forms, which is translated by the RPython framework into a recursive C program that uses the native stack. Recall that, however, the Pycket's interpreter is based on the CEK machine, and the heap allocated explicit continuations makes it very convenient to implement complex control operations with continuations (as well as the proper handling of tail-calls). Therefore, the proposed approach is to use a stackful interpreter \emph{alongside} the CEK, rather than replacing the current CEK with a stackful interpreter. The idea is to use the stack and heap in balance to decrease the GC pressure and take advantage of using the stack, such as rapid allocations, locality etc.
-    \end{paragraph-here}
+    \paragraph{}%
+      A prominent contributor to the performance overhead in self-hosting via meta-tracing JIT compilers is the considerable memory pressure arising from frequent heap allocations, especially continuations and environments used by the CEK machine in Pycket. [TODO: Here's a brief summary ]
 
-    \begin{paragraph-here}
-      Using the stack to implement a language like Racket, however, understandably introduces some challenges regarding the stack management, such as handling overflows due to arbitrarily deep recursion. Additionally, implementing a stackful interpreter on Pycket for the entire Racket would be illogical, since it would not only
-    require implementing everything from scratch including the
-    continuations, but also not benefit from the current CEK's
-    performance. Therefore, the logical approach is to use the two
-    interpreters together, repeatedly switch between the two whenever
-    appropriate/beneficial, making sure that the switches don't induce a high
-    performance overhead.
-    \end{paragraph-here}
+    \paragraph{}%
+      A prominent contributor to the performance overhead in self-hosting via meta-tracing JIT compilers is the considerable memory pressure arising from frequent heap allocations, especially continuations and environments. Recall that the explicit continuations allocated on the heap are fundamental to the CEK machine's ability to implement complex control operations, including proper tail-calls, which inherently leads to frequent continuation allocations in Pycket. [TODO: Here's a brief summary from \chapterRef{chapter:problem}]
 
-    \begin{paragraph-here}
-        One of the most fundamental points here is the interaction between the
-      two interpreters. Essentially, we want to use the stack to save some
-      heap space (thereby reducing the GC pressure) and take advantage of
-      faster allocations and locality. On the other hand, we don't want to
-      lose the benefits of the JIT's performance optimizations on the
-      CEK. Moreover, the stack management needs to be on point to avoid
-      problems such as switching back to the CEK when the stack is very deep
-      (e.g. stack overflow), since that would require allocating enough
-      continuations on the heap to counterbalance the performance benefit we
-      get from using the stackful interpreter.
-    \end{paragraph-here}
+    \paragraph{}%
+      To address memory issues without altering the underlying runtime system or garbage collector, we propose incorporating a stackful interpreter alongside the existing CEK machine in Pycket. This hybrid approach leverages the stack to handle certain computation phases, thereby significantly reducing the number of continuation allocations on the heap. The stackful interpreter is realized as a simple recursive interpreter compiled by the RPython framework into a recursive C program utilizing the native stack.
+
+    \paragraph{}%
+      Despite its simplicity, the use of a stackful interpreter introduces notable challenges related to stack management, particularly concerning stack overflows due to arbitrarily deep recursion levels. Furthermore, entirely replacing the CEK interpreter with a stack-based alternative would forgo the performance and convenience benefits offered by explicit continuations in the CEK machine, particularly in managing complex control operations and proper tail-calls.
+
+    \paragraph{}%
+      Consequently, we advocate for an approach where the two interpreters operate in tandem, strategically switching between them to optimize overall performance. The primary goal of this dual-interpreter strategy is to judiciously balance heap and stack usage—leveraging rapid stack allocations and improved locality while retaining the sophisticated control and optimization capabilities provided by the heap-based CEK interpreter.
+
 
     \subsection{Formalism for CEK \+ Stackful}
 
       \inputSub{solution}{cek-stackful-grammar}
 
-      \begin{paragraph-here}
-          To understand this problem better and to work on a simpler setup, I
-        developed a formalism that includes both the CEK machine and the
-        stackful interpreter, evaluating a very simple subset of Racket
-        together, shown in \figref{fig:st-cek-grammar}, which is similar to the
-        Racket Core language used in \secref{section:linklet-semantics} minus
-        the forms for the linklet variables, plus some \racketcode{convert}
-        forms for controlling the interpreter switches from the source
-        level. \figref{fig:cek-convert-stack} shows the basic
-        interaction between the two models. We can start with either of the
-        interpreters and switch back and forth between them using the
-        \racketcode{convert} forms manually within the source code.
-      \end{paragraph-here}
+      \paragraph{}%
+        To facilitate deeper understanding and more precise experimental control, we developed a formal model integrating both the CEK and stackful interpreters. This formalism evaluates a simplified subset of Racket, closely resembling the Racket Core language described previously in \secref{section:linklet-semantics}, but excluding the linklet variable forms. Additionally, this model introduces specialized \racketcode{convert} forms explicitly designed for managing interpreter transitions directly from the source code. \figref{fig:st-cek-grammar} illustrates this simplified language, and \figref{fig:cek-convert-stack} depicts the fundamental interaction model, allowing for deliberate interpreter switching through these special forms.
 
       \begin{figure}[!h]
         \centering
@@ -135,9 +96,8 @@
         \label{fig:cek-convert-stack}
       \end{figure}
 
-      \begin{paragraph-here}
-        The idea is, again, to try to reduce some memory pressure on the heap caused by the long-lived big objects, by utilizing the stack. As an executable formalism, this is developed on PLT Redex. \figref{fig:cek-reduction-relation-redacted} and \figref{fig:interpret-stack-redacted} shows the redacted semantics of the CEK model and the Stackful model respectively. The full semantics are available in \appendixRef{appendix:cek-stackful-redex}.
-      \end{paragraph-here}
+      \paragraph{}%
+        The underlying objective of this approach is to reduce heap memory pressure induced by large, long-lived continuations. Developed as an executable formalism using PLT Redex, this model enables rigorous experimentation with the semantics of interpreter transitions. \figref{fig:cek-reduction-relation-redacted} and \figref{fig:interpret-stack-redacted} provide simplified versions of the CEK and Stackful interpreter semantics, respectively. Complete semantics are available in \appendixRef{appendix:cek-stackful-redex}.
 
       \begin{figure}[!h]
         \centering
@@ -163,52 +123,18 @@
 
     \subsection{CEK \+ Stackful Prototype on Pycket}
 
-      \begin{paragraph-here}
-          In addition, the formalism, in order to see how well this would perform
-        in action, we also prototyped an implementation on Pycket. It works similarly to the model in \figref{fig:cek-convert-stack}, except
-        the starting point is the CEK, because Pycket needs to instantiate and
-        import the bootstrapping linklets at the startup and start a
-        computation by loading and running the program via the
-        \racketcode{read}, \racketcode{expand} etc.
-      \end{paragraph-here}
+      \paragraph{}%
+        Building upon the insights gained from the formalism, we implemented a practical prototype of the hybrid interpreter approach on Pycket. This prototype aligns closely with the conceptual framework illustrated in \figref{fig:cek-convert-stack}, though it primarily initiates computations using the CEK interpreter. This design choice accommodates Pycket's need to load and instantiate the bootstrapping linklets at startup, subsequently beginning computations via the \racketcode{read}, \racketcode{expand}, and evaluation processes.
 
-      \begin{paragraph-here}
-          The CEK starts the computation and hands the control to the stackful
-        whenever it encounters a \racketcode{let} or a \racketcode{begin}
-        form. The switch happens by just calling the stackful interpreter. The
-        stackful interpreter includes a trampoline to handle the tail-calls,
-        and in the current implementation it automatically switches back to
-        the CEK whenever \textbf{i)} it returns, or \textbf{ii)} a CPSed
-        primitive (e.g. a higher order function) is used, or \textbf{iii)} a
-        stack overflow is detected. The switch back to the CEK happens by
-        rewinding the stack via a \verb|ConvertStack| exception in which the
-        forms in each activation record installs a continuation. The CEK takes
-        the control and all the information at the previous switch-to-stack
-        point and continues from there.
-      \end{paragraph-here}
+      \paragraph{}%
+        In the implemented prototype, the CEK interpreter transfers control to the stackful interpreter upon encountering computational constructs such as \racketcode{let} or \racketcode{begin}. The switching mechanism itself is straightforward, via direct invocation of the stackful interpreter. The stackful interpreter is augmented with a trampoline mechanism to efficiently manage tail-call optimizations. Furthermore, it automatically hands control back to the CEK interpreter under three key conditions: (i) completion of computation and return, (ii) execution involving CPS-transformed primitives (e.g. \racketcode{call/cc}), or (iii) detection of potential stack overflow situations. The return to CEK is handled by unwinding the stack and installing necessary continuations via a \verb|ConvertStack| exception mechanism, effectively allowing seamless continuation of the computation in CEK mode.
 
-      \begin{paragraph-here}
-          The main investigation here is about the increase in the overall
-        performance with the following constraints: \textbf{i)} The memory overhead should be reduced. \textbf{ii)} The number of
-        points where a switch occurs between the two interpreters and the
-        switching overhead should both be minimal, and \textbf{iii)} the amount
-        of copying activation records from the stack into the continuations in
-        the heap should be bounded.
-      \end{paragraph-here}
+      \begin{todo}[REVISE NUMBERS]
+        Revise the numbers in the paragraph below.
+      \end{todo}
 
-
-      \begin{paragraph-here}
-        Since we're interested in self-hosting performance, we ran branchy from [[chapter - problem]] on Pycket using Stackful+CEK and only-CEK with
-      different auto-generated inputs containing; only 1s, only 2s, and
-      random [0-7], each having 1000 and 2000 numbers. The runtimes for the
-      ones with only 1s and 2s are quite similar, except a larger warmup
-      time for the stackful interpreter, which is expected since RPython's
-      meta-tracing is not designed for recursive interpreters, therefore it
-      needs to be further optimized. However, we observe a consistent
-      increase in the run-time performance in the randomized experiments
-      (both 1000 and 2000) which visits different branches. \figref{fig:hybrid-model-overall-good} shows the
-      medians for the run-times for the experiments using 1000 numbers.
-      \end{paragraph-here}
+      \paragraph{}%
+        The central investigative goals for this prototype revolve around confirming reduced memory overhead, minimal interpreter-switching overhead, and bounded copying of activation records from the stack to the heap. To assess these goals, we conducted experiments using the \texttt{Branchy} program from \chapterRef{chapter:problem} (see \figref{fig:branchy-introduce-code}). We executed \texttt{Branchy} on Pycket under two configurations: the hybrid Stackful+CEK model and the CEK-only model. These experiments involved varying auto-generated inputs—specifically, sequences composed exclusively of 1s, exclusively of 2s, and randomized sequences containing numbers between 0 and 7—with sequence lengths of both 1000 and 2000 elements. For input sequences containing only 1s or only 2s, runtime performance was largely comparable between the two interpreter configurations, albeit with a noticeable increase in warmup time observed for the stackful interpreter. This increased warmup is anticipated, as RPython's meta-tracing JIT is not optimized for recursive interpreter structures, thus requiring further optimization efforts. Notably, we consistently observed improved runtime performance in the hybrid Stackful+CEK configuration during experiments utilizing randomized inputs, both for sequences of 1000 and 2000 numbers. \figref{fig:hybrid-model-overall-good} presents median runtime results specifically for the 1000-element randomized sequences.
 
       \begin{figure}[!h]
       %\begin{wrapfigure}{l}{0.5\textwidth}
@@ -227,7 +153,7 @@
       \end{show-experiment}
 
       \begin{paragraph-here}
-        So overall memory usage is reduced, so the technique works.
+        So overall memory usage is reduced, so the technique works. [DUE TECH WORK]
       \end{paragraph-here}
 
       \begin{todo}[Technical TODO]
@@ -235,7 +161,7 @@
       \end{todo}
 
       \begin{paragraph-here}
-        We didn't add much by doing this.
+        We didn't add much by doing this. [DUE TECH WORK]
       \end{paragraph-here}
 
       \begin{todo}[Technical TODO]
@@ -246,17 +172,8 @@
         Figure out how to show that the amount of copying activation records from the stack into the continuations in the heap should be bounded.
       \end{todo}
 
+      \paragraph{}%
+        Taking a step towards addressing the fundamental challenges in self-hosting on meta-tracing frameworks—namely, intelligent meta-tracing of programs with complex control flows and effective management of heap memory pressure—we demonstrate viable strategies for achieving efficient self-hosting of Racket on Pycket. We believe the approaches explored herein hold broad applicability, potentially serving as foundational methods for self-hosting on meta-tracing frameworks more generally.
 
-      \begin{paragraph-here}
-        A slight conclusion paragraph (since right after this the actual Conclusion chapter will follow.)
-
-          Taking a step towards solving the fundamental issues in self-hosting
-        on meta-tracing, namely, intelligent meta-tracing of the programs with
-        complex control-flow and proper handling of the heap pressure, will
-        allow efficient self-hosting of Racket on meta-tracing Pycket. We
-        believe these are broadly applicable solutions that will serve as
-        principle approaches in self-hosting on meta-tracing frameworks in
-        general.
-      \end{paragraph-here}
 
 

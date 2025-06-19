@@ -16,6 +16,17 @@
   file = {C:\Users\caner\Zotero\storage\MVZCMYBI\Ancona et al. - 2007 - RPython A Step Towards Reconciling Dynamically an.pdf}
 }
 
+@book{appelCompilingContinuations2007,
+  title = {Compiling with {{Continuations}}},
+  author = {Appel, Andrew W.},
+  year = {2007},
+  month = jan,
+  publisher = {Cambridge University Press},
+  address = {USA},
+  abstract = {This book shows how continuation-passing style is used as an intermediate representation to perform optimizations and program transformations. Continuations can be used to compile most programming languages. The method is illustrated in a compiler for the programming language Standard ML. Prior knowledge of ML, however, is not necessary, as the author carefully explains each concept as it arises. This is the first book to show how concepts from the theory of programming languages can be applied to the production of practical optimizing compilers for modern languages like ML. All the details of compiling are covered, including the interface to a runtime system and garbage collector.},
+  isbn = {978-0-521-03311-4}
+}
+
 @article{bolzMetatracingMakesFast,
   title = {Meta-Tracing Makes a Fast {{Racket}}},
   author = {Bolz, Carl Friedrich and Pape, Tobias and Siek, Jeremy and {Tobin-Hochstadt}, Sam},
@@ -23,6 +34,31 @@
   abstract = {Tracing just-in-time (JIT) compilers record and optimize the instruction sequences they observe at runtime. With some modifications, a tracing JIT can perform well even when the executed program is itself an interpreter, an approach called meta-tracing. The advantage of meta-tracing is that it separates the concern of JIT compilation from language implementation, enabling the same JIT compiler to be used with many different languages. The RPython meta-tracing JIT compiler has enabled the efficient interpretation of several dynamic languages including Python (PyPy), Prolog, and Smalltalk. In this paper we present initial findings in applying the RPython JIT to Racket. Racket comes from the Scheme family of programming languages for which there are mature static optimizing compilers. We present the result of spending just a couple person-months implementing and tuning an implementation of Racket written in RPython. The results are promising, with a geometric mean equal to Racket's performance and within a factor of 2 slower than Gambit and Larceny on a collection of standard Scheme benchmarks. The results on individual benchmarks vary widely. On the positive side, our interpreter is sometimes up to two to six times faster than Gambit, an order of magnitude faster than Larceny, and two orders of magnitude faster than the Racket JIT compiler when making heavy use of continuations. On the negative side, our interpreter is sometimes three times slower than Racket, nine times slower than Gambit, and five times slower than Larceny.},
   langid = {english},
   file = {C:\Users\caner\Zotero\storage\2RGFN3VC\Bolz et al. - Meta-tracing makes a fast Racket.pdf}
+}
+
+@article{bolzPhDThesis,
+  title = {{Meta-Tracing Just-in-Time Compilation for RPython}},
+  author = {Bolz, Carl Friedrich},
+  langid = {ngerman},
+  file = {C:\Users\caner\Zotero\storage\57J8CJLC\Bolz - Meta-Tracing Just-in-Time Compilation for RPython.pdf}
+}
+
+@article{flattMacrosThatWork2012,
+  title = {Macros That {{Work Together}}: {{Compile-time}} Bindings, Partial Expansion, and Definition Contexts},
+  shorttitle = {Macros That {{Work Together}}},
+  author = {Flatt, Matthew and Culpepper, Ryan and Darais, David and Findler, Robert Bruce},
+  year = {2012},
+  month = mar,
+  journal = {Journal of Functional Programming},
+  volume = {22},
+  number = {2},
+  pages = {181--216},
+  issn = {1469-7653, 0956-7968},
+  doi = {10.1017/S0956796812000093},
+  urldate = {2020-01-30},
+  abstract = {Racket is a large language that is built mostly within itself. Unlike the usual approach taken by non-Lisp languages, the self-hosting of Racket is not a matter of bootstrapping one implementation through a previous implementation, but instead a matter of building a tower of languages and libraries via macros. The upper layers of the tower include a class system, a component system, pedagogic variants of Scheme, a statically typed dialect of Scheme, and more. The demands of this language-construction effort require a macro system that is substantially more expressive than previous macro systems. In particular, while conventional Scheme macro systems handle stand-alone syntactic forms adequately, they provide weak support for macros that share information or macros that use existing syntactic forms in new contexts. This paper describes and models features of the Racket macro system, including support for general compile-time bindings, sub-form expansion and analysis, and environment management. The presentation assumes a basic familiarity with Lisp-style macros, and it takes for granted the need for macros that respect lexical scope. The model, however, strips away the pattern and template system that is normally associated with Scheme macros, isolating a core that is simpler, can support pattern and template forms themselves as macros, and generalizes naturally to Racket's other extensions.},
+  langid = {english},
+  file = {C\:\\Users\\caner\\Zotero\\storage\\KJ3MZ6SZ\\Flatt et al. - 2012 - Macros that Work Together Compile-time bindings, .pdf;C\:\\Users\\caner\\Zotero\\storage\\9IWC2NZF\\375043C6746405B22014D235FA4C90C3.html}
 }
 
 @article{hayashizakiImprovingPerformanceTracebased2011,
@@ -58,6 +94,23 @@
   isbn = {978-1-59593-332-4},
   keywords = {dynamic compilation,embedded and resource-constrained systems,mixed-mode interpretive compiled systems,software trace scheduling,static single assignment form,virtual machines},
   file = {C:\Users\caner\Zotero\storage\MUT26PBM\Gal et al. - 2006 - HotpathVM An Effective JIT Compiler for Resource-.pdf}
+}
+
+@article{icfp2019,
+  title = {Rebuilding {{Racket}} on {{Chez Scheme}} ({{Experience Report}})},
+  author = {Flatt, Matthew and Derici, Caner and Dybvig, R. Kent and Keep, Andrew W. and Massaccesi, Gustavo E. and Spall, Sarah and {Tobin-Hochstadt}, Sam and Zeppieri, Jon},
+  year = {2019},
+  month = jul,
+  journal = {Proc. ACM Program. Lang.},
+  volume = {3},
+  number = {ICFP},
+  pages = {78:1--78:15},
+  issn = {2475-1421},
+  doi = {10.1145/3341642},
+  urldate = {2019-11-12},
+  abstract = {We rebuilt Racket on Chez Scheme, and it works well\&mdash;as long as we're allowed a few patches to Chez Scheme. DrRacket runs, the Racket distribution can build itself, and nearly all of the core Racket test suite passes. Maintainability and performance of the resulting implementation are good, although some work remains to improve end-to-end performance. The least predictable part of our effort was how big the differences between Racket and Chez Scheme would turn out to be and how we would manage those differences. We expect Racket on Chez Scheme to become the main Racket implementation, and we encourage other language implementers to consider Chez Scheme as a target virtual machine.},
+  keywords = {Racket,Scheme},
+  file = {C:\Users\caner\Zotero\storage\76JHJJYP\Flatt et al. - 2019 - Rebuilding Racket on Chez Scheme (Experience Repor.pdf}
 }
 
 @inproceedings{izawaAmalgamatingDifferentJIT2020b,
