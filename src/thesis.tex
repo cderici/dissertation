@@ -160,7 +160,6 @@
 \tableofcontents
 %\end{singlespace}
 
-
 \clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -201,7 +200,10 @@
 
 % Adjust chapter title formatting
 %format title font size and position (this also applys to list of figures and list of tables)
-\titleformat{\chapter}[display]{\normalfont\bfseries\filcenter}{\MakeUppercase\chaptertitlename\ \thechapter}{0pt}{\MakeUppercase{#1}}
+% \titleformat{\chapter}[display]{\normalfont\bfseries\filcenter}{\MakeUppercase\chaptertitlename\ \thechapter}{0pt}{\MakeUppercase{#1}}
+% \titleformat{\chapter}[display]{\normalfont\bfseries\large\filcenter}{\MakeUppercase\chaptertitlename\ \thechapter}{30pt}{\MakeUppercase{#1}}
+\titleformat{\chapter}[block]{\normalfont\Large\raggedright}{\MakeUppercase{\thechapter}}{1em}{\MakeUppercase{#1}}
+
 
 %spacing between titles
 \titlespacing*{\chapter}{0pt}{0pt}{30pt}	%controls vertical margins on title
