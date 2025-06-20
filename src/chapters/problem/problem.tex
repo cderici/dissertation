@@ -203,7 +203,11 @@
 				It is important to note that describing static source code itself as "branch-heavy" can be misleading. The critical notion here is the data-dependent nature of branch decisions during runtime. A program could possess deeply nested conditional structures yet exhibit minimal runtime branching if the input consistently chooses shallow branches. Therefore, the "branchiness" of a computation is an empirical property, characterized by the frequency and complexity of branching decisions made during an actual evaluation over an input.
 
 			\paragraph{}%
-				This data-dependency manifests explicitly through the guards placed by a tracing JIT. During tracing, each conditional encountered generates a corresponding guard, asserting assumptions made about the input data at trace time. Consequently, more complex branching decisions lead directly to more numerous and more specialized guards. A trace containing multiple guards becomes highly specific to the particular input data observed during tracing, thereby limiting its reusability.
+				This data-dependency manifests explicitly through the guards placed by a tracing JIT. During tracing, each conditional encountered generates a corresponding guard, asserting assumptions made about the input data at trace time.
+
+			\begin{todo}[Mention]
+				All guards also have additional information attached that makes it possible to return to the interpreter, should the guard fail. This means that too many guard operations also consume a lot of memory. \cite{rpython:efficient-guards}
+			\end{todo}
 
 			\begin{figure}[h] % let LaTeX decide where it fits best
 				\centering
@@ -213,7 +217,11 @@
 			\end{figure}
 
 			\paragraph{}%
-				\figref{fig:branchy-long-path-trace} presents an excerpt from a trace of Branchy executed with an all-zero input, repeatedly following the deep path sequence \emph{18-8-3-1}. Each decision along this path generates a guard that must hold true at runtime; failure of any guard causes the trace to exit prematurely and fallback to the interpreter or trigger another trace. The resulting trace, while optimized and compiled, is excessively specialized, limiting its utility exclusively to identical inputs.
+				\figref{fig:branchy-long-path-trace} presents an excerpt from a trace of Branchy executed with an all-zero input, repeatedly following the deep path sequence \emph{18-8-3-1}. Note how all the guards in trace correspond to an if condition in the Branchy code. Each decision along this path generates a guard that must hold true at runtime; failure of any guard causes the trace to exit prematurely and fallback to the interpreter or trigger another trace. The resulting trace, while optimized and compiled, is excessively specialized, limiting its utility exclusively to identical inputs.
+
+			\begin{todo}[Mention]
+				There are tons of arguments to the trace, therefore tons of objects that existed before the trace and that are passed in as arguments, therefore the partial evaluating optimizer performing escape analysis just copies all the operations that use them into the output trace.
+			\end{todo}
 
 			\paragraph{}%
 				Thus, the internal structure of the input data significantly influences tracing outcomes. Repetitive input patterns, such as \racketcode{'(3 3 3 3 ...)}, allow trace reuse, thereby amortizing the overhead of tracing and compiling. However, highly repetitive inputs like these are uncommon in realistic workloads. Conversely, more varied or random inputs, such as \racketcode{'(1 3 5 1 3 5 ...)}, significantly reduce trace reuse. This phenomenon of internal "loops" within the input data will be revisited in greater detail in \sectionRef{section:there-is-no-loop} when we discuss the nature of loops the tracer attempts to capture.
@@ -312,6 +320,14 @@
 
 			\paragraph{}%
   				Transforming or expanding a program shares fundamental characteristics with regular expression matching or FASL parsing—each being equally data-dependent. The essence of these computations lies primarily in the ordered manipulation and parsing of symbolic structures rather than in executing the semantics within those structures. Importantly, expanding or transforming a user program that contains loops represents a fundamentally different computational pattern to a tracing JIT than simply interpreting those loops. When interpreting loops, the meta-tracing JIT can trace iterations and capture hot paths. In contrast, program expansion involves repeatedly branching and manipulating data structures, rarely exhibiting consistent iteration patterns suitable for effective tracing. Nevertheless, the loops within a fully expanded user program remain efficiently capturable by Pycket's meta-traced CEK machine core. We will discuss the implications of this multi-level tracing scenario and its resulting performance characteristics further in \sectionRef{section:cross-benchmarks}.
+
+			\begin{paragraph-here}
+				Also, runtime feedback (from \chapterRef{chapter:rpython}) doesn't work,
+
+				e.g. can't \emph{promote} values that are within the macro expander.
+
+				e.g. can't mark methods/functions as @elidable .
+			\end{paragraph-here}
 
 			\paragraph{}%
 				Addressing this challenge requires further research and careful consideration. At the heart of this challenge is the fundamental violation of the second assumption underlying tracing JITs, as previously discussed in \chapterRef{chapter:rpython}. The second assumption—that multiple iterations of the same loop are likely to traverse similar code paths—is directly contradicted by the highly data-dependent, branch-heavy nature of interpreter-style computations such as those found in the expander. This inherent violation explains why such computations, although critical for self-hosting, remain particularly ill-suited to meta-tracing and tracing JITs in general.

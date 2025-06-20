@@ -10,35 +10,81 @@
     \end{chaptersynopsis}
 
     \begin{paragraph-here}
-        Traces are the real performance currency of a tracing JIT compiler.
-        Understanding performance-related concepts, such as traces, warmup, and relevant RPython backend optimizations, as well as reviewing Pycket's characteristics is important for this research.
+        In this chapter we do three things:
+
+        - Thesis statement that we stated in [[chapter - intro]] is "Efficient self-hosting of full-scale functional languages on meta-tracing just-in-time (JIT) compilers is achievable.", so we explain what is a meta-tracing JIT compiler.
+
+        - We present the framework and context on which Pycket is built. Translation etc.
+
+        - introduce everything that is referred to in the rest of the dissertation regarding RPython and meta-tracing to provide context for technical discussions about traces and optimizations in [[chapter - problem]] and [[chapter - solution]].
     \end{paragraph-here}
 
     \begin{paragraph-here}
-        Tracing JIT compilers are based on two main assumptions, programs spend most of their runtime in loops, and several iterations of the same loop are likely to take similar code paths \cite{pypy-main}
-        The idea is to trace and generate optimized machine code for these frequently taken code paths to improve performance.
+        What's a JIT compiler?
+
+        JIT compilers allow programs to be compiled dynamically at run-time
+        during the evaluation via an interpreter. As opposed to the
+        ahead-of-time (AOT) compilers, JITs interleave the compilation with
+        execution, aiming to compile and optimize only the parts of the
+        program that are used the most. JIT compilers employ a low-overhead
+        profiling to dynamically detect a frequent (i.e. hot) sequence of
+        instructions during interpretation. Starting with evaluating a given
+        program with an interpreter, a JIT compiler stops the evaluation when
+        a frequently evaluated instruction path is detected, compiles the
+        instructions and starts using the compiled path whenever the same path
+        needs to be evaluated again \cite{dynamo}.
     \end{paragraph-here}
 
     \begin{paragraph-here}
-        What is a trace?
+            JITs have been shown to be significantly effective in implementing
+            efficient VMs for dynamic languages. There are two main approaches in
+            JIT compilation. Method-based compilation work on the method level,
+            and compile the most frequently used methods in the program, while
+            trace-based JIT compilers compile the most frequently evaluated loops
+            \cite{survey:05,jit-history:03}. In this thesis, we're interested in
+            the trace-based JIT compilation.
 
-        A trace in a tracing JIT compiler is a ......
-        Trace looks like this ...................
+            Tracing JITs trace and generate machine code for frequently taken code paths, and are based on two main assumptions:
+
+            \textbf{i)} Programs spend most of their running time in loops.
+
+            \textbf{ii)} Several iterations of the same loop are likely to take
+            similar code paths. \cite{pypy-main}
+    \end{paragraph-here}
+
+    \begin{paragraph-here}
+        what's a trace? trace internals look like this.
+
+        To exploit? these assumptions, a tracing JIT classifies certain
+        execution paths to be \emph{hot loops} during the evaluation. When a
+        hot loop is detected, as described before the evaluation stops, and
+        loop is compiled and optimized into a \emph{trace}, and then the
+        execution continues, using the compiled trace whenever the same path
+        needs to be executed. A trace is a linear sequence of instructions
+        with an entry point and one or more exit points. \figref{fig:trace}
+        shows a simplified example of a typical trace, taking two arguments
+        $p0$ and $p1$ as inputs, having a preamble (because of unrolling) and
+        an inner loop that jumps to itself. The \emph{guards} within a trace
+        make up the trace's exit points, where the trace jumps out if certain
+        conditions are not satisfied. They are often used for \textbf{i)}
+        making sure in the preamble the conditions are the same when this
+        sequence is first traced, and \textbf{ii)} to finish and exit the
+        loop.
     \end{paragraph-here}
 
     \inputSub{rpython}{fig-trace}
 
-    \begin{paragraph-here}
-        The tracer is a component of a JIT compiler that is responsible for tracing the execution of the program and generating traces.
-    \end{paragraph-here}
+    % \begin{paragraph-here}
+    %     The tracer is a component of a JIT compiler that is responsible for tracing the execution of the program and generating traces.
+    % \end{paragraph-here}
 
-    \begin{paragraph-here}
-        Whenever a hot loop is detected, the tracer generates a trace that captures the execution of the loop.
+    % \begin{paragraph-here}
+    %     Whenever a hot loop is detected, the tracer generates a trace that captures the execution of the loop.
 
-        For a given program, a time that it takes for the JIT to find and trace all the hot loops is called the warmup time.
-    \end{paragraph-here}
+    %     For a given program, a time that it takes for the JIT to find and trace all the hot loops is called the warmup time.
+    % \end{paragraph-here}
 
-    \section{Meta-tracing in JIT Compilation}
+    \section{Meta-tracing \& RPython Framework}
         \begin{mainpoint}
             The problem that PyPy solves:
 
@@ -46,7 +92,9 @@
         \end{mainpoint}
 
         \begin{paragraph-here}
-            If the program that's being JIT compiled is a language interpreter that's interpreting a user program, then a naive JIT compiler will try to capture the hot loops in the interpreter itself, rather than in the user program being interpreted. The most significant loop in an interpreter is the main dispatch loop. For a functional programming language, this would typically be a recursive descent loop that evaluate a sub-expression at each iteration. But this violates the second assumption of the tracing JITs where we assume several iterations of a hot loop take similar code paths. Because it is highly unlikely that the interpreter keeps evaluating the same expression over and over again.
+            If the program that's being JIT compiled is a language interpreter that's interpreting a user program, then a naive JIT compiler will try to capture the hot loops in the interpreter itself, rather than in the user program being interpreted.
+            So there's the language interpreter, the tracing interpreter, and the user program being interpreted by the language interpreter.
+            The most significant loop in an interpreter is the main dispatch loop. For a functional programming language, this would typically be a recursive descent loop that evaluate a sub-expression at each iteration. But this violates the second assumption of the tracing JITs where we assume several iterations of a hot loop take similar code paths. Because it is highly unlikely that the interpreter keeps evaluating the same expression over and over again.
         \end{paragraph-here}
 
         \begin{paragraph-here}
@@ -57,8 +105,116 @@
             Meta-tracing defined in PyPy \cite{pypy-main} solves exactly that. It manages to capture the hot loops in the user program being interpreted, rather than the interpreter itself. When we evaluate a Racket program on Pycket, Pycket's meta-tracing JIT compiler captures the hot loops in the Racket program, rather than the CEK interpreter in RPython itself.
         \end{paragraph-here}
 
-    \section{Pycket Primer}
+        \begin{paragraph-here}
+            What's a loop? How is it detected in a language interpreter?
 
-        \begin{todo}[Import]
-                Section 3.1 of the proposal document is relevant for this section.
-        \end{todo}
+            can-enter-jit, jit-merge-point, JITDriver, green-red variables..
+        \end{paragraph-here}
+
+    \section{Pycket: A Rudimentary Racket Interpreter Built on RPython Framework}
+        \label{section:pycket-primer}
+
+        \begin{paragraph-here}
+            What's RPython?
+
+            RPython (Restricted Python) is a statically typed, object-oriented
+            proper subset of Python that is designed during PyPy's development
+            \cite{pypy06}. It restricts Python in a way that enables
+            type-inference on RPython programs allowing an efficient conversion to
+            a lower language such as C. The restrictions are mainly the dynamic
+            features of Python and commonly listed as \cite{rpython07,rpython09};
+            no mix types at the same location (all variables need to be type
+            consistent and infereable), run-time reflection is not supported
+            (i.e. changing method of classes at run-time), no closures, global and
+            class bindings are assumed to be constants etc.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            What's RPython framework? What does it do? How does it do it? It generates JIT compilers from given interpreters.
+
+            The RPython framework takes RPython code and converts it to a chosen
+            lower-level language, most commonly C. Given an interpreter written in
+            RPython, the toolchain translates it to the target language by
+            lowering it in numerous phases, where each phase has its own type
+            system and a generic type inference engine. Because the RPython is a
+            subset of Python, the entire process can use a Python run-time. The
+            general translation process can be described as follows. It starts
+            with loading the program into the run-time and get the function
+            objects in memory as inputs. Using these function objects, the
+            framework generates by abstract intepretation the control flow graphs
+            for these functions that will be processed at further transformation
+            steps. Then the annotator acts as a high-level type inference engine
+            and assigns ``annotations'' to each variable at each flow graph. These
+            annotations basically denotes the possible Python objects a variable
+            might contain at the run-time. After the whole program is annotated,
+            RTyper (RPython typer) takes control and starts lowering the
+            annotations and some operations into the lower types and operations
+            that would make sense to the targeted environment (e.g. structs,
+            pointers, arrays in case of C), acting as a bridge between the
+            high-level annotator and the low-level code generation. After RTyping,
+            some optional backend optimizations are applied, such as inlining,
+            malloc removal and escape analysis. Note that like Python, RPython is
+            garbage collected, however, C is not. Therefore at this point a
+            garbage collector is inserted into the program as well. Finally the
+            typed and lowered flow-graphs are inputted into the code generation
+            and the binary is generated. \cite{rpython07, pypy06, pypy08}
+        \end{paragraph-here}
+
+
+
+        \begin{paragraph-here}
+            Enter Pycket, generated by that RPython framework.
+
+            Pycket is first designed in 2014 as a high-performance JIT compiler
+            for Racket, generated using the RPython meta-tracing framework
+            \cite{bolz14-racket}. In its original design, as shown in
+            \figref{fig:old-pycket}, Pycket relies on the Racket executable to
+            read and fully expand a given module\cite{samth:11}, and then
+            generates RPython AST for it and evaluates it within the interpreter
+            loop \cite{pycket15}. The language interpreter is based on the CEK
+            abstract machine and has the state $\langle e, \rho, \kappa \rangle$ ($e$ : control
+            (program AST), $\rho$ : environment, $\kappa$ : continuation)
+            \cite{felleisen87}. \figref{fig:cek} shows the transition rules and
+            how the CEK-loop is implemented in Pycket. The interpreter loop
+            continuously reduces the CEK triple until an empty continuation is
+            reached, which triggers a \emph{Done} exception that returns the
+            results.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            Here's the main CEK loop annotated with JITDriver, green/red variables, can\_enter\_jit, etc, so that when we evaluate a Racket program on Pycket, meta-tracing JIT captures hot loops in the Racket program, rather than Pycket itself.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            This CEK loop evaluates Racket kernel. The Racket binary is applied to a given Racket program to expand it into \racketcode{\#\%kernel}.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            We'll talk about this Pycket's performance characteristics in \secref{section:pycket-performance-characteristics}. let's first talk about relevant RPython trace optimizations to provide a context for technical discussions about performance in \chapterRef{chapter:problem}.
+        \end{paragraph-here}
+
+    \section{Optimizations \& Runtime Feedback}
+
+        \begin{paragraph-here}
+            Traces are the real performance currency of a tracing JIT compiler.
+
+            Good trace quality is a thing.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            warmup is a thing
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            introduce and explain promote, give an example from Pycket
+
+            promote, turns arbitrary variables into constants
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            talk about escape analysis, and introduce and explain trace-elidable, give an example from pycket
+
+            @elidable, it's like memoization of functions, for traces.
+
+            a function is trace-elidable, if during the execution of the program, successive calls to the function with identical arguments always return the same result.
+        \end{paragraph-here}
