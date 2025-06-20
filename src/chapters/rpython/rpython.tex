@@ -1,11 +1,16 @@
 % Tracing JITs and Meta-Tracing Frameworks
-\chapter{Tracing JITs and Meta-Tracing Frameworks}
+\chapter{Tracing Just-in-time (JIT) Compilers and Meta-tracing Frameworks}
     \label{chapter:rpython}
 
     \begin{chaptersynopsis}
         Introduce tracing JITs and meta-tracing.
         Introduce RPython, and trace internals.
     \end{chaptersynopsis}
+
+    \begin{paragraph-here}
+        Traces are the real performance currency of a tracing JIT compiler.
+        Understanding performance-related concepts, such as traces, warmup, and relevant RPython backend optimizations, as well as reviewing Pycket's characteristics is important for this research.
+    \end{paragraph-here}
 
     \begin{paragraph-here}
         Tracing JIT compilers are based on two main assumptions, programs spend most of their runtime in loops, and several iterations of the same loop are likely to take similar code paths \cite{pypy-main}
@@ -16,18 +21,10 @@
         What is a trace?
 
         A trace in a tracing JIT compiler is a ......
-    \end{paragraph-here}
-
-    \inputSub{rpython}{fig-trace}
-
-    \begin{paragraph-here}
         Trace looks like this ...................
     \end{paragraph-here}
 
-    \begin{paragraph-here}
-        Traces are the real performance currency of a tracing JIT compiler.
-        Understanding performance-related concepts, such as traces, warmup, and relevant RPython backend optimizations, as well as reviewing Pycket's characteristics is important for this research.
-    \end{paragraph-here}
+    \inputSub{rpython}{fig-trace}
 
     \begin{paragraph-here}
         The tracer is a component of a JIT compiler that is responsible for tracing the execution of the program and generating traces.
@@ -57,3 +54,9 @@
         \begin{paragraph-here}
             Meta-tracing defined in PyPy \cite{pypy-main} solves exactly that. It manages to capture the hot loops in the user program being interpreted, rather than the interpreter itself. When we evaluate a Racket program on Pycket, Pycket's meta-tracing JIT compiler captures the hot loops in the Racket program, rather than the CEK interpreter in RPython itself.
         \end{paragraph-here}
+
+    \section{Pycket Primer}
+
+        \begin{todo}[Import]
+                Section 3.1 of the proposal document is relevant for this section.
+        \end{todo}
