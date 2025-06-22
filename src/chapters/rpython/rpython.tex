@@ -93,7 +93,6 @@
         loop.
     \end{paragraph-here}
 
-    % TECH TODO
     \inputSub{rpython}{fig-trace}
 
     % \begin{paragraph-here}
@@ -134,12 +133,10 @@
         \end{paragraph-here}
 
         \begin{paragraph-here}
-            So we define a JITdriver, and give it the green/red variables, and annotate the interpreter with  can-enter-jit, jit-merge-point, JITDriver, green-red variables.. As shown in FIGURE
+            So we define a JITdriver, and give it the green/red variables, and annotate the interpreter with  can-enter-jit, jit-merge-point, JITDriver, green-red variables.. As shown in \figref{fig:pycket-annotated-cek}. We'll talk about how it all works in \secref{section:pycket-primer}.
         \end{paragraph-here}
 
-        \begin{figure-here}
-            Pycket's CEK loop annotated with jit interpreter hints. We'll talk about how it all works in \secref{section:pycket-primer}.
-        \end{figure-here}
+        \inputSub{rpython}{pycket-annotated-cek}
 
         \begin{paragraph-here}
             Segue into Pycket internals. Let's see how the interpreter is built around this CEK that you see.

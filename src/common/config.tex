@@ -82,6 +82,30 @@
   framexrightmargin=0pt
 }
 
+\lstdefinestyle{python-style}{
+  language=Python,
+  numbers=right,
+  numbersep=-5pt,
+  numberstyle=\scriptsize\ttfamily\color{black},
+  basicstyle=\scriptsize\ttfamily,
+  sensitive=true,
+  tabsize=2,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces,
+  showstringspaces=false,
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{black},
+  framesep=10pt,
+  framexleftmargin=0pt,
+  framexrightmargin=0pt,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape,
+  morekeywords=[2]{JitDriver, jit_merge_point, can_enter_jit},
+}
+
+
 \lstdefinelanguage{rptrace}{
   morecomment=[l]{\#},
   morestring=[b]",
