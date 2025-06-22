@@ -1,0 +1,42 @@
+\begin{figure}[!h]
+  \centering
+  \hspace*{-38mm}
+  \vspace{1em}
+  \begin{tikzpicture}[
+      font=\footnotesize,
+      box/.style = {draw, rounded corners, align=center,
+                    minimum width=34mm, minimum height=8mm, fill=gray!8},
+      spine/.style = {thick},
+      carr/.style  = {-Stealth, thick},
+      ann/.style   = {anchor=east, inner sep=0pt, font=\footnotesize},
+      node distance = 10mm
+    ]
+
+    \node[box] (t1) {Translation Task};
+    \node[box, below=of t1] (t2) {Building flow graph\\of entry point};
+    \node[box, below=of t2] (t3) {Annotation};
+    \node[box, below=of t3] (t4) {RTyping};
+    \node[box, below=of t4] (t5) {Applying Backend\\Optimizations};
+    \node[box, below=of t5] (t6) {Building Low-Level\\Database};
+    \node[box, below=of t6] (t7) {Source Generation};
+
+    \draw[-Stealth, thick] (t7.south) -- ++(0,-6mm);
+    \node[ann] at ($(t7.south)+(10mm,-9mm)$) {ANSI C Code};
+
+    \newcommand{\carrow}[3]{
+      \draw[carr] (#1.south west) to[out=180,in=180,looseness=1.25] (#2.north west);
+
+      \node[ann] at ($(#1.west)+(-6mm,-10mm)$) {#3};
+    }
+
+    \carrow{t1}{t2}{entry\_point (Python function)}
+    \carrow{t2}{t3}{entry\_point (flow graph)}
+    \carrow{t3}{t4}{annotated graphs}
+    \carrow{t4}{t5}{rtyped graphs}
+    \carrow{t5}{t6}{rtyped graphs}
+    \carrow{t6}{t7}{database of names of objects}
+
+  \end{tikzpicture}
+  \caption{The RPython framework translates a given interpreter code in RPython into a meta-tracing JIT compiler in C.}
+  \label{fig:rpypy-toolchain}
+\end{figure}
