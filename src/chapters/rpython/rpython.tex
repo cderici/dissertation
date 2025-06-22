@@ -24,9 +24,9 @@
 			\item Pycket: A Rudimentary Racket Interpreter Built on RPython Framework
 
                 Primer on Pycket's fundamentals. It's language RPython, CEK core, and how it is built.
-			\item Optimizations \& Runtime Feedback
+			\item Trace Optimizations \& Runtime Feedback
 
-                Traces are the real performance currency. Relevant optimizations and runtime feedback (e.g. promote, escape analysis, warmup, etc.).
+                Traces are the real performance currency. Relevant optimizations and runtime feedback (e.g promote, escape analysis, warmup, etc.).
 		\end{itemize}
     \end{chaptersynopsis}
 
@@ -114,7 +114,9 @@
 
         \begin{paragraph-here}
             If the program that's being JIT compiled is a language interpreter that's interpreting a user program, then a naive JIT compiler will try to capture the hot loops in the interpreter itself, rather than in the user program being interpreted.
+
             So there's the language interpreter, the tracing interpreter, and the user program being interpreted by the language interpreter.
+
             The most significant loop in an interpreter is the main dispatch loop. For a functional programming language, this would typically be a recursive descent loop that evaluate a sub-expression at each iteration. But this violates the second assumption of the tracing JITs where we assume several iterations of a hot loop take similar code paths. Because it is highly unlikely that the interpreter keeps evaluating the same expression over and over again.
         \end{paragraph-here}
 
@@ -127,17 +129,33 @@
         \end{paragraph-here}
 
         \begin{paragraph-here}
-            What's a loop? How is it detected in a language interpreter?
-
-            can-enter-jit, jit-merge-point, JITDriver, green-red variables..
+            What's a loop? (backwards jump) How is it detected in a language interpreter?
         \end{paragraph-here}
+
+        \begin{paragraph-here}
+            So we define a JITdriver, and give it the green/red variables, and annotate the interpreter with  can-enter-jit, jit-merge-point, JITDriver, green-red variables.. As shown in FIGURE
+        \end{paragraph-here}
+
+        \begin{figure-here}
+            Pycket's CEK loop annotated with jit interpreter hints. We'll talk about how it all works in \secref{section:pycket-primer}.
+        \end{figure-here}
+
+        \begin{paragraph-here}
+            Segue into Pycket internals. Let's see how the interpreter is built around this CEK that you see.
+        \end{paragraph-here}
+
 
     \section{Pycket: A Rudimentary Racket Interpreter Built on RPython Framework}
         \label{section:pycket-primer}
 
         \begin{paragraph-here}
+            Pycket, first designed as a high-performance tracing JIT compiler for Racket, supporting wide variety of complex language features such as contracts, continuations, structures, dynamic binding, and more. It's shown to outperform existing compilers at the time (2015) including Racket's own JIT \cite{pycketmain}, later shown to eliminate approximately \%90 of the sound gradual typing overhead \cite{pycketmain2}. In this section we provide a primer on Pycket's fundamentals. It's language RPython, CEK core, and how it is built, etc.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
             What's RPython?
 
+            Originally created for PyPy.
             RPython (Restricted Python) is a statically typed, object-oriented
             proper subset of Python that is designed during PyPy's development
             \cite{pypy06}. It restricts Python in a way that enables
@@ -149,6 +167,10 @@
             (i.e. changing method of classes at run-time), no closures, global and
             class bindings are assumed to be constants etc.
         \end{paragraph-here}
+
+        \begin{figure-here}
+            RPython translation flow.
+        \end{figure-here}
 
         \begin{paragraph-here}
             What's RPython framework? What does it do? How does it do it? It generates JIT compilers from given interpreters.
@@ -202,25 +224,63 @@
             results.
         \end{paragraph-here}
 
-        \begin{paragraph-here}
-            Here's the main CEK loop annotated with JITDriver, green/red variables, can\_enter\_jit, etc, so that when we evaluate a Racket program on Pycket, meta-tracing JIT captures hot loops in the Racket program, rather than Pycket itself.
-        \end{paragraph-here}
+        \begin{figure-here}
+            OLD Pycket runtime flow diagram figure.
+        \end{figure-here}
+
+        Macros \& Modules
+
+        Pycket uses Racket’s macro expander (Flatt 2002) to evaluate macros, thereby reducing Racket programs to just a few core forms implemented by the runtime system (TobinHochstadt et al. 2011).
+
+        Assignment Conversion and ANF
+
+        Once a module is expanded to core Racket and parsed from the serialized representation, Pycket performs two transformations on the AST. First, the program is converted to A-normal form (ANF), ensuring that all non-trivial expressions are named (Danvy 1991; Flanagan et al. 1993). For example [SIMPLE FIGURE]
+
+        Next, we convert all mutable variables (those that are the target of set!) into heap-allocated cells. This is a common technique in Lisp systems, and Racket performs it as well. This approach allows environments to be immutable mappings from variables to values. Additionally, each AST node stores its static environment; see section 5.1 for how this is used.
+
+        Primitives and Values
+
+        Racket comes with over 1,400 primitive functions and values, of which Pycket implements nearly 900. These range from numeric operations, where Pycket implements the full numeric tower including bignums, rational numbers, and complex numbers, to regular expression matching, to input/output including a port abstraction. As of this writing, more than half of the non-test lines of code in Pycket implement primitive functions.
+
+        hidden classes, type specializations
+
+        CEK States and Representation
+
+        With our program in its final form, we now execute it using the CEK machine.
 
         \begin{paragraph-here}
-            This CEK loop evaluates Racket kernel. The Racket binary is applied to a given Racket program to expand it into \racketcode{\#\%kernel}.
+            We saw the CEK loop before (figure reference). This CEK loop evaluates Racket kernel. The Racket binary is applied to a given Racket program to expand it into \racketcode{\#\%kernel}.
         \end{paragraph-here}
+
 
         \begin{paragraph-here}
-            We'll talk about this Pycket's performance characteristics in \secref{section:pycket-performance-characteristics}. let's first talk about relevant RPython trace optimizations to provide a context for technical discussions about performance in \chapterRef{chapter:problem}.
+               How does Pycket help find loops? two-state representation and call-graph.
+
+               section 4 in \cite{pycketmain}.
         \end{paragraph-here}
 
-    \section{Optimizations \& Runtime Feedback}
 
         \begin{paragraph-here}
-            Traces are the real performance currency of a tracing JIT compiler.
-
-            Good trace quality is a thing.
+            We'll talk about this Pycket's overall performance characteristics in \secref{section:pycket-performance-characteristics}. let's first talk about relevant RPython trace optimizations to provide a context for technical discussions about performance in \chapterRef{chapter:problem}.
         \end{paragraph-here}
+
+
+    \section{Trace Optimizations \& Runtime Feedback}
+
+    \begin{paragraph-here}
+        Traces are the real performance currency of a tracing JIT compiler.
+
+        Good trace quality is a thing.
+    \end{paragraph-here}
+
+
+RPython’s trace optimizer includes a suite of standard compiler optimizations, such as commonsubexpression elimination, copy propagation, constant folding, and many others (Ardo l. 2012). One advantage of trace compilation for optimization is that the control-flow graph of a trace is a straight line. Trace optimizations and their supporting analyses can be implemented in two passes over the trace, one forward pass and one backward pass.
+
+Inlining Inlining is a vital compiler optimization for high-level languages, both functional and object-oriented. In a tracing JIT compiler such as RPython, inlining comes for free from tracing (Gal et al. 2006). A given trace will include the inlined code from any functions called during tracing. This includes Racket-level functions as well as runtime system functions (Bolz et al. 2009). The highlyaggressive inlining produced by tracing is one of the keys to its successful performance: it eliminates function call overhead and exposes opportunities for other optimizations.
+
+Loop-invariant Code Motion Loop-invariant code motion is implemented in RPython particularly simple way, by peeling off a single iteration of the loop, and then performing its standard suite of forward analyses to optimize the loop further (Ardo 2012).
+
+Allocation Removal The CEK machine allocates a vast quantity of objects which would appear in the heap without optimization. This ranges from the tuple holding the three components of the machine state, to the environments holding each variable, to the continuations created for each operation.
 
         \begin{paragraph-here}
             warmup is a thing
