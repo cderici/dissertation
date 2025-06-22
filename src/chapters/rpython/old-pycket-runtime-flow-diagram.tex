@@ -1,0 +1,40 @@
+\begin{figure}[!h]
+  \centering
+  \hspace*{-32mm}
+  \begin{tikzpicture}[
+      font=\footnotesize,
+      box/.style  ={draw, rounded corners, align=center,
+                    minimum width=32mm, minimum height=8mm},
+      circ/.style ={draw, circle, minimum size=10mm, inner sep=1pt},
+      spine/.style={-Stealth, thick},
+      carr/.style ={-Stealth, thick},
+      ann/.style  ={anchor=east, inner sep=0pt, font=\footnotesize},
+      node distance=10mm
+    ]
+
+    % vertical nodes ----------------------------------------------------
+    \node[circ] (n1) {input.rkt};
+    \node[box,  below=of n1] (n2) {Pycket\\Entry};
+    \node[box,  below=of n2] (n3) {Racket\\Executable};
+    \node[box,  below=of n3] (n4) {Pycket\\Expand};
+    \node[box,  below=of n4] (n5) {JITted CEK};
+
+    % spine arrows ------------------------------------------------------
+    \foreach \a/\b in {n1/n2,n2/n3,n3/n4,n4/n5}
+      {\draw[spine] (\a.south) -- (\b.north);}
+
+    % helper for curved annotation arrows -------------------------------
+    \newcommand{\carrow}[3]{%
+      \draw[carr] (#1.south west) to[out=180,in=180,looseness=1.25] (#2.north west);
+      \node[ann] at ($(#1.west)+(-6mm,-10mm)$) {#3};
+    }
+
+    % curved arrows with labels -----------------------------------------
+    \carrow{n2}{n3}{input.rkt}
+    \carrow{n3}{n4}{input.rkt (expanded)}
+    \carrow{n4}{n5}{Pycket AST}
+
+  \end{tikzpicture}
+  \caption{Pycket's original design used to run the Racket executable to expand before running it on the CEK.}
+  \label{fig:pycket-workflow-vertical}
+\end{figure}
