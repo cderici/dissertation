@@ -1,21 +1,3 @@
-@inproceedings{anconaRPythonStepReconciling2007,
-  title = {{{RPython}}: {{A Step Towards Reconciling Dynamically}} and {{Statically Typed OO Languages}}},
-  shorttitle = {{{RPython}}},
-  booktitle = {Proceedings of the 2007 {{Symposium}} on {{Dynamic Languages}}},
-  author = {Ancona, Davide and Ancona, Massimo and Cuni, Antonio and Matsakis, Nicholas D.},
-  year = {2007},
-  series = {{{DLS}} '07},
-  pages = {53--64},
-  publisher = {ACM},
-  address = {New York, NY, USA},
-  doi = {10.1145/1297081.1297091},
-  urldate = {2019-11-12},
-  abstract = {Although the C-based interpreter of Python is reasonably fast, implementations on the CLI or the JVM platforms offers some advantages in terms of robustness and interoperability. Unfortunately, because the CLI and JVM are primarily designed to execute statically typed, object-oriented languages, most dynamic language implementations cannot use the native bytecodes for common operations like method calls and exception handling; as a result, they are not able to take full advantage of the power offered by the CLI and JVM. We describe a different approach that attempts to preserve the flexibility of Python, while still allowing for efficient execution. This is achieved by limiting the use of the more dynamic features of Python to an initial, bootstrapping phase. This phase is used to construct a final RPython (Restricted Python) program that is actually executed. RPython is a proper subset of Python, is statically typed, and does not allow dynamic modification of class or method definitions; however, it can still take advantage of Python features such as mixins and first-class methods and classes. This paper presents an overview of RPython, including its design and its translation to both CLI and JVM bytecode. We show how the bootstrapping phase can be used to implement advanced features, like extensible classes and generative programming. We also discuss what work remains before RPython is truly ready for general use, and compare the performance of RPython with that of other approaches.},
-  isbn = {978-1-59593-868-8},
-  keywords = {.NET,JVM,Python},
-  file = {C:\Users\caner\Zotero\storage\MVZCMYBI\Ancona et al. - 2007 - RPython A Step Towards Reconciling Dynamically an.pdf}
-}
-
 @book{appelCompilingContinuations2007,
   title = {Compiling with {{Continuations}}},
   author = {Appel, Andrew W.},
@@ -44,12 +26,77 @@
   file = {C:\Users\caner\Zotero\storage\57J8CJLC\Bolz - Meta-Tracing Just-in-Time Compilation for RPython.pdf}
 }
 
+@inproceedings{danvy93,
+  title = {Separating Stages in the Continuation-Passing Style Transformation},
+  booktitle = {Proceedings of the 20th {{ACM SIGPLAN-SIGACT}} Symposium on {{Principles}} of Programming Languages},
+  author = {Lawall, Julia L. and Danvy, Olivier},
+  year = {1993},
+  month = mar,
+  series = {{{POPL}} '93},
+  pages = {124--136},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  doi = {10.1145/158511.158613},
+  urldate = {2025-06-23},
+  abstract = {The continuation-passing style (CPS) transformation is powerful but complex. Our thesis is that this transformation is in fact compound, and we set out to stage it. We factor the CPS transformation into several steps, separating aspects in each step: (1) Intermediate values are named; (2) Continuations are introduced; (3) Sequencing order is decided and administrative reductions are performed.Step 1 determines the evaluation order (e.g., call-by-name or call-by-value). Step 2 isolates the introduction of continuations and is expressed with local, structure-preserving rewrite rules --- a novel aspect standing in sharp contrast with the usual CPS transformations. Step 3 determines the ordering of continuations (e.g., left-to-right or right-to-left evaluation) and leads to the familiar-looking continuation-passing terms.Step 2 is completely reversible and Steps 1 and 3 form Galois connections. Together they lead to the direct style (DS) transformation of our earlier work (including first-class continuations): (1) Intermediate continuations are named and sequencing order is abstracted; (2) Second-class continuations are eliminated; (3) Administrative reductions are performed.A subset of these transformations can leverage program manipulation systems: CPS-based compilers can modify sequencing to improve e.g., register allocation; static program analyzers can yield more precise results; and overspecified CPS programs can be rescheduled. Separating aspects of the CPS transformation also enables a new programming style, with applications to nondeterministic programming. As a byproduct, our work also suggests a new continuation semantics for unspecified sequencing orders in programming languages (e.g., Scheme).},
+  isbn = {978-0-89791-560-1},
+  file = {C:\Users\caner\Zotero\storage\5LRL7IK2\Lawall and Danvy - 1993 - Separating stages in the continuation-passing style transformation.pdf}
+}
+
 @article{dynamo,
   title = {Dynamo: {{A Transparent Dynamic Optimization System}}},
   author = {Bala, Vasanth and Duesterwald, Evelyn and Banerjia, Sanjeev},
   pages = {12},
   abstract = {We describe the design and implementation of Dynamo, a software dynamic optimization system that is capable of transparently improving the performance of a native instruction stream as it executes on the processor. The input native instruction stream to Dynamo can be dynamically generated (by a JIT for example), or it can come from the execution of a statically compiled native binary. This paper evaluates the Dynamo system in the latter, more challenging situation, in order to emphasize the limits, rather than the potential, of the system. Our experiments demonstrate that even statically optimized native binaries can be accelerated Dynamo, and often by a significant degree. For example, the average performance of --O optimized SpecInt95 benchmark binaries created by the HP product C compiler is improved to a level comparable to their --O4 optimized version running without Dynamo. Dynamo achieves this by focusing its efforts on optimization opportunities that tend to manifest only at runtime, and hence opportunities that might be difficult for a static compiler to exploit. Dynamo's operation is transparent in the sense that it does not depend on any user annotations or binary instrumentation, and does not require multiple runs, or any special compiler, operating system or hardware support. The Dynamo prototype presented here is a realistic implementation running on an HP PA-8000 workstation under the HPUX 10.20 operating system.},
   langid = {english}
+}
+
+@inproceedings{felleisen87,
+  title = {Control Operators, the {{SECD-machine}}, and the {$\lambda$}-Calculus},
+  booktitle = {Formal {{Description}} of {{Programming Concepts}}},
+  author = {Felleisen, Matthias and Friedman, Daniel P.},
+  year = {1987},
+  keywords = {Lambda calculus,SECD machine}
+}
+
+@misc{findler-felleisen:2002,
+  title = {Contracts for Higher-Order Functions {\textbar} {{Proceedings}} of the Seventh {{ACM SIGPLAN}} International Conference on {{Functional}} Programming},
+  urldate = {2025-06-23},
+  howpublished = {https://dl-acm-org.proxyiub.uits.iu.edu/doi/10.1145/581478.581484},
+  file = {C:\Users\caner\Zotero\storage\DJUW4VN7\581478.html}
+}
+
+@article{flanagan:93,
+  title = {The Essence of Compiling with Continuations},
+  author = {Flanagan, Cormac and Sabry, Amr and Duba, Bruce F. and Felleisen, Matthias},
+  year = {1993},
+  month = jun,
+  journal = {SIGPLAN Not.},
+  volume = {28},
+  number = {6},
+  pages = {237--247},
+  issn = {0362-1340},
+  doi = {10.1145/173262.155113},
+  urldate = {2025-06-23},
+  abstract = {In order to simplify the compilation process, many compilers for higher-order languages use the continuation-passing style (CPS) transformation in a first phase to generate an intermediate representation of the source program. The salient aspect of this intermediate form is that all procedures take an argument that represents the rest of the computation (the ``continuation''). Since the nai{\textasciidieresis}ve CPS transformation considerably increases the size of programs, CPS compilers perform reductions to produce a more compact intermediate representation. Although often implemented as a part of the CPS transformation, this step is conceptually a second phase. Finally, code generators for typical CPS compilers treat continuations specially in order to optimize the interpretation of continuation parameters.A thorough analysis of the abstract machine for CPS terms show that the actions of the code generator invert the nai{\textasciidieresis}ve CPS translation step. Put differently, the combined effect of the three phases is equivalent to a source-to-source transformation that simulates the compaction phase. Thus, fully developed CPS compilers do not need to employ the CPS transformation but can achieve the same results with a simple source-level transformation.},
+  file = {C:\Users\caner\Zotero\storage\VWHIVX6I\Flanagan et al. - 1993 - The essence of compiling with continuations.pdf}
+}
+
+@article{flatt:2002,
+  title = {Composable and Compilable Macros: You Want It When?},
+  shorttitle = {Composable and Compilable Macros},
+  author = {Flatt, Matthew},
+  year = {2002},
+  month = sep,
+  journal = {SIGPLAN Not.},
+  volume = {37},
+  number = {9},
+  pages = {72--83},
+  issn = {0362-1340},
+  doi = {10.1145/583852.581486},
+  urldate = {2025-06-23},
+  abstract = {Many macro systems, especially for Lisp and Scheme, allow macro transformers to perform general computation. Moreover, the language for implementing compile-time macro transformers is usually the same as the language for implementing run-time functions. As a side effect of this sharing, implementations tend to allow the mingling of compile-time values and run-time values, as well as values from separate compilations. Such mingling breaks programming tools that must parse code without executing it. Macro implementors avoid harmful mingling by obeying certain macro-definition protocols and by inserting phase-distinguishing annotations into the code. However, the annotations are fragile, the protocols are not enforced, and programmers can only reason about the result in terms of the compiler's implementation. MzScheme---the language of the PLT Scheme tool suite---addresses the problem through a macro system that separates compilation without sacrificing the expressiveness of macros.},
+  file = {C:\Users\caner\Zotero\storage\55CGSQJ9\Flatt - 2002 - Composable and compilable macros you want it when.pdf}
 }
 
 @article{flattMacrosThatWork2012,
@@ -282,6 +329,70 @@
   file = {C:\Users\caner\Zotero\storage\ZW64A5W8\Bolz et al. - 2009 - Tracing the Meta-level PyPy's Tracing JIT Compile.pdf}
 }
 
+@inproceedings{pypy06,
+  title = {{{PyPy}}'s {{Approach}} to {{Virtual Machine Construction}}},
+  booktitle = {Companion to the 21st {{ACM SIGPLAN Symposium}} on {{Object-oriented Programming Systems}}, {{Languages}}, and {{Applications}}},
+  author = {Rigo, Armin and Pedroni, Samuele},
+  year = {2006},
+  series = {{{OOPSLA}} '06},
+  pages = {944--953},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/1176617.1176753},
+  urldate = {2019-11-12},
+  abstract = {The PyPy project seeks to prove both on a research and a practical level the feasibility of constructing a virtual machine (VM) for a dynamic language in a dynamic language - in this case, Python. The aim is to translate (i.e. compile) the VM to arbitrary target environments, ranging in level from C/Posix to Smalltalk/Squeak via Java and CLI/.NET, while still being of reasonable efficiency within these environments.A key tool to achieve this goal is the systematic reuse of the Python language as a system programming language at various levels of our architecture and translation process. For each level, we design a corresponding type system and apply a generic type inference engine - for example, the garbage collector is written in a style that manipulates simulated pointer and address objects, and when translated to C these operations become C-level pointer and address instructions.},
+  isbn = {978-1-59593-491-8},
+  keywords = {metacircularity,Python,retargettable code generation,type inference,virtual machine},
+  file = {C:\Users\caner\Zotero\storage\ALGTU6SG\Rigo and Pedroni - 2006 - PyPy's Approach to Virtual Machine Construction.pdf}
+}
+
+@misc{pypy08,
+  title = {The {{Architecture}} of {{Open Source Applications}} ({{Volume}} 2): {{PyPy}}},
+  urldate = {2019-11-12},
+  howpublished = {https://www.aosabook.org/en/pypy.html},
+  file = {C:\Users\caner\Zotero\storage\B2QBSUWA\pypy.html}
+}
+
+@inproceedings{rpython07,
+  title = {{{RPython}}: {{A Step Towards Reconciling Dynamically}} and {{Statically Typed OO Languages}}},
+  shorttitle = {{{RPython}}},
+  booktitle = {Proceedings of the 2007 {{Symposium}} on {{Dynamic Languages}}},
+  author = {Ancona, Davide and Ancona, Massimo and Cuni, Antonio and Matsakis, Nicholas D.},
+  year = {2007},
+  series = {{{DLS}} '07},
+  pages = {53--64},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/1297081.1297091},
+  urldate = {2019-11-12},
+  abstract = {Although the C-based interpreter of Python is reasonably fast, implementations on the CLI or the JVM platforms offers some advantages in terms of robustness and interoperability. Unfortunately, because the CLI and JVM are primarily designed to execute statically typed, object-oriented languages, most dynamic language implementations cannot use the native bytecodes for common operations like method calls and exception handling; as a result, they are not able to take full advantage of the power offered by the CLI and JVM. We describe a different approach that attempts to preserve the flexibility of Python, while still allowing for efficient execution. This is achieved by limiting the use of the more dynamic features of Python to an initial, bootstrapping phase. This phase is used to construct a final RPython (Restricted Python) program that is actually executed. RPython is a proper subset of Python, is statically typed, and does not allow dynamic modification of class or method definitions; however, it can still take advantage of Python features such as mixins and first-class methods and classes. This paper presents an overview of RPython, including its design and its translation to both CLI and JVM bytecode. We show how the bootstrapping phase can be used to implement advanced features, like extensible classes and generative programming. We also discuss what work remains before RPython is truly ready for general use, and compare the performance of RPython with that of other approaches.},
+  isbn = {978-1-59593-868-8},
+  keywords = {.NET,JVM,Python},
+  file = {C:\Users\caner\Zotero\storage\MVZCMYBI\Ancona et al. - 2007 - RPython A Step Towards Reconciling Dynamically an.pdf}
+}
+
+@inproceedings{rpython09,
+  title = {{{PyGirl}}: {{Generating Whole-System VMs}} from High-Level Models Using {{PyPy}}},
+  shorttitle = {{{PyGirl}}},
+  author = {Bruni, Camillo and Verwaest, Toon},
+  year = {2009},
+  month = jun,
+  volume = {33},
+  pages = {328--347},
+  doi = {10.1007/978-3-642-02571-6_19},
+  abstract = {Virtual machines (VMs) emulating hardware devices are generally implemented in low-level languages for performance reasons. This results in unmaintainable systems that are difficult to understand. In this paper we report on our experience using the PyPy toolchain to improve the portability and reduce the complexity of whole-system VM implementations. As a case study we implement a VM prototype for a Nintendo Game Boy, called PyGirl, in which the high-level model is separated from low-level VM implementation issues. We shed light on the process of refactoring from a low-level VM implementation in Java to a high-level model in RPython. We show that our whole-system VM written with PyPy is significantly less complex than standard implementations, without substantial loss in performance.},
+  file = {C:\Users\caner\Zotero\storage\ESEZHPD5\Bruni and Verwaest - 2009 - PyGirl Generating Whole-System VMs from high-leve.pdf}
+}
+
+@article{samth:11,
+  title = {Languages as Libraries},
+  author = {{Tobin-Hochstadt}, Sam and {St-Amour}, Vincent and Culpepper, Ryan and Flatt, Matthew and Felleisen, Matthias},
+  pages = {10},
+  abstract = {Programming language design benefits from constructs for extending the syntax and semantics of a host language. While C's stringbased macros empower programmers to introduce notational shorthands, the parser-level macros of Lisp encourage experimentation with domain-specific languages. The Scheme programming language improves on Lisp with macros that respect lexical scope.},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\Y47HQ2G4\Tobin-Hochstadt et al. - Languages as libraries.pdf}
+}
+
 @inproceedings{schneiderEfficientHandlingGuards2012,
   title = {The Efficient Handling of Guards in the Design of {{RPython}}'s Tracing {{JIT}}},
   booktitle = {Proceedings of the Sixth {{ACM}} Workshop on {{Virtual}} Machines and Intermediate Languages},
@@ -378,6 +489,22 @@
   isbn = {978-1-4503-2472-4},
   langid = {english},
   file = {C:\Users\caner\Zotero\storage\7JJNARJ3\Würthinger et al. - 2013 - One VM to rule them all.pdf}
+}
+
+@article{typeSpecial:2009,
+  title = {Trace-Based Just-in-Time Type Specialization for Dynamic Languages},
+  author = {Gal, Andreas and Eich, Brendan and Shaver, Mike and Anderson, David and Mandelin, David and Haghighat, Mohammad R. and Kaplan, Blake and Hoare, Graydon and Zbarsky, Boris and Orendorff, Jason and Ruderman, Jesse and Smith, Edwin W. and Reitmaier, Rick and Bebenita, Michael and Chang, Mason and Franz, Michael},
+  year = {2009},
+  month = jun,
+  journal = {SIGPLAN Not.},
+  volume = {44},
+  number = {6},
+  pages = {465--478},
+  issn = {0362-1340},
+  doi = {10.1145/1543135.1542528},
+  urldate = {2025-06-23},
+  abstract = {Dynamic languages such as JavaScript are more difficult to compile than statically typed ones. Since no concrete type information is available, traditional compilers need to emit generic code that can handle all possible type combinations at runtime. We present an alternative compilation technique for dynamically-typed languages that identifies frequently executed loop traces at run-time and then generates machine code on the fly that is specialized for the actual dynamic types occurring on each path through the loop. Our method provides cheap inter-procedural type specialization, and an elegant and efficient way of incrementally compiling lazily discovered alternative paths through nested loops. We have implemented a dynamic compiler for JavaScript based on our technique and we have measured speedups of 10x and more for certain benchmark programs.},
+  file = {C:\Users\caner\Zotero\storage\T59L5B5Z\Gal et al. - 2009 - Trace-based just-in-time type specialization for dynamic languages.pdf}
 }
 
 @article{vandercammenEssenceMetaTracingJIT,
