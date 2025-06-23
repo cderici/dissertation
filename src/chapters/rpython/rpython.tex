@@ -67,24 +67,40 @@
         \end{mainpoint}
 
         \begin{paragraph-here}
-            If the program that's being JIT compiled is a language interpreter that's interpreting a user program, then a naive JIT compiler will try to capture the hot loops in the interpreter itself, rather than in the user program being interpreted.
+            If the program that's being JIT compiled is a language interpreter that's interpreting a user program (i.e. if you apply a tracing JIT to a language interpreter), then a naive JIT compiler will try to capture the hot loops in the given program, the language interpreter itself, rather than in the user program being interpreted.
 
-            So there's the language interpreter, the tracing interpreter, and the user program being interpreted by the language interpreter.
-
-            The most significant loop in an interpreter is the main dispatch loop. For a functional programming language, this would typically be a recursive descent loop that evaluate a sub-expression at each iteration. But this violates the second assumption of the tracing JITs where we assume several iterations of a hot loop take similar code paths. Because it is highly unlikely that the interpreter keeps evaluating the same expression over and over again.
+            [Define the terms we'll use later: there's the language interpreter, the tracing interpreter, and the user program being interpreted by the language interpreter. The language interpreter is the interpreter for the language that we want this system to implement. The tracing interpreter (i.e. the meta-tracer) is the interpreter that holds hands with the language interpreter and tracks its steps as the language interpreter interprets the given user program, stopping it every now and then to compile and store traces.]
         \end{paragraph-here}
 
         \begin{paragraph-here}
-            Besides, by its nature tracing captures the most essential part of the program being executed, and on an interpreter interpreting a user program, the main dispatch loop of the interpreter is not the most essential part, the hot loops within the user program are the most essential parts. So we really want the JIT compiler to capture the hot loops in the user program, rather than the interpreter itself.
+            the main dispatch loop in a language interpreter is The most significant loop. For a functional programming language, this would typically be a recursive descent loop that evaluate a sub-expression at each iteration. But this violates the second assumption of the tracing JITs where we assume several iterations of a hot loop take similar code paths. Because it is highly unlikely that a language interpreter keeps evaluating the same operation/expression over and over again.
         \end{paragraph-here}
 
         \begin{paragraph-here}
-            Meta-tracing defined in PyPy \cite{pypy-main} solves exactly that. It manages to capture the hot loops in the user program being interpreted, rather than the interpreter itself. When we evaluate a Racket program on Pycket, Pycket's meta-tracing JIT compiler captures the hot loops in the Racket program, rather than the CEK interpreter in RPython itself.
+            Besides, by its nature, tracing captures the most essential part of the program being executed, and on an interpreter interpreting a user program, the main dispatch loop of the interpreter is not the most essential part, the hot loops within the user program are the most essential parts. So we really want the JIT compiler to capture the hot loops in the user program, rather than the interpreter itself. Meta-tracing defined in PyPy solves exactly that\cite{pypy-main}. It manages to capture the hot loops in the user program being interpreted, rather than the interpreter itself.
         \end{paragraph-here}
 
         \begin{paragraph-here}
-            What's a loop? (backwards jump) How is it detected in a language interpreter?
+            [What's a loop? (backwards jump) How is it detected in a language interpreter?]
+
+
+            Fundamentally, there's no way for the tracing interpreter (the meta-tracer) to know the semantics of the language interpreter, without an explicit internal coding language or something. Therefore, when the meta-tracer traces the language interpreter, it can't know when a loop in the user program is happening. For this purpose, the tracing interpreter exposes an API that the language interpreter uses to communicate when and where a loop might be forming in the user program.
+
+            A loop in a program is essentially a backwards jump to a previously executed instruction. To detect a loop in the user program, the meta-tracer allows the language to define its own logical \emph{program counter} using its own variables. For example in a bytecode interpreter, the program counter might be a compound value that consists of the bytecode of the operation and a global variable. This way, when the meta-tracer repeatedly sees the same value in the program counter that the language interpreter defined, it knows that the user code is looping.
         \end{paragraph-here}
+
+        \begin{paragraph-here}
+            For a more fine-grained control of the computation paths being traced, the language interpreter is armed with some functionality and some hints to guide the meta-tracer along the way (of interpreting the user program), most importantly the \emph{jit\_merge\_point}, and \emph{can\_enter\_jit}. These
+        \end{paragraph-here}
+
+        \begin{paragraph-here}
+            In this study, we'll work with an interpreter for Racket language, namely Pycket, built as a meta-tracing JIT compiler. We'll introduce it properly in the next section.
+
+            Because it's a meta-tracing compiler, when we evaluate a Racket program on Pycket, Pycket's meta-tracing JIT compiler captures the hot loops in the Racket program, rather than the CEK interpreter in RPython itself.
+
+            Let's see concretely how the interpreter informs the meta-tracer for detecting loops in the user program.
+        \end{paragraph-here}
+
 
         \begin{paragraph-here}
             So we define a JITdriver, and give it the green/red variables, and annotate the interpreter with  can-enter-jit, jit-merge-point, JITDriver, green-red variables.. As shown in \figref{fig:pycket-annotated-cek}. We'll talk about how it all works in \secref{section:pycket-primer}.
