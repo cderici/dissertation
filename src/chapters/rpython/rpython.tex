@@ -30,70 +30,24 @@
 		\end{itemize}
     \end{chaptersynopsis}
 
-    \begin{paragraph-here}
-        In this chapter we do three things:
+    \paragraph{}%
+        In this chapter, we have three main objectives. First, we explain the concept of a meta-tracing Just-in-Time (JIT) compiler, clearly connecting it to our thesis statement presented earlier, that efficient self-hosting of full-scale functional languages is achievable using meta-tracing JIT compilation. Second, we introduce the RPython framework, detailing its role as the foundational technology upon which Pycket is constructed, including aspects of translation and toolchain workflow. Lastly, we outline key concepts related to RPython and meta-tracing—such as trace formation, optimization strategies, and runtime feedback—which serve as essential context for technical discussions and evaluations relating to performance in \chapterRef{chapter:problem} and \chapterRef{chapter:solution}.
 
-        - Thesis statement that we stated in [[chapter - intro]] is "Efficient self-hosting of full-scale functional languages on meta-tracing just-in-time (JIT) compilers is achievable.", so we explain what is a meta-tracing JIT compiler.
+    \paragraph{}%
+        A Just-in-Time (JIT) compiler dynamically compiles frequently executed parts of a program at runtime, interleaving compilation with interpretation. Unlike Ahead-of-Time (AOT) compilers, which compile the entire program beforehand, JIT compilers selectively target hot paths identified through low-overhead profiling. When the interpreter repeatedly executes a particular sequence of instructions, the JIT compiler pauses interpretation momentarily, compiles and optimizes this sequence, and subsequently executes the optimized code whenever the same instruction path recurs \cite{dynamo}.
 
-        - We present the framework and context on which Pycket is built. Translation etc.
+    \paragraph{}%
+        JIT compilers have proven particularly effective for dynamic language virtual machines (VMs), generally adopting either method-based or trace-based approaches. Method-based compilers optimize frequently invoked methods, whereas trace-based compilers focus on frequently executed loops \cite{survey:05,jit-history:03}. This dissertation specifically focuses on trace-based compilation. Tracing JITs generate optimized machine code by tracing and compiling execution paths under two fundamental assumptions\cite{pypy-main}:
 
-        - introduce everything that is referred to in the rest of the dissertation regarding RPython and meta-tracing to provide context for technical discussions about traces and optimizations in [[chapter - problem]] and [[chapter - solution]].
-    \end{paragraph-here}
-
-    \begin{paragraph-here}
-        What's a JIT compiler?
-
-        JIT compilers allow programs to be compiled dynamically at run-time
-        during the evaluation via an interpreter. As opposed to the
-        ahead-of-time (AOT) compilers, JITs interleave the compilation with
-        execution, aiming to compile and optimize only the parts of the
-        program that are used the most. JIT compilers employ a low-overhead
-        profiling to dynamically detect a frequent (i.e. hot) sequence of
-        instructions during interpretation. Starting with evaluating a given
-        program with an interpreter, a JIT compiler stops the evaluation when
-        a frequently evaluated instruction path is detected, compiles the
-        instructions and starts using the compiled path whenever the same path
-        needs to be evaluated again \cite{dynamo}.
-    \end{paragraph-here}
-
-    \begin{paragraph-here}
-            JITs have been shown to be significantly effective in implementing
-            efficient VMs for dynamic languages. There are two main approaches in
-            JIT compilation. Method-based compilation work on the method level,
-            and compile the most frequently used methods in the program, while
-            trace-based JIT compilers compile the most frequently evaluated loops
-            \cite{survey:05,jit-history:03}. In this thesis, we're interested in
-            the trace-based JIT compilation.
-
-            Tracing JITs trace and generate machine code for frequently taken code paths, and are based on two main assumptions:
-
-            \textbf{i)} Programs spend most of their running time in loops.
-
-            \textbf{ii)} Several iterations of the same loop are likely to take
-            similar code paths. \cite{pypy-main}
-    \end{paragraph-here}
-
-    \begin{paragraph-here}
-        what's a trace? trace internals look like this.
-
-        To exploit? these assumptions, a tracing JIT classifies certain
-        execution paths to be \emph{hot loops} during the evaluation. When a
-        hot loop is detected, as described before the evaluation stops, and
-        loop is compiled and optimized into a \emph{trace}, and then the
-        execution continues, using the compiled trace whenever the same path
-        needs to be executed. A trace is a linear sequence of instructions
-        with an entry point and one or more exit points. \figref{fig:trace}
-        shows a simplified example of a typical trace, taking two arguments
-        $p0$ and $p1$ as inputs, having a preamble (because of unrolling) and
-        an inner loop that jumps to itself. The \emph{guards} within a trace
-        make up the trace's exit points, where the trace jumps out if certain
-        conditions are not satisfied. They are often used for \textbf{i)}
-        making sure in the preamble the conditions are the same when this
-        sequence is first traced, and \textbf{ii)} to finish and exit the
-        loop.
-    \end{paragraph-here}
+    \begin{enumerate}
+        \item Programs spend most of their execution time in loops.
+        \item Iterations of the same loop often follow similar execution paths.
+    \end{enumerate}
 
     \inputSub{rpython}{fig-trace}
+
+    \paragraph{}%
+        To exploit these assumptions, tracing JIT compilers identify certain execution paths as \emph{hot loops}. Upon detecting a hot loop, the interpreter pauses evaluation to compile this loop into a \emph{trace}, subsequently using the optimized trace whenever the same path is executed again. A trace is a linear sequence of instructions with a single entry and potentially multiple exit points. \figref{fig:trace} illustrates a simplified trace, with inputs $p0$ and $p1$, comprising a preamble (due to loop unrolling) and an inner loop that jumps back to itself. \emph{Guards} within a trace define its exit points, performing runtime checks to ensure that conditions remain consistent with the initial tracing context and handling conditions for loop termination or deviation.
 
     % \begin{paragraph-here}
     %     The tracer is a component of a JIT compiler that is responsible for tracing the execution of the program and generating traces.

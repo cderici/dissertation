@@ -27,9 +27,10 @@
   isbn = {978-0-521-03311-4}
 }
 
-@article{bolzMetatracingMakesFast,
+@article{bolzMetatracingMakesFast2014,
   title = {Meta-Tracing Makes a Fast {{Racket}}},
   author = {Bolz, Carl Friedrich and Pape, Tobias and Siek, Jeremy and {Tobin-Hochstadt}, Sam},
+  year = {2014},
   pages = {7},
   abstract = {Tracing just-in-time (JIT) compilers record and optimize the instruction sequences they observe at runtime. With some modifications, a tracing JIT can perform well even when the executed program is itself an interpreter, an approach called meta-tracing. The advantage of meta-tracing is that it separates the concern of JIT compilation from language implementation, enabling the same JIT compiler to be used with many different languages. The RPython meta-tracing JIT compiler has enabled the efficient interpretation of several dynamic languages including Python (PyPy), Prolog, and Smalltalk. In this paper we present initial findings in applying the RPython JIT to Racket. Racket comes from the Scheme family of programming languages for which there are mature static optimizing compilers. We present the result of spending just a couple person-months implementing and tuning an implementation of Racket written in RPython. The results are promising, with a geometric mean equal to Racket's performance and within a factor of 2 slower than Gambit and Larceny on a collection of standard Scheme benchmarks. The results on individual benchmarks vary widely. On the positive side, our interpreter is sometimes up to two to six times faster than Gambit, an order of magnitude faster than Larceny, and two orders of magnitude faster than the Racket JIT compiler when making heavy use of continuations. On the negative side, our interpreter is sometimes three times slower than Racket, nine times slower than Gambit, and five times slower than Larceny.},
   langid = {english},
@@ -41,6 +42,14 @@
   author = {Bolz, Carl Friedrich},
   langid = {ngerman},
   file = {C:\Users\caner\Zotero\storage\57J8CJLC\Bolz - Meta-Tracing Just-in-Time Compilation for RPython.pdf}
+}
+
+@article{dynamo,
+  title = {Dynamo: {{A Transparent Dynamic Optimization System}}},
+  author = {Bala, Vasanth and Duesterwald, Evelyn and Banerjia, Sanjeev},
+  pages = {12},
+  abstract = {We describe the design and implementation of Dynamo, a software dynamic optimization system that is capable of transparently improving the performance of a native instruction stream as it executes on the processor. The input native instruction stream to Dynamo can be dynamically generated (by a JIT for example), or it can come from the execution of a statically compiled native binary. This paper evaluates the Dynamo system in the latter, more challenging situation, in order to emphasize the limits, rather than the potential, of the system. Our experiments demonstrate that even statically optimized native binaries can be accelerated Dynamo, and often by a significant degree. For example, the average performance of --O optimized SpecInt95 benchmark binaries created by the HP product C compiler is improved to a level comparable to their --O4 optimized version running without Dynamo. Dynamo achieves this by focusing its efforts on optimization opportunities that tend to manifest only at runtime, and hence opportunities that might be difficult for a static compiler to exploit. Dynamo's operation is transparent in the sense that it does not depend on any user annotations or binary instrumentation, and does not require multiple runs, or any special compiler, operating system or hardware support. The Dynamo prototype presented here is a realistic implementation running on an HP PA-8000 workstation under the HPUX 10.20 operating system.},
+  langid = {english}
 }
 
 @article{flattMacrosThatWork2012,
@@ -144,6 +153,23 @@
   archiveprefix = {arXiv},
   keywords = {Computer Science - Programming Languages},
   file = {C\:\\Users\\caner\\Zotero\\storage\\SX29ZQUE\\Izawa et al. - 2025 - A Lightweight Method for Generating Multi-Tier JIT Compilation Virtual Machine in a Meta-Tracing Com.pdf;C\:\\Users\\caner\\Zotero\\storage\\7WFHXFWI\\2504.html}
+}
+
+@article{jit-history:03,
+  title = {A {{Brief History}} of {{Just-in-time}}},
+  author = {Aycock, John},
+  year = {2003},
+  month = jun,
+  journal = {ACM Comput. Surv.},
+  volume = {35},
+  number = {2},
+  pages = {97--113},
+  issn = {0360-0300},
+  doi = {10.1145/857076.857077},
+  urldate = {2019-12-01},
+  abstract = {Software systems have been using "just-in-time" compilation (JIT) techniques since the 1960s. Broadly, JIT compilation includes any translation performed dynamically, after a program has started execution. We examine the motivation behind JIT compilation and constraints imposed on JIT compilation systems, and present a classification scheme for such systems. This classification emerges as we survey forty years of JIT work, from 1960--2000.},
+  keywords = {dynamic compilation,Just-in-time compilation},
+  file = {C:\Users\caner\Zotero\storage\48RY7S5V\Aycock - 2003 - A Brief History of Just-in-time.pdf}
 }
 
 @inproceedings{loop-aware:12,
@@ -254,6 +280,55 @@
   abstract = {We attempt to apply the technique of Tracing JIT Compilers in the context of the PyPy project, i.e., to programs that are interpreters for some dynamic languages, including Python. Tracing JIT compilers can greatly speed up programs that spend most of their time in loops in which they take similar code paths. However, applying an unmodified tracing JIT to a program that is itself a bytecode interpreter results in very limited or no speedup. In this paper we show how to guide tracing JIT compilers to greatly improve the speed of bytecode interpreters. One crucial point is to unroll the bytecode dispatch loop, based on two kinds of hints provided by the implementer of the bytecode interpreter. We evaluate our technique by applying it to two PyPy interpreters: one is a small example, and the other one is the full Python interpreter.},
   isbn = {978-1-60558-541-3},
   file = {C:\Users\caner\Zotero\storage\ZW64A5W8\Bolz et al. - 2009 - Tracing the Meta-level PyPy's Tracing JIT Compile.pdf}
+}
+
+@inproceedings{schneiderEfficientHandlingGuards2012,
+  title = {The Efficient Handling of Guards in the Design of {{RPython}}'s Tracing {{JIT}}},
+  booktitle = {Proceedings of the Sixth {{ACM}} Workshop on {{Virtual}} Machines and Intermediate Languages},
+  author = {Schneider, David and Bolz, Carl Friedrich},
+  year = {2012},
+  month = oct,
+  pages = {3--12},
+  publisher = {ACM},
+  address = {Tucson Arizona USA},
+  doi = {10.1145/2414740.2414743},
+  urldate = {2025-06-20},
+  isbn = {978-1-4503-1633-0},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\EWXZMD8Y\Schneider and Bolz - 2012 - The efficient handling of guards in the design of RPython's tracing JIT.pdf}
+}
+
+@inproceedings{schneiderEfficientHandlingGuards2012a,
+  title = {The Efficient Handling of Guards in the Design of {{RPython}}'s Tracing {{JIT}}},
+  booktitle = {Proceedings of the Sixth {{ACM}} Workshop on {{Virtual}} Machines and Intermediate Languages},
+  author = {Schneider, David and Bolz, Carl Friedrich},
+  year = {2012},
+  month = oct,
+  series = {{{VMIL}} '12},
+  pages = {3--12},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  doi = {10.1145/2414740.2414743},
+  urldate = {2025-06-20},
+  abstract = {Tracing just-in-time (JIT) compilers record linear control flow paths, inserting operations called guards at points of possible divergence. These operations occur frequently in generated traces and therefore it is important to design and implement them carefully to find the right trade-off between deoptimization, memory overhead, and (partly) execution speed. In this paper, we perform an empirical analysis of runtime properties of guards. This is used to guide the design of guards in the RPython tracing JIT.},
+  isbn = {978-1-4503-1633-0},
+  file = {C:\Users\caner\Zotero\storage\2PWWZY7I\Schneider and Bolz - 2012 - The efficient handling of guards in the design of RPython's tracing JIT.pdf}
+}
+
+@article{survey:05,
+  title = {A {{Survey}} of {{Adaptive Optimization}} in {{Virtual Machines}}},
+  author = {Arnold, M. and Fink, S. J. and Grove, D. and Hind, M. and Sweeney, P. F.},
+  year = {2005},
+  month = feb,
+  journal = {Proceedings of the IEEE},
+  volume = {93},
+  number = {2},
+  pages = {449--466},
+  issn = {0018-9219},
+  doi = {10.1109/JPROC.2004.840305},
+  abstract = {Virtual machines face significant performance challenges beyond those confronted by traditional static optimizers. First, portable program representations and dynamic language features, such as dynamic class loading, force the deferral of most optimizations until runtime, inducing runtime optimization overhead. Second, modular program representations preclude many forms of whole-program interprocedural optimization. Third, virtual machines incur additional costs for runtime services such as security guarantees and automatic memory management. To address these challenges, vendors have invested considerable resources into adaptive optimization systems in production virtual machines. Today, mainstream virtual machine implementations include substantial infrastructure for online monitoring and profiling, runtime compilation, and feedback-directed optimization. As a result, adaptive optimization has begun to mature as a widespread production-level technology. This paper surveys the evolution and current state of adaptive optimization technology in virtual machines.},
+  keywords = {Adaptive optimization,adaptive optimization systems,Adaptive systems,automatic memory management,Condition monitoring,Costs,dynamic optimization,feedback directed optimization,feedback-directed optimization (FDO),Memory management,modular program representations,online monitoring,online profiling,optimisation,optimising compilers,optimization,Optimized production technology,production level technology,Production systems,Runtime,runtime compilation,Security,software performance evaluation,static optimizers,Virtual machine monitors,virtual machines,Virtual machining},
+  file = {C\:\\Users\\caner\\Zotero\\storage\\DVWJXGSE\\Arnold et al. - 2005 - A Survey of Adaptive Optimization in Virtual Machi.pdf;C\:\\Users\\caner\\Zotero\\storage\\I5PPYRYM\\1386662.html}
 }
 
 @inproceedings{trace-vs-PE,
