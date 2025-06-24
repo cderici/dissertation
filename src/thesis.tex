@@ -24,12 +24,18 @@
 % For trace listings
 \usepackage[T1]{fontenc}
 \usepackage{microtype}
+\microtypesetup{tracking=true}
 
 % Palatino SC + very slight letter-spacing helper
 \newcommand{\chapsc}{%
   \fontfamily{ppl}\fontseries{sc}\selectfont   % URW Palladio = Palatino
   \SetTracking{encoding=T1,shape=sc}{45}% ≈ 4½ ‰ – tweak or drop as you like
 }
+\newcommand{\sectionsc}{%
+  \fontfamily{ppl}\fontseries{sc}\selectfont   % URW Palladio = Palatino
+  \SetTracking{encoding=T1,shape=sc}{45}% ≈ 4½ ‰ – tweak or drop as you like
+}
+
 
 \makeatletter
 \renewcommand{\@makeschapterhead}[1]{%
@@ -159,15 +165,17 @@
 % \renewcommand{\cftsecdotsep}{\cftnodots}
 \renewcommand{\cftsubsecdotsep}{\cftnodots}
 
-\renewcommand{\cftchapfont}{\small\chapsc\bfseries}  %set title font weight
-\renewcommand{\cftchappagefont}{}  %set page number font weight
+\renewcommand{\cftchapfont}{\small\chapsc\bfseries}
+\renewcommand{\cftchappagefont}{}
 \renewcommand{\cftchappresnum}{}
 \renewcommand{\cftchapaftersnum}{\enspace}
 \settowidth{\cftchapnumwidth}{99\enspace}
-\renewcommand{\cftchapafterpnum}{} %set correct spacing for entries in single space environment
-\renewcommand{\cftsecafterpnum}{}  %set correct spacing for entries in single space environment
-\renewcommand{\cftsubsecafterpnum}{} %set correct spacing for entries in single space environment
-\renewcommand{\cftsubsubsecafterpnum}{} %set correct spacing for entries in single space environment
+\renewcommand{\cftchapafterpnum}{}
+
+\renewcommand{\cftsecfont}{\small\sectionsc}
+\renewcommand{\cftsecafterpnum}{}
+\renewcommand{\cftsubsecafterpnum}{}
+\renewcommand{\cftsubsubsecafterpnum}{}
 
 \setcounter{tocdepth}{1}
 
@@ -227,13 +235,13 @@
 \titlespacing*{\chapter}{0pt}{0pt}{30pt}	%controls vertical margins on title
 
 % Adjust section title formatting
-\titleformat{\section}{\normalfont\bfseries}{\thesection}{1em}{#1}
+\titleformat{\section}{\normalfont\sectionsc\bfseries}{\thesection}{1em}{#1}
 
 % Adjust subsection title formatting
-\titleformat{\subsection}{\normalfont\bfseries}{\thesubsection}{1em}{#1}
+\titleformat{\subsection}{\normalfont\sectionsc\bfseries}{\thesubsection}{1em}{#1}
 
 % Adjust subsubsection title formatting
-\titleformat{\subsubsection}{\normalfont\itshape}{\thesubsubsection}{1em}{#1}
+\titleformat{\subsubsection}{\normalfont\sectionsc\itshape}{\thesubsubsection}{1em}{#1}
 
 %%%%%%%%%%%%%%%%
 % 1 - Introduction
