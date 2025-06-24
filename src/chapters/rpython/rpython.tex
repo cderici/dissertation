@@ -98,104 +98,36 @@
     \section[\texorpdfstring{Pycket: A Rudimentary Racket Interpreter Built on RPython Framework}{Pycket Primer}]{Pycket: A Rudimentary Racket Interpreter Built on RPython Framework}
         \label{section:pycket-primer}
 
-        \begin{paragraph-here}
-            Pycket, first designed as a high-performance tracing JIT compiler for Racket, supporting wide variety of complex language features such as contracts, continuations, structures, dynamic binding, and more. It's shown to outperform existing compilers at the time (2015) including Racket's own JIT \cite{pycketmain}, later shown to eliminate approximately \%90 of the sound gradual typing overhead \cite{pycketmain2}. In this section we provide a primer on Pycket's fundamentals. It's language RPython, CEK core, and how it is built, etc.
-        \end{paragraph-here}
+        \paragraph{}%
+            Pycket was initially developed in 2014 as a high-performance tracing JIT compiler for the Racket language. From the start, Pycket aimed at efficiently supporting advanced Racket features such as contracts, continuations, structures, and dynamic binding, demonstrating significant performance improvements over existing compilers at the time, including Racket's own JIT compiler~\cite{pycketmain}. It was later shown that Pycket could remove nearly 90\% of the overhead associated with sound gradual typing~\cite{pycketmain2}. In this section, we provide a primer on Pycket's core fundamentals, focusing on the RPython framework upon which it is built, its CEK-based abstract machine, and the process of running Racket programs.
 
-        \begin{paragraph-here}
-            What's RPython?
-
-            Originally created for PyPy.
-            RPython (Restricted Python) is a statically typed, object-oriented
-            proper subset of Python that is designed during PyPy's development
-            \cite{pypy06}. It restricts Python in a way that enables
-            type-inference on RPython programs allowing an efficient conversion to
-            a lower language such as C. The restrictions are mainly the dynamic
-            features of Python and commonly listed as;
-            no mix types at the same location (RPython is a statically typed language, despite that it doesn't have explicit type annotations. This rule says that all variables need to be type
-            consistent and infereable), run-time reflection is not supported
-            (i.e. changing method of classes at run-time), no closures, global and
-            class bindings are assumed to be constants etc \cite{rpython07,rpython09}.
-        \end{paragraph-here}
+        \paragraph{}%
+            RPython (Restricted Python) is a statically typed, object-oriented subset of Python, originally created during the development of the PyPy project~\cite{pypy06}. By restricting Python’s dynamic features, RPython enables type inference on programs, allowing efficient compilation to lower-level languages like C. Notably, RPython disallows mixing variable types at the same program location, ensuring all types are consistent and inferable. It also prohibits runtime reflection (such as modifying classes at runtime), closures, and assumes global and class-level bindings are constants~\cite{rpython07,rpython09}.
 
         \inputSub{rpython}{rpython-toolchain-diagram}
 
-        \begin{paragraph-here}
-            What's RPython framework? What does it do? How does it do it? It generates JIT compilers from given interpreters.
+        \paragraph{}%
+            The RPython framework is a toolchain designed to translate interpreters written in RPython into efficient low-level languages, typically C. As illustrated in \figref{fig:rpython-toolchain}, this translation involves several phases, each with its own type system and type inference mechanism. Initially, the RPython program is loaded into a Python runtime environment, and control-flow graphs (CFGs) are generated through abstract interpretation. Next, the annotator infers types and annotates variables at each CFG node, reflecting possible Python object types. Following annotation, the RTyper (RPython typer) lowers annotations and operations into types compatible with the target language, acting as a bridge to code generation. Subsequent optional backend optimizations, such as inlining, malloc removal, and escape analysis, refine the resulting code. Because RPython programs assume automatic memory management, a garbage collector is inserted into the program before final translation into a binary executable~\cite{rpython07,pypy06,pypy08}.
 
-            The RPython framework takes a language interpreter code written in RPython and translates it to a chosen
-            lower-level language, most commonly C. Given an interpreter written in
-            RPython, the toolchain translates it to the target language by
-            lowering it in numerous phases, as can be seen in \figref{fig:rpython-toolchain}, where each phase has its own type
-            system and a generic type inference engine. Because RPython is a
-            subset of Python, the entire process can use a Python run-time (this also means that any Python interpreter can run that code). The
-            general translation process can be described as follows. It starts
-            with loading the RPython program into the run-time and get the function
-            objects in memory as inputs. Using these function objects, the
-            framework generates by abstract interpretation the control flow graphs
-            for these functions that will be processed at further transformation
-            steps. Then the annotator acts as a high-level type inference engine
-            and assigns ``annotations'' to each variable at each flow graph. These
-            annotations basically denotes the possible Python objects a variable
-            might contain at the run-time. After the whole program is annotated,
-            RTyper (RPython typer) takes control and starts lowering the
-            annotations and some operations into the lower types and operations
-            that would make sense to the targeted environment (e.g. structs,
-            pointers, arrays in case of C), acting as a bridge between the
-            high-level annotator and the low-level code generation. After RTyping,
-            some optional backend optimizations are applied, such as inlining,
-            malloc removal and escape analysis. Note that like Python, RPython is
-            garbage collected, however, C is not. Therefore at this point a
-            garbage collector is inserted into the program as well. Finally the
-            typed and lowered flow-graphs are inputted into the code generation
-            and the binary is generated. \cite{rpython07, pypy06, pypy08}
-        \end{paragraph-here}
-
-        \begin{paragraph-here}
-            Enter Pycket, generated by that RPython framework.
-
-            Pycket is first designed in 2014 as a high-performance JIT compiler
-            for Racket, generated using the RPython meta-tracing framework
-            \cite{bolzMetatracingMakesFast2014}. In its original design, as shown in
-            \figref{fig:old-pycket}, Pycket relies on the Racket executable to
-            read and fully expand a given module\cite{samth:11}, and then
-            generates RPython AST for it and evaluates it within the interpreter
-            loop \cite{pycketmain}. The language interpreter is based on the CEK
-            abstract machine and has the state $\langle e, \rho, \kappa \rangle$ ($e$ : control
-            (program AST), $\rho$ : environment, $\kappa$ : continuation)
-            \cite{felleisen87}.
-        \end{paragraph-here}
+        \paragraph{}%
+            Pycket was built using this RPython framework. In its initial design, shown in \figref{fig:old-pycket-workflow-vertical}, Pycket utilized the Racket executable to read and expand modules into fully expanded code, after which Pycket itself converted the expanded code into its own AST representation for execution within its interpreter loop~\cite{samth:11,bolzMetatracingMakesFast2014,pycketmain}. This interpreter is based on the CEK abstract machine, defined by the state triple $\langle e,\rho,\kappa\rangle$ (where $e$ is the AST representing the control, $\rho$ is the environment mapping variables to values, and $\kappa$ is the continuation, capturing the context of the computation)~\cite{felleisen87}.
 
         \inputSub{rpython}{old-pycket-runtime-flow-diagram}
 
-        \begin{paragraph-here}
-            Macros \& Modules
+        \paragraph{}%
+            In its original design, Pycket leverages Racket’s macro expander~\cite{flatt:2002} to preprocess macros, simplifying input programs into a small set of core forms that Pycket's runtime can directly handle~\cite{samth:11}. Initially, this macro expansion is performed externally by invoking the Racket executable, which expands modules and serializes them into JSON-encoded files for Pycket to read, convert into ASTs, and evaluate directly. As we will discuss in detail in \chapterRef{chapter:linklets}, we shift the macro expansion process into Pycket's runtime itself by importing Racket's expander linklet into Pycket's runtime. This shift is the key step that enables Pycket to become a fully self-hosted and independent execution environment for Racket.
 
-            Pycket uses Racket’s macro expander \cite{flatt:2002} to evaluate macros, thereby reducing Racket programs to just a few core forms implemented by the runtime system \cite{samth:11}.
-            To run a Racket program,2 Pycket uses Racket to macro-expand all the modules used in a program and write the resulting forms and metadata as JSON encoded files. Pycket then reads the serialized representation, parses it to an AST, and executes it. Adopting this technique enables Pycket to handle most of the Racket language while focusing on the key research contributions. Because Racket’s static optimizations are performed after macro expansion, Pycket does not benefit from them.
-        \end{paragraph-here}
+        \paragraph{}%
+            Once a module is expanded to core Racket forms, Pycket performs two transformations on its AST. First, it converts the AST into A-normal form (ANF), ensuring that all complex expressions are explicitly named, simplifying subsequent evaluation and optimization~\cite{danvy:93,flanagan:93}. Second, all mutable variables targeted by set! operations are transformed into heap-allocated cells. This approach, common in Lisp-family languages, enables environments to be immutable mappings from variables to values and allows each AST node to carry its static environment explicitly \cite{pycketmain}.
 
-        \begin{paragraph-here}
-            Assignment Conversion and ANF
+        \paragraph{}%
+            Pycket implements approximately 1500 of Racket’s more than 2000 primitive operations and values. These primitives range from numeric computations, including bignums, rationals, and complex numbers, to regular expression handling, and sophisticated input/output abstractions. A substantial portion of Pycket’s implementation consists of these primitives, which are further extended by bootstrapping linklets discussed in \chapterRef{chapter:linklets}.
 
-            Once a module is expanded to core Racket and parsed from the serialized representation, Pycket performs two transformations on the AST. First, the program is converted to A-normal form (ANF), ensuring that all non-trivial expressions are named (\cite{danvy:93,flanagan:93}.
+        \paragraph{}%
+            Pycket implements approximately 1500 of Racket’s more than 2000 primitive operations and values. These primitives range from numeric computations, including bignums, rationals, and complex numbers, to sophisticated input/output abstractions and regular expression handling. Some of these primitive sets, notably input/output and regular expressions, are subsequently replaced by implementations supplied directly from Racket through bootstrapping linklets, as discussed in \chapterRef{chapter:linklets}. This approach allows Pycket to extend its runtime functionality using primitives provided as Racket code by the language itself.
 
-            Next, we convert all mutable variables (those that are the target of set!) into heap-allocated cells. This is a common technique in Lisp systems, and Racket performs it as well. This approach allows environments to be immutable mappings from variables to values. Additionally, each AST node stores its static environment.
-
-        \end{paragraph-here}
-
-        \begin{paragraph-here}
-            Primitives and Values
-
-            Racket comes with over 2,000 primitive functions and values, of which Pycket implements nearly 1500. These range from numeric operations, where Pycket implements the full numeric tower including bignums, rational numbers, and complex numbers, to regular expression matching, to input/output including a port abstraction. As of this writing, more than half of the non-test lines of code in Pycket implement primitive functions. These primitives are extended with the set of primitives we get from the bootstrapping linklets from Racket language, as we'll discuss in \chapterRef{chapter:linklets}.
-        \end{paragraph-here}
-
-        \begin{paragraph-here}
-            hidden classes
-
-            Pycket adapts the technique of hidden classes from prototype-based object systems to develop a novel implementation of proxies, a common mechanism used to enforce soundness in gradual type systems. Our approach not only improves the performance of gradually typed programs, but also other programs that use proxies created by Racket’s contract systems \cite{findler-felleisen:2002, pycketmain2}.
-            Pycket also benefits from type specialization that naturally comes with tracing, as opposed to method-based JITs needing a separate "type-feedback" pass to decide which specializations to generate \cite{typeSpecial:2009}.
-        \end{paragraph-here}
+        \paragraph{}%
+            Additionally, Pycket employs some advanced techniques such as hidden classes, a technique borrowed from prototype-based object systems, to implement proxies efficiently. Proxies, crucial for enforcing soundness in gradual type systems and Racket’s contract systems, benefit significantly from Pycket’s approach, enhancing performance in both gradually typed and contract-heavy programs~\cite{findler-felleisen:2002,pycketmain2}. Moreover, Pycket naturally benefits from type specialization through tracing, eliminating the need for a separate type-feedback pass required by JITs such as method-based JIT compilers~\cite{typeSpecial:2009}.
 
         \begin{figure}[t]
         \centering
@@ -235,34 +167,17 @@
         \label{fig:cek-formal}
         \end{figure}
 
-        \begin{paragraph-here}
+        \paragraph{}%
+            After the user program is fully converted into its final AST form, Pycket evaluates it using the CEK abstract machine, whose semantics are given by the transition rules in Figure~\ref{fig:cek-formal}. A CEK state is represented as $\langle e,\rho,\kappa\rangle$, where $e$ is the expression currently being evaluated (the control), $\rho$ maps variable identifiers to their associated values (the environment), and $\kappa$ holds the computation context (the continuation). The continuation consists of frames that track pending evaluations, which come in two forms: an $\mathsf{arg}(e,\rho)$ frame captures an argument that is awaiting evaluation, and a $\mathsf{fun}(v,\rho)$ frame represents a function that is ready to receive its argument. Evaluating a variable involves simply looking up its value in the environment. Applying a function involves two steps—first evaluating the function itself and then evaluating its argument. The final step applies the evaluated function to its evaluated argument. Importantly, the CEK machine creates no additional continuation frames for tail calls, thus ensuring proper tail-calls \cite{pycketmain}.
 
-            With the user program in its final form, it's ready to be evaluated using the CEK machine.
-            To review, the CEK machine is described by the four transition rules in Figure~\ref{fig:cek-formal}.
-            A CEK state has the form $\langle e,\rho,\kappa\rangle$ where $e$ is the AST for the program (the control), $\rho$ is the environment (a mapping of variables to values), and $\kappa$ is the continuation.
-            A continuation is a sequence of frames and there are two kinds of frames:
-            $\mathsf{arg}(e,\rho)$ represents the argument of a function application that is waiting to be evaluated, and
-            $\mathsf{fun}(v,\rho)$ represents a function that is waiting for its argument.
-            The first transition evaluates a variable by looking it up in the environment.
-            The second and third transitions concern function applications; they reduce the function and argument expressions to values.
-            The fourth transition performs the actual function call.
-            Because no continuations are created when entering a function, tail calls are space efficient.
-        \end{paragraph-here}
+        \paragraph{}%
+            The corresponding RPython code implementing the CEK loop (\figref{fig:pycket-annotated-cek}) on Pycket continuously transforms CEK triples $(\text{ast}, \text{env}, \text{cont})$ into new states by invoking the \texttt{interpret} method on the current AST node. This iterative process proceeds until an empty continuation is encountered, at which point a \texttt{Done} exception is triggered, storing and returning the computation’s final result.
 
-        \begin{paragraph-here}
-            The RPython code in \figref{fig:pycket-annotated-cek} continuously transforms a CEK triple (ast, env, cont) into a new one, by calling the interpret method of the ast, with the current environment env and continuation cont as an argument. This process goes on until the continuation is the empty continuation, in which case a Done exception is raised, which stores the return value.
-        \end{paragraph-here}
+        \paragraph{}%
+            Pycket help the meta-tracer identify loops using two complementary mechanisms: the \emph{two-state tracking} and a dynamic \emph{call-graph} approach. In two-state tracking, Pycket filters out false loops by associating potential loop points with caller-callee pairs, represented by the current and previous AST nodes. Without additional context, the JIT may incorrectly recognize various control-flow points as loops, and the two-state approach effectively reduces such false positives. However, this mechanism alone struggles with complex recursive patterns, such as indirect recursion or proxy-based calls. To complement two-state tracking, Pycket employs a dynamic call-graph technique. This method incrementally constructs a call graph at runtime, with nodes representing invoked functions and edges representing caller-callee relationships. Whenever adding a new edge creates a cycle, Pycket recognizes the target function as a loop header suitable for tracing. The combination of these two approaches ensures robust loop detection and optimized trace generation, particularly in programs with intricate control flows involving recursion and higher-order functions~\cite{pycketmain, pycketmain2}.
 
-
-        \begin{paragraph-here}
-               Pycket identifies loops using two complementary techniques: the two-state representation and a call graph approach. In the two-state representation, Pycket tracks each invocation of a loop or function call site by pairing the current and previous abstract syntax tree (AST) nodes, allowing loops to be recognized even if they start mid-way through the iteration (a "phase shift"). This mechanism treats recursive invocations separately by distinguishing recursive call sites, enabling Pycket to precisely generate specialized traces for each recursive loop site rather than only one generic trace per function. However, when recursive call patterns become more complex (such as indirect recursion or calls via proxies), the simple AST-node-based identification may fail. To address this, Pycket supplements loop detection with a dynamic call graph technique: it incrementally builds a runtime call graph representing invoked functions as nodes and calls as edges. Each edge is checked at runtime to detect cycles, indicating loops, even through proxies or indirect calls. This combined approach effectively identifies loops both at the straightforward AST level and through more complex runtime patterns, ensuring broader coverage of loop detection and generating optimized traces\cite{pycketmain}.
-        \end{paragraph-here}
-
-
-        \begin{paragraph-here}
-            We'll talk about this Pycket's overall performance characteristics in \secref{section:pycket-performance-characteristics}. let's first talk about relevant RPython trace optimizations to provide a context for technical discussions about performance in \chapterRef{chapter:problem}.
-        \end{paragraph-here}
-
+        \paragraph{}%
+            While we will explore Pycket’s performance characteristics further in \secref{section:pycket-performance-characteristics}, we first turn to relevant RPython trace optimizations, which will provide the context necessary for a detailed technical discussion about performance considerations in \chapterRef{chapter:problem}.
 
     \section{Trace Optimizations \& Runtime Feedback}
 
