@@ -60,11 +60,6 @@
     % \end{paragraph-here}
 
     \section[\texorpdfstring{Tracing vs Meta-tracing in JIT Compilation}{Tracing vs Meta-tracing}]{Tracing vs Meta-tracing in JIT Compilation}
-        \begin{mainpoint}
-            The problem that PyPy solves:
-
-            Rather than the loops in the interpreter being evaluated, meta-tracing manages to capture the hot loops in the user program being interpreted.
-        \end{mainpoint}
 
         \paragraph{}%
             When a tracing JIT compiler is applied to a language interpreter, it typically ends up tracing the loops of the interpreter itself—rather than the loops in the user program that the interpreter is executing. To understand why this is a problem, we need to distinguish three roles: the language interpreter (the implementation of the language semantics), the tracing interpreter (or meta-tracer), and the user program (the input being evaluated by the language interpreter). The meta-tracer effectively executes the language interpreter step-by-step, carrying out its operations and observing their effects. Without additional guidance, it has no visibility into the boundaries or semantics of the user-level code being interpreted, and so it naturally captures hot paths in the language interpreter logic rather than in the user program.
@@ -95,7 +90,7 @@
         \paragraph{}%
             Having described Pycket’s use of meta-tracing annotations, we now transition to exploring its internal core architecture. Specifically, we will discuss how its interpreter is built around the CEK abstract machine, a foundational design component that remains constant throughout our study—even as we modify and extend Pycket’s broader architecture during the transition to a self-hosted Racket implementation.
 
-    \section[\texorpdfstring{Pycket: A Rudimentary Racket Interpreter Built on RPython Framework}{Pycket Primer}]{Pycket: A Rudimentary Racket Interpreter Built on RPython Framework}
+    \section[\texorpdfstring{Pycket Primer: A Rudimentary Interpreter Built on RPython Framework}{Pycket Primer}]{Pycket Primer: A Rudimentary Interpreter Built on RPython Framework}
         \label{section:pycket-primer}
 
         \paragraph{}%
@@ -181,35 +176,39 @@
 
     \section{Trace Optimizations \& Runtime Feedback}
 
-    \begin{paragraph-here}
-        Traces are the real performance currency of a tracing JIT compiler.
+        \paragraph{}%
+            Traces are central to the performance characteristics of tracing JIT compilers. Good-quality traces directly influence the efficiency and effectiveness of JIT compilation. Quality here implies that traces capture frequently executed execution paths clearly and succinctly, avoiding excessive guards or unnecessary complexity. For example, traces that are tighter—having fewer exits—maximize the value derived from compiled machine code and facilitate other optimization opportunities, such as allocation removal. In contrast, poor-quality traces, characterized by multiple exit points or redundant control-flow checks, can introduce significant performance penalties, leading to frequent trace invalidations or costly fallbacks to interpreter execution.
 
-        Good trace quality is a thing.
-    \end{paragraph-here}
+        \paragraph{}%
+            An important aspect affecting trace quality and overall JIT performance is warmup time. Warmup refers to the initial period during program execution when the JIT compiler is actively identifying and tracing hot loops. Initially, execution proceeds more slowly due to overheads from trace recording and compilation, as well as running interpreted code. Once the JIT compiler has completed its initial tracing and optimized key loops, execution starts to transition from interpreted paths to increased use of optimized compiled code, achieving a significant speedup. Thus, warmup time is the duration required for this transition, and minimizing it is critical for overall runtime performance.
 
+        \paragraph{}%
+            RPython’s trace optimizer incorporates several classic compiler optimizations tailored specifically for traces, including common sub-expression elimination, constant folding, copy propagation, and dead-code elimination. One inherent advantage of trace-based compilation for optimization purposes is the linear nature of traces. Unlike general control-flow graphs, a trace's straight-line structure simplifies analysis and optimization, typically requiring only forward and backward passes through the trace. This streamlined approach ensures efficient optimization, minimizing compilation overhead while maximizing runtime performance~\cite{loop-aware:12}.
 
-RPython’s trace optimizer includes a suite of standard compiler optimizations, such as commonsubexpression elimination, copy propagation, constant folding, and many others (Ardo l. 2012). One advantage of trace compilation for optimization is that the control-flow graph of a trace is a straight line. Trace optimizations and their supporting analyses can be implemented in two passes over the trace, one forward pass and one backward pass.
+        \paragraph{}%
+            Inlining is a key optimization strategy significantly enhances performance in tracing JIT compilers, such as those provided by RPython. During trace recording, function calls encountered along the traced path are naturally inlined into the trace itself. This includes both high-level language functions and lower-level runtime routines. This aggressive inlining eliminates function call overhead, crosses abstraction level borders, thus significantly simplifies the execution path, and creates additional opportunities for further optimizations, such as constant propagation and automatic dead-code elimination~\cite{gal:2006,pypy-main}.
 
-Inlining Inlining is a vital compiler optimization for high-level languages, both functional and object-oriented. In a tracing JIT compiler such as RPython, inlining comes for free from tracing (Gal et al. 2006). A given trace will include the inlined code from any functions called during tracing. This includes Racket-level functions as well as runtime system functions (Bolz et al. 2009). The highlyaggressive inlining produced by tracing is one of the keys to its successful performance: it eliminates function call overhead and exposes opportunities for other optimizations.
+        \paragraph{}%
+            Loop-invariant code motion is another effective optimization applied by RPython’s trace optimizer. Due to the linear nature of traces, loop-invariant computations are easily identified and relocated outside the loop. RPython accomplishes this by peeling off a single iteration from the loop, performing standard forward analyses, and optimizing the peeled iteration separately from the loop body~\cite{loop-aware:12}. Additionally, allocation removal is particularly relevant to Pycket’s CEK-based interpreter, which involves frequent allocations of state components such as continuations and environments. By analyzing object lifetimes and usages within traces, the optimizer can eliminate many heap allocations, significantly reducing memory pressure and improving runtime performance. We provide an in-depth analysis of memory performance in \sectionRef{section:memory}.
 
-Loop-invariant Code Motion Loop-invariant code motion is implemented in RPython particularly simple way, by peeling off a single iteration of the loop, and then performing its standard suite of forward analyses to optimize the loop further (Ardo 2012).
+        \paragraph{}%
+            Promotion is a specialized trace-optimization technique used by RPython that converts runtime variable values into compile-time constants within traces. This optimization explicitly introduces guards, such as \racketcode{guard(x == 0)}, to assert runtime invariants, thereby enabling the compiler to treat the guarded variables as constants in subsequent instructions within the trace. Although the original source code might not contain explicit constants, promotion allows the optimizer to leverage runtime information, effectively specializing traces for frequently occurring execution contexts. Promotion significantly enhances the trace specialization capability of the optimizer, leading to improved runtime performance through aggressive constant propagation and folding~\cite{bolzPhDThesis}.
 
-Allocation Removal The CEK machine allocates a vast quantity of objects which would appear in the heap without optimization. This ranges from the tuple holding the three components of the machine state, to the environments holding each variable, to the continuations created for each operation.
+        \begin{figure}[!htbp]                    % ordinary floating figure
+            \centering
+            \begin{minipage}{0.3\textwidth}
+            \begin{lstlisting}[style=python-style,gobble=16]
+                @jit.elidable
+                def _is_ascii_elidable(s):
+                    for c in s:
+                        if ord(c) >= 128:
+                            return False
+                    return True
+            \end{lstlisting}
+            \end{minipage}
+            \caption{A trace-elidable function in Pycket.}
+            \label{fig:elidable-function}
+        \end{figure}
 
-        \begin{paragraph-here}
-            warmup is a thing
-        \end{paragraph-here}
-
-        \begin{paragraph-here}
-            introduce and explain promote, give an example from Pycket
-
-            promote, turns arbitrary variables into constants
-        \end{paragraph-here}
-
-        \begin{paragraph-here}
-            talk about escape analysis, and introduce and explain trace-elidable, give an example from pycket
-
-            @elidable, it's like memoization of functions, for traces.
-
-            a function is trace-elidable, if during the execution of the program, successive calls to the function with identical arguments always return the same result.
-        \end{paragraph-here}
+        \paragraph{}%
+            Escape analysis and the notion of trace-elidable functions further enhance trace optimizations in RPython. A function is deemed trace-elidable if successive calls with identical arguments during program execution yields the same result. Naturally, such a function should be free of any side-effects. Annotating such functions with the \texttt{@elidable} decorator allows the optimizer to replace repeated calls with cached results, effectively performing trace-level memoization. \figref{fig:elidable-function} provides an example of such an elidable function in Pycket. By replacing repeated function calls within traces with previously computed results, this optimization substantially reduces runtime overhead, further streamlining trace execution and improving overall performance~\cite{bolzPhDThesis}.
