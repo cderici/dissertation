@@ -24,18 +24,24 @@
 
 			- a language grammar: expressions you can form in that language -- stuff you can express -- the syntax
 
-			- core langauge semantics: what you mean by what you express -- reduction semantcs -- rules that takes you from an expression to a value
+			- core language semantics: what you mean by what you express -- reduction semantics -- rules that takes you from an expression to a value
 
-			- runtime: the machinery that allows you to realize the reduction semantics on a computing environment. You need to be able to read and expand expressions (allow users to make expressions in the langauge), print values (allow users to evaluate expressions and receive values)..
+			- runtime: the machinery that allows you to realize the reduction semantics on a computing environment. You need to be able to read and expand expressions (allow users to make expressions in the language), print values (allow users to evaluate expressions and receive values).
 	\end{paragraph-here}
 
 	\begin{paragraph-here}
 		Portability of a programming language is the ability to re-target different runtimes... Some languages suck at it, some languages are good at re-targeting different VMs...
 
+		I'm not talking about languages having multiple different runtimes. I'm talking about a support at the language syntax or semantic level that allows runtimes to easily adopt and implement the language on itself.
+
 		\begin{todo}[TECH TODO]
 			example languages?
 		\end{todo}
 	\end{paragraph-here}
+
+	\paragraph{}%
+		Other languages whose own syntax / semantics deliberately expose an intermediate form that can be “plugged” into new back‑ends include \textbf{Haskell} (the \gls{ghc} toolchain lowers every module to the typed Core → STG IR; adding the 2010 LLVM back‑end immediately let all existing Haskell code run on any CPU for which LLVM can spit machine code \cite{ghc_llvm_backend}), \textbf{Nim} (its self‑hosting compiler first rewrites Nim to a backend‑neutral tree and then mechanically emits C, C++, Objective‑C, or JavaScript—so porting Nim itself to a fresh architecture usually needs only a functioning C toolchain \cite{nim_porting}), and \textbf{Common Lisp} (implementations such as Clasp keep the macroexpander, reader and most of the runtime written \emph{in} Lisp while swapping only the final code generator—LLVM, JVM byte‑code, or C—thus retargeting the whole language by replacing a single layer \cite{clasp_llvm}).  Like Racket’s linklets, these designs localise platform knowledge in a thin backend, leaving almost all compiler and library code intact when a new platform arrives.
+
 
 	\begin{paragraph-here}
 		More portability is good because
@@ -81,7 +87,7 @@
 
 				- You may have a certain way to read the source of your language, but if you have a language with a macro system and a macro expansion phase, then that way of reading might change, in which case you might need a new regexp implementation as well.
 
-				- You may have a certain way to serialize values/objects of your language into the file system to unmarshall it later back into the memory. Runtime needs to know how.
+				- You may have a certain way to serialize values/objects of your language into the file system to un-marshall it later back into the memory. Runtime needs to know how.
 
 				- Your language may provide its own semantics for green (user level) threads, so runtime has to know how to map them to OS threads.
 		\end{paragraph-here}
@@ -98,34 +104,20 @@
 			One good example for a language that improved its portability this way is Racket, which became more portable as an effort to target Chez Scheme as its primary runtime in 2019. This portability allows us to self-host Racket on Pycket for our thesis.
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			SHOW THE FIGURE with 3 stacks
-
-			\begin{todo}[TECH TODO]
-				latexify that figure
-			\end{todo}
-		\end{figure-here}
+		\inputFigure{linklets}{racket-on-chez-3-stacks-figure}
 
 		\begin{paragraph-here}
-			Racket turned everything on the stack from C to Racket, notably the expander, which implements macro system, module system, read, expand, basically most of the high-level stuff you need for reading and expanding Racket code in any language that Racket macro expander can elaborate.
+			Racket turned everything on the stack from C to Racket, notably the expander, which implements macro system, module system, read, expand, basically most of the high-level stuff you need for reading and expanding Racket code in any language that Racket macro expander can elaborate. \figref{fig:racket-on-chez}
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			SHOW THE LINKET EXPANSION FIGURE
-
-			\begin{todo}[TECH TODO]
-				grab and prep the figure
-			\end{todo}
-
-			Don't forget to cite in caption.
-		\end{figure-here}
+		\inputFigure{linklets}{racket-expand-example-figure}
 
 		\begin{paragraph-here}
-			The Racket macro expander is also made to elaborate given Racket code into a core IR-like language for the hosting compiler, the runtime to consume. As we will discuss in more detail in the next section, the essential forms of this language, acting as units of compilation in the run-time, are called the ”linklets”. This is the key move to improve portability and also make self-hosting possible.
+			The Racket macro expander is also made to elaborate given Racket code into a core IR-like language for the hosting compiler, the runtime to consume. As we will discuss in more detail in the next section, the essential forms of this language, acting as units of compilation in the run-time, are called the "linklets". This is the key move to improve portability and also make self-hosting possible. \figref{fig:racket-expand-example}
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
-			How? Because now, everything a runtime that wants to implement Racket needs to do is to implement how to compile and run serialized linklets that are given by the language, basically to understand this internal language. Once it does that, then Racket as a language applies offline the expander to its facilities to export functionality in the form of linklets, such as IO, threads, etc. Importantly, it also applies the expander to itself to export the Racket macro expander as a single independent linklet, so once compiling and loading it, the runtime has the entire module system, macro system, reader, expander, etc ready to use in its memory, without writing a single line of high-level code about these systems that are strictly about Racket language in high-level. This allows runtime to grab, read and expand any given Racket code into a core Racket langauge that runtime already understands and knows how to evaluate. In other words, this is what enables a runtime to self-host Racket.
+			How? Because now, everything a runtime that wants to implement Racket needs to do is to implement how to compile and run serialized linklets that are given by the language, basically to understand this internal language. Once it does that, then Racket as a language applies offline the expander to its facilities to export functionality in the form of linklets, such as IO, threads, etc. Importantly, it also applies the expander to itself to export the Racket macro expander as a single independent linklet, so once compiling and loading it, the runtime has the entire module system, macro system, reader, expander, etc., ready to use in its memory, without writing a single line of high-level code about these systems that are strictly about Racket language in high-level. This allows runtime to grab, read and expand any given Racket code into a core Racket language that runtime already understands and knows how to evaluate. In other words, this is what enables a runtime to self-host Racket.
 		\end{paragraph-here}
 
 
@@ -139,40 +131,35 @@
 		\end{mainpoint}
 
 		\begin{paragraph-here}
-			In this section, we introduce linklets as a language form, the minimal API for a VM to implement to support linklets, their operational semantics, along with a practical example of how they implement interesting functionality.
+			In this section, we introduce linklets as a language form and provide formal operational semantics, the minimal API for a VM to implement to support linklets, along with a practical example of how they implement an interesting functionality.
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			Linklet grammar (quals doc Fig.1)
-
-			Maybe side by side with an example linklet (see quals Fig.2)
-
-			\begin{todo}[TECH TODO]
-				grab and prep the figure, possibly make a BNF with latex instead of an actual picture.
-			\end{todo}
-		\end{figure-here}
+		\inputFigure{linklets}{linklet-source-language-figure}
 
 		\begin{paragraph-here}
-			The form....A linklet consists of a set of variable definitions and expressions ....... 2nd paragraph in 3.2.1 proposal
+			A \emph{linklet}, as a language form, is a lambda-like binding form that consists of four main components, as can be seen in \figref{fig:linklet-grammar}:
 
-			refer to the figure
+			\begin{itemize}
+				\item A set of imported variables.
+				\item A set of exported variables.
+				\item A body that consists of variable definitions and expressions.
+			\end{itemize}
+
+			Some real-life s-expressions for linklets can be seen in \figref{fig:racket-expand-example}. The set of imported variables brings in variables from other linklets, while the exported make variables available to other linklets. One of the key things that allows linklets to do interesting things is that the set of exported variables can have some variables that have no corresponding definitions in the body. [<-- cliffhanger for next paragraph]
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			Basic instantiation of a linklet (quals Fig 3)
 
-			\begin{todo}[TECH TODO]
-				grab and prep the Fig 3 from quals, possibly make a latex tikz figure for it
-			\end{todo}
-		\end{figure-here}
 
-A linklet consists of a set of variable definitions and expressions, an exported subset of the defined variable names, a set of variables to export from the linklet despite having no corresponding definition, and a set of imports that provide other variables for the linklet to use. Some linklet examples can be seen in Figure 4. To run a linklet, it is instantiated as a linklet instance, which is a container for a set of linklet variables and some other data (e.g. namespace). When a linklet is instantiated, it receives other linklet instances for its imports, and it extracts a specified set of variables that are exported from each of the given instances. The newly created linklet instance provides its exported variables for use by other linklets. Moreover, an instantiation may be given an additional linklet instance as an input, namely the target instance. In this case, the variables in the target instance is used and modified for the linklet definitions and expressions during the evaluation of the body expressions, and the result is the value of the last expression in the linklet (instead of an instance). In the remainder of this document we will use the names “targeted instantiation” and “regular instantiation” for these two modes.
+		To run a linklet, it is instantiated as a linklet instance, which is a container for a set of linklet variables and some other data (e.g. namespace). When a linklet is instantiated, it receives other linklet instances for its imports, and it extracts a specified set of variables that are exported from each of the given instances. The newly created linklet instance provides its exported variables for use by other linklets. Moreover, an instantiation may be given an additional linklet instance as an input, namely the target instance. In this case, the variables in the target instance is used and modified for the linklet definitions and expressions during the evaluation of the body expressions, and the result is the value of the last expression in the linklet (instead of an instance). In the remainder of this document we will use the names “targeted instantiation” and “regular instantiation” for these two modes. \figref{fig:basic-linklet-instantiation}
 
+
+		\inputFigure{linklets}{basic-linklet-instantiation-figure}
 
 		\begin{paragraph-here}
 			What do you do with it? Basic instantiation semantics.. figure 3 from quals.
 		\end{paragraph-here}
 
+		\subsection{Operational Example: A Small Top-level REPL Interaction}
 
 		\begin{paragraph-here}
 			Before we jump in to the operational semantics, let's go over an example to see how they work internally to implement a top-level repl.
@@ -212,7 +199,7 @@ A linklet consists of a set of variable definitions and expressions, an exported
 
 
 		\begin{paragraph-here}
-			The important point about the top-level part in this example is the handling of the undefined identifier ”a”. When the expander generates a linklet containing an unidentified identifier, it puts the identifier among the exported variables of the linklet (despite having no corresponding definition for it), allowing it to be handled via the linklet variables. During the compilation of the linklet on the VM, a new linklet variable is created for it with the special value uninitialized, and when the binding for the identifier is needed, it will be dynamically provided using the target instance (in this case using the top-level instance), essentially forming a low-level dynamic scope. Note that we have the variable mappings for both ”a” and the ”k” within the target instance after the instantiation, containing the values uninitialized and a closure with no arguments and body with a reference to vara respectively.
+			The important point about the top-level part in this example is the handling of the undefined identifier ”a”. When the expander generates a linklet containing an unidentified identifier, it puts the identifier among the exported variables of the linklet (despite having no corresponding definition for it), allowing it to be handled via the linklet variables. During the compilation of the linklet on the VM, a new linklet variable is created for it with the special value un-initialized, and when the binding for the identifier is needed, it will be dynamically provided using the target instance (in this case using the top-level instance), essentially forming a low-level dynamic scope. Note that we have the variable mappings for both ”a” and the ”k” within the target instance after the instantiation, containing the values un-initialized and a closure with no arguments and body with a reference to vara respectively.
 		\end{paragraph-here}
 
 
@@ -236,36 +223,6 @@ A linklet consists of a set of variable definitions and expressions, an exported
 				In this section I present a formalism to briefly describe the operational semantics of linklets, which is the basis of the implementation on Pycket. The formalism is developed in the PLT Redex language, therefore it is executable [25]. Randomized testing is used to verify the model [35], and a parallel test suite is used to verify the Pycket implementation and the model with each other
 			\end{paragraph-here}
 
-			\begin{figure-here}
-
-				\begin{todo}[TECH TODO]
-					Linklet source language
-				\end{todo}
-
-				% \begin{wrapfigure}[14]{r}{0.45\textwidth}
-				% \vspace{-0.7cm}
-				% \footnotesize
-				% %\begin{figure}[h!]
-				% \begin{mdframed}
-				% 	\begin{align*}
-				% 	L  &::= (\textbf{linklet}\:((imp\: \ldots)\: \ldots)\:(exp\: \ldots)\:l\dash top\:\ldots\:e)\\
-				% 	l\dash top &::= (\textbf{define\dash values}\:(x)\:e)\:|\:e \\
-				% 	imp &::= x\:|\:(x x) \tag*{[external internal]}\\
-				% 	exp &::= x\:|\:(x x) \tag*{[internal external]} \\
-				% 	e &::=\; x\; |\; v\; |\; (e\; e\; \ldots)\; |\; (\textbf{if}\; e\; e\; e)\; |\; (o\; e\; e)\; \\
-				% 	\; &|\; (\textbf{begin}\; e\; e\; \ldots)\; |\; (\textbf{lambda}\; (x_{\_!\_}\; \ldots)\; e)\\
-				% 	\; &|\; (\textbf{set!}\; x\; e)\; |\; (\textbf{raises}\; e)\\
-				% 	\; &|\; (\textbf{var\dash ref}\; x)\; |\; (\textbf{var\dash ref/no\dash check}\; x) \\
-				% 	\; &|\; (\textbf{var\dash set!}\; x\; e)  \\
-				% 	\; &|\; (\textbf{var\dash set/check\dash undef!}\; x\; e)
-				% 	\end{align*}
-				% \caption[hede]{Linklet Source Language \footnotemark}
-				% \label{fig:linklet-source}
-				% \end{mdframed}
-				% %\end{figure}
-				% \end{wrapfigure}
-
-			\end{figure-here}
 
 			\begin{paragraph-here}
 				Figure \ref{fig:linklet-source} shows the grammar of the linklet

@@ -1,0 +1,82 @@
+% % --- in any .tex file that already loads TikZ -------------------------------
+% \definecolor{racketclr}  {gray}{0.92}  % Racket
+% \definecolor{schemeclr}  {gray}{0.78}  % Scheme
+% \definecolor{cclr}       {gray}{0.55}  % C
+
+% \begin{figure}[!htbp]
+%   \centering
+%   \begin{tikzpicture}[x=1cm,y=1cm]
+
+%     % helper macro ----------------------------------------------------------------
+%     \newcommand{\drawbar}[4]{%
+%       \begin{scope}[shift={(#1,0)}]
+%         \def\w{#2}\def\cum{0}%
+%         \foreach \clr/\lab/\h in {#3}{%
+%           \fill[\clr,draw=black] (0,\cum) rectangle (\w,\cum+\h);
+%           \node[font=\small] at (\w/2,\cum+0.5*\h) {\lab};
+%           \pgfmathsetmacro\cum{\cum+\h}%
+%         }
+%         \node[font=\scriptsize,above] at (\w/2,\cum) {#4};
+%       \end{scope}}
+%     %---------------------------------------------------------------------------
+
+%     % bar 1: Racket v7
+%     \drawbar{0}{2.2}{
+%       racketclr/Racket expander/1.50,
+%       schemeclr/regexp/0.30,
+%       schemeclr/I\slash O/0.75,
+%       cclr/rktio/0.70,
+%       schemeclr/threads/0.75,
+%       schemeclr/control+structs/0.55,
+%       schemeclr/builtins/5.20,
+%       schemeclr/bytecode+JIT compiler/1.15,
+%       schemeclr/gc/0.55}{231k}
+%     \node[font=\bfseries] at (1.1,-0.6) {Racket v7};
+
+%     % bar 2: Chez Scheme
+%     \drawbar{4}{2.2}{
+%       schemeclr/Scheme expander/0.40,
+%       schemeclr/builtins/2.95,
+%       schemeclr/machine-code compiler/1.50,
+%       schemeclr/kernel/0.80,
+%       schemeclr/gc/0.10}{115k}
+%     \node[font=\bfseries] at (5.1,-0.6) {Chez Scheme};
+
+%     % bar 3: Racket-on-Chez Scheme
+%     \drawbar{8}{2.2}{
+%       racketclr/main/0.05,
+%       racketclr/Racket expander/1.50,
+%       racketclr/linklet/0.10,
+%       racketclr/schemify/0.20,
+%       schemeclr/I\slash O/0.80,
+%       cclr/rktio/0.70,
+%       schemeclr/threads/0.35,
+%       schemeclr/control+structs+\ldots/0.75,
+%       schemeclr/Scheme expander/0.40,
+%       schemeclr/builtins/2.95,
+%       schemeclr/machine-code compiler/1.50,
+%       schemeclr/kernel/0.80,
+%       schemeclr/gc/0.10}{208k}
+%     \node[font=\bfseries] at (9.1,-0.6) {Racket on Chez Scheme};
+
+%     % legend --------------------------------------------------------------------
+%     \begin{scope}[shift={(13,3)}]
+%       \draw[black,fill=racketclr] (0,0) rectangle (0.4,0.4);
+%       \node[right] at (0.5,0.2) {Racket};
+%       \draw[black,fill=schemeclr] (0,-0.7) rectangle (0.4,-0.3);
+%       \node[right] at (0.5,-0.5) {Scheme};
+%       \draw[black,fill=cclr] (0,-1.4) rectangle (0.4,-1.0);
+%       \node[right] at (0.5,-1.2) {C};
+%     \end{scope}
+
+%   \end{tikzpicture}
+%   \caption{Component sizes of three Racket implementations (dummy caption).}
+%   \label{fig:racket-stacks}
+% \end{figure}
+
+\begin{figure}[!htbp]                    % ordinary floating figure
+    \centering
+    \includegraphics[width=0.6\linewidth]{\inputFigPath{linklets}{racket-portable.png}}
+    \caption{Comparison of Racket implementations. Figure used from \cite{icfp2019} [PLACEHOLDER]}
+    \label{fig:racket-on-chez}
+\end{figure}
