@@ -15,62 +15,31 @@
                 Motivation for linklets. Making programming languages more portable is good.
 			\item Linklets as Units of Compilation
 
-                Semantics for linklets. Linklets are good tools to improve communication between the compiler and runtime.
+                Operational semantics for linklets, both formalism and PLT Redex model.
+
+				Linklets are good tools to improve communication between the compiler and runtime.
 		\end{itemize}
     \end{chaptersynopsis}
 
-	\begin{paragraph-here}
-		The general anatomy of a practical, real programming language, has:
-
-			- a language grammar: expressions you can form in that language -- stuff you can express -- the syntax
-
-			- core language semantics: what you mean by what you express -- reduction semantics -- rules that takes you from an expression to a value
-
-			- runtime: the machinery that allows you to realize the reduction semantics on a computing environment. You need to be able to read and expand expressions (allow users to make expressions in the language), print values (allow users to evaluate expressions and receive values).
-	\end{paragraph-here}
-
-	\begin{paragraph-here}
-		Portability of a programming language is the ability to re-target different runtimes... Some languages suck at it, some languages are good at re-targeting different VMs...
-
-		I'm not talking about languages having multiple different runtimes. I'm talking about a support at the language syntax or semantic level that allows runtimes to easily adopt and implement the language on itself.
-
-		\begin{todo}[TECH TODO]
-			example languages?
-		\end{todo}
-	\end{paragraph-here}
+	\paragraph{}%
+  		A practical programming language typically consists of three essential components: first, a \emph{language grammar} defining the syntax—expressions that can be formed; second, \emph{core language semantics}, which determine the meaning of these expressions, typically via reduction rules mapping expressions to values; and third, a \emph{runtime} responsible for realizing these semantics on a computing environment. The runtime provides mechanisms to read and expand user expressions, evaluate them, and produce values, effectively bridging the gap between abstract language semantics and concrete execution.
 
 	\paragraph{}%
-		Other languages whose own syntax / semantics deliberately expose an intermediate form that can be “plugged” into new back‑ends include \textbf{Haskell} (the \gls{ghc} toolchain lowers every module to the typed Core → STG IR; adding the 2010 LLVM back‑end immediately let all existing Haskell code run on any CPU for which LLVM can spit machine code \cite{ghc_llvm_backend}), \textbf{Nim} (its self‑hosting compiler first rewrites Nim to a backend‑neutral tree and then mechanically emits C, C++, Objective‑C, or JavaScript—so porting Nim itself to a fresh architecture usually needs only a functioning C toolchain \cite{nim_porting}), and \textbf{Common Lisp} (implementations such as Clasp keep the macroexpander, reader and most of the runtime written \emph{in} Lisp while swapping only the final code generator—LLVM, JVM byte‑code, or C—thus retargeting the whole language by replacing a single layer \cite{clasp_llvm}).  Like Racket’s linklets, these designs localise platform knowledge in a thin backend, leaving almost all compiler and library code intact when a new platform arrives.
+  		The \emph{portability} of a programming language refers to its ability to be adapted to run on different runtimes or virtual machines. This notion is distinct from having multiple independent implementations of a language. Rather, portability implies deliberate support at the language's syntax or semantic level, enabling runtimes to more easily adopt the language's core implementation. Languages that explicitly expose an intermediate form or semantics conducive to plugging into different backend runtimes exemplify this approach. Notable examples include Haskell, whose \gls{ghc} toolchain reduces every module to an intermediate typed Core IR, facilitating easy backend integration such as LLVM~\cite{ghc_llvm_backend}; and Common Lisp, particularly implementations like Clasp, which retain high-level runtime elements (macro expander, reader) in Lisp while swapping only the code generator~\cite{clasp_llvm}. Such designs demonstrate how exposing an intermediate representation at the language level significantly simplifies retargeting efforts, reducing engineering overhead.
 
 
-	\begin{paragraph-here}
-		More portability is good because
+	\paragraph{Future-proofing and platform agility}%
+		When language semantics are lowered to a portable, implementation-independent \gls{ir}, targeting new \glspl{vm} typically involves writing a minimal backend rather than a complete compiler. For instance, the \gls{ghc} gained support for ARM, PowerPC, and WebAssembly virtually \smartQL for free\smartQR upon integrating LLVM~\cite{ghc_llvm_backend}. Reducing engineering costs per new target ensures the language remains viable across evolving hardware ecosystems, preserving the investments made by implementers and users.
 
-		\begin{todo}[TECH TODO]
-			find motivation for portability
-		\end{todo}
-	\end{paragraph-here}
+	\paragraph{Tooling \& ecosystem leverage}%
+		A standardized, information-rich IR allows external tools—such as optimizers, verifiers, and profilers—to uniformly support all eventual backends. Compiler research demonstrates that most optimization efforts naturally gravitate toward the IR layer because benefits propagate globally~\cite{ir_cacm}. Recent advances, such as the SMACK verifier, illustrate that languages emitting LLVM \gls{ir} immediately gain powerful, cross-language verification capabilities without rewriting analysis tools for each source language~\cite{llvm_verification}. Hence, language-level portability not only expands the range of deployment targets but also enhances the reuse potential of infrastructure and tooling around the language.
 
-	\begin{paragraph-here}
-		Another good thing about improved portability is ....
+	\paragraph{}%
+  		Improving language portability fundamentally relies on enhancing semantic communication between the language's core semantics and its runtime. Clear, explicit interfaces or intermediate representations are required for languages to effectively instruct runtimes on realizing their semantics, rather than each runtime manually handling tight couplings such as macro expansion, serialization, or user-level threading models.
 
-		\begin{todo}[TECH TODO]
-			find motivation for portability
-		\end{todo}
-	\end{paragraph-here}
+	\paragraph{}%
+		In this chapter, we examine improvements to language portability, using Racket's linklets as a concrete example. We introduce a formal specification along with an executable PLT Redex model to describe the operational semantics of linklets. This formalism forms the basis for understanding how self-hosting is achieved in the meta-tracing JIT-compiled Pycket implementation described in \chapterRef{chapter:pycket}, supporting the main thesis statement.
 
-	\begin{paragraph-here}
-		Improving portability of a language requires improving the semantic communication between the language's core semantics and its runtime.
-	\end{paragraph-here}
-
-	\begin{paragraph-here}
-		 In this chapter, we'll first study as an example how Racket achieved improved portability, and then introduce the key construct (linklet) that allows it to self-host on its runtime, which is exactly what allows us to self-host it on Pycket to prove our thesis.
-	\end{paragraph-here}
-
-% This is not only about Racket, the CPython is written in C. Python developers don't want to write C, they
-	% want to write Python....
-
-	% ICFP'19 experience report
 
 	\section[\texorpdfstring{Enriching Compiler \& Runtime Communication}{Motivation for Linklets}]{Enriching Compiler \& Runtime Communication}
 
@@ -147,6 +116,8 @@
 
 			Some real-life s-expressions for linklets can be seen in \figref{fig:racket-expand-example}. The set of imported variables brings in variables from other linklets, while the exported make variables available to other linklets. One of the key things that allows linklets to do interesting things is that the set of exported variables can have some variables that have no corresponding definitions in the body. [<-- cliffhanger for next paragraph]
 		\end{paragraph-here}
+
+		Instead of consuming and producing values like a regular lambda form, linklets consume and produce variables that are potentially mutable.
 
 		\begin{paragraph-here}
 			Linklets as s-expressions by themselves are as much interesting as an s-expression for a \racketcode{lambda} form. But when \emph{compiled} by a hosting runtime into a linklet object, a linklet becomes ready for \emph{instantiation}. Instantiating a linklet is essentially very similar to a function application with some extra bookkeeping regarding the imported and exported variables, eventually running the expressions within the body.

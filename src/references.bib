@@ -26,6 +26,21 @@
   file = {C:\Users\caner\Zotero\storage\57J8CJLC\Bolz - Meta-Tracing Just-in-Time Compilation for RPython.pdf}
 }
 
+@inproceedings{clasp_llvm,
+  title = {Clasp {{Common Lisp Implementation}} and {{Optimization}}},
+  booktitle = {Proceedings of the 11th {{European Lisp Symposium}} on {{European Lisp Symposium}}},
+  author = {Schafmeister, Christian A. and Wood, Alex},
+  year = {2018},
+  month = apr,
+  series = {{{ELS2018}}},
+  pages = {59--64},
+  publisher = {European Lisp Scientific Activities Association},
+  address = {Marbella, Spain},
+  urldate = {2025-06-26},
+  abstract = {We describe implementation strategies and updates made in the last two years to clasp,[1, 2] a new Common Lisp implementation that interoperates with C++, uses the cleavir compiler, and uses the LLVM backend[4]. Improvements in clasp have been made in many areas. The most important changes are: (1) Tagged pointers and immediate values have been incorporated. (2) A fast generic function dispatch approach has been implemented that allows clasp to carry out generic function dispatch as fast as SBCL, a highly optimized free implementation of Common Lisp. The generic function dispatch memoization approach was developed by Robert Strandh[8] and demonstrates a 20x improvement in performance of generic function dispatch. (3) The new LLVM feature ``Thin Link Time Optimization'' has been added, which speeds up generated code by removing call overhead throughout the system. (4) Type inference has been added to the cleavir compiler, which is part of clasp. Type inference removes redundant run-time type checks and dead code paths. Type inference currently provides about a 30\% speedup in microbenchmarks.[9] (5) Constants and literals have been moved close to the code and ``instruction pointer addressing'' has been incorporated to speed access to literals and constants. (6) Pre-emptive multithreading has been added to clasp, based on pthreads, supporting the Bordeaux threads library. (7) The overall build time for clasp has been reduced from five to eight hours over two years ago to approximately one hour at present.},
+  isbn = {978-2-9557474-2-1}
+}
+
 @inproceedings{danvy:93,
   title = {Separating Stages in the Continuation-Passing Style Transformation},
   booktitle = {Proceedings of the 20th {{ACM SIGPLAN-SIGACT}} Symposium on {{Principles}} of Programming Languages},
@@ -127,6 +142,22 @@
   file = {C:\Users\caner\Zotero\storage\I8RVLKRY\213877755_Incremental_Dynamic_Code_Generation_with_Trace_Trees.html}
 }
 
+@article{ghc_llvm_backend,
+  title = {An {{llVM}} Backend for {{GHC}}},
+  author = {Terei, David A. and Chakravarty, Manuel M.T.},
+  year = {2010},
+  month = sep,
+  journal = {SIGPLAN Not.},
+  volume = {45},
+  number = {11},
+  pages = {109--120},
+  issn = {0362-1340},
+  doi = {10.1145/2088456.1863538},
+  urldate = {2025-06-26},
+  abstract = {In the presence of ever-changing computer architectures, high-quality optimising compiler backends are moving targets that require specialist knowledge and sophisticated algorithms. In this paper, we explore a new backend for the Glasgow Haskell Compiler (GHC) that leverages the Low Level Virtual Machine (LLVM), a new breed of compiler written explicitly for use by other compiler writers, not high-level programmers, that promises to enable outsourcing of low-level and architecture-dependent aspects of code generation. We discuss the conceptual challenges and our backend design. We also provide an extensive quantitative evaluation of the performance of the backend and of the code it produces.},
+  file = {C:\Users\caner\Zotero\storage\VRKITGY6\Terei and Chakravarty - 2010 - An llVM backend for GHC.pdf}
+}
+
 @article{hayashizakiImprovingPerformanceTracebased2011,
   title = {Improving the Performance of Trace-Based Systems by False Loop Filtering},
   author = {Hayashizaki, Hiroshige and Wu, Peng and Inoue, Hiroshi and Serrano, Mauricio J. and Nakatani, Toshio},
@@ -179,6 +210,22 @@
   file = {C:\Users\caner\Zotero\storage\76JHJJYP\Flatt et al. - 2019 - Rebuilding Racket on Chez Scheme (Experience Repor.pdf}
 }
 
+@article{ir_cacm,
+  title = {Intermediate Representation},
+  author = {Chow, Fred},
+  year = {2013},
+  month = dec,
+  journal = {Commun. ACM},
+  volume = {56},
+  number = {12},
+  pages = {57--62},
+  issn = {0001-0782},
+  doi = {10.1145/2534706.2534720},
+  urldate = {2025-06-26},
+  abstract = {The increasing significance of intermediate representations in compilers.},
+  file = {C:\Users\caner\Zotero\storage\FMNRNXNJ\Chow - 2013 - Intermediate representation.pdf}
+}
+
 @inproceedings{izawaAmalgamatingDifferentJIT2020b,
   title = {Amalgamating Different {{JIT}} Compilations in a Meta-Tracing {{JIT}} Compiler Framework},
   booktitle = {Proceedings of the 16th {{ACM SIGPLAN International Symposium}} on {{Dynamic Languages}}},
@@ -227,6 +274,21 @@
   abstract = {Software systems have been using "just-in-time" compilation (JIT) techniques since the 1960s. Broadly, JIT compilation includes any translation performed dynamically, after a program has started execution. We examine the motivation behind JIT compilation and constraints imposed on JIT compilation systems, and present a classification scheme for such systems. This classification emerges as we survey forty years of JIT work, from 1960--2000.},
   keywords = {dynamic compilation,Just-in-time compilation},
   file = {C:\Users\caner\Zotero\storage\48RY7S5V\Aycock - 2003 - A Brief History of Just-in-time.pdf}
+}
+
+@inproceedings{llvm_verification,
+  title = {Leveraging {{Compiler Intermediate Representation}} for {{Multi-}} and {{Cross-Language Verification}}},
+  booktitle = {Verification, {{Model Checking}}, and {{Abstract Interpretation}}: 21st {{International Conference}}, {{VMCAI}} 2020, {{New Orleans}}, {{LA}}, {{USA}}, {{January}} 16--21, 2020, {{Proceedings}}},
+  author = {Garzella, Jack J. and Baranowski, Marek and He, Shaobo and Rakamari{\'c}, Zvonimir},
+  year = {2020},
+  month = jan,
+  pages = {90--111},
+  publisher = {Springer-Verlag},
+  address = {Berlin, Heidelberg},
+  doi = {10.1007/978-3-030-39322-9_5},
+  urldate = {2025-06-26},
+  abstract = {Developers nowadays regularly use numerous programming languages with different characteristics and trade-offs. Unfortunately, implementing a software verifier for a new language from scratch is a large and tedious undertaking, requiring expert knowledge in multiple domains, such as compilers, verification, and constraint solving. Hence, only a tiny fraction of the used languages has readily available software verifiers to aid in the development of correct programs. In the past decade, there has been a trend of leveraging popular compiler intermediate representations (IRs), such as LLVM IR, when implementing software verifiers. Processing IR promises out-of-the-box multi- and cross-language verification since, at least in theory, a verifier ought to be able to handle a program in any programming language (and their combination) that can be compiled into the IR. In practice though, to the best of our knowledge, nobody has explored the feasibility and ease of such integration of new languages. In this paper, we provide a procedure for adding support for a new language into an IR-based verification toolflow. Using our procedure, we extend the SMACK verifier with prototypical support for 6 additional languages. We assess the quality of our extensions through several case studies, and we describe our experience in detail to guide future efforts in this area.},
+  isbn = {978-3-030-39321-2}
 }
 
 @inproceedings{loop-aware:12,
