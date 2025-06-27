@@ -96,21 +96,33 @@
 				\item A body that consists of variable definitions and expressions.
 			\end{itemize}
 
-			Some real-life s-expressions for linklets can be seen in \figref{fig:racket-expand-example}. The set of imported variables brings in variables from other linklets, while the exported make variables available to other linklets. One of the key things that allows linklets to do interesting things is that the set of exported variables can have some variables that have no corresponding definitions in the body. [<-- cliffhanger for next paragraph]
+			Some real-life s-expressions for linklets can be seen in \figref{fig:racket-expand-example}. The set of imported variables brings in variables from other linklets, while the exported ones are made available for linklets to use. One of the key things that allows linklets to do interesting things is that the set of exports can have some variables that have no corresponding definitions in the body. [<-- cliffhanger for next paragraph]
 		\end{paragraph-here}
 
-		Instead of consuming and producing values like a regular lambda form, linklets consume and produce variables that are potentially mutable.
+		\begin{paragraph-here}
+			Linklets as s-expressions by themselves are as much interesting as an s-expression for a \racketcode{lambda} form. But when \emph{compiled} by a hosting runtime into a linklet object, a linklet becomes ready for \emph{instantiation}. Instantiating a linklet as a \emph{linklet instance} is essentially very similar to a function application where the linklet is provided with the imported variables and starts sequentially running the expressions within its body. The result of an instantiation depends on the mode of the instantiation, which we will refer as the \emph{regular instantiation}, and the \emph{targeted instantiation}.
+		\end{paragraph-here}
 
 		\begin{paragraph-here}
-			Linklets as s-expressions by themselves are as much interesting as an s-expression for a \racketcode{lambda} form. But when \emph{compiled} by a hosting runtime into a linklet object, a linklet becomes ready for \emph{instantiation}. Instantiating a linklet is essentially very similar to a function application with some extra bookkeeping regarding the imported and exported variables, eventually running the expressions within the body.
+			Regular instantiation is where a linklet is given some linklet instances for its imported variables and evaluates the expressions within its body. The result of a regular instantiation is a linklet instance, which is container for a mapping of the exported variables to values, along with some other data (e.g. namespace).
+		\end{paragraph-here}
 
+		\begin{paragraph-here}
+			A targeted instantiation on the other hand is where a linklet is given a \emph{target} instance along with some other linklet instances for its imported variables. This kind of instantiation is often used for side-effects, and the result is the value of the last expression in the linklet (instead of a fresh linklet instance).
+		\end{paragraph-here}
+
+
+
+
+		\begin{paragraph-here}
+			When instantiated, a linklet
 
 			The purpose of a linklet instantiation is to produce a \emph{linklet instance}, which is a mapping of variables to values, plus some additional data.
 
 			What do you do with it? Basic instantiation semantics.. figure 3 from quals.
 		\end{paragraph-here}
 
-		To run a linklet, it is instantiated as a linklet instance, which is a container for a set of linklet variables and some other data (e.g. namespace). When a linklet is instantiated, it receives other linklet instances for its imports, and it extracts a specified set of variables that are exported from each of the given instances. The newly created linklet instance provides its exported variables for use by other linklets. Moreover, an instantiation may be given an additional linklet instance as an input, namely the target instance. In this case, the variables in the target instance is used and modified for the linklet definitions and expressions during the evaluation of the body expressions, and the result is the value of the last expression in the linklet (instead of an instance). In the remainder of this document we will use the names “targeted instantiation” and “regular instantiation” for these two modes. \figref{fig:basic-linklet-instantiation}
+		To run a linklet, it is instantiated as a linklet instance, which is a . When a linklet is instantiated, it receives other linklet instances for its imports, and it extracts a specified set of variables that are exported from each of the given instances. The newly created linklet instance provides its exported variables for use by other linklets. Moreover, an instantiation may be given an additional linklet instance as an input, namely the target instance. In this case, the variables in the target instance is used and modified for the linklet definitions and expressions during the evaluation of the body expressions, and the result is the value of the last expression in the linklet (instead of an instance). In the remainder of this document we will use the names “targeted instantiation” and “regular instantiation” for these two modes. \figref{fig:basic-linklet-instantiation}
 
 
 		\inputFigure{linklets}{basic-linklet-instantiation-figure}
