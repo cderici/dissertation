@@ -106,43 +106,30 @@
 		\inputFigure{linklets}{basic-linklet-instantiation-figure}
 
 		\begin{paragraph-here}
-			Regular instantiation is where a linklet is given some linklet instances for its imported variables and evaluates the expressions within its body. As illustrated in \figref{fig:basic-linklet-instantiation}, the result of a regular instantiation is a linklet instance, which is container for a mapping of the exported variables to values, along with some other data (e.g. namespace).
+			Regular instantiation is where a linklet is given some linklet instances for its imported variables and evaluates the expressions within its body. As illustrated in \figref{fig:regular-linklet-instantiation}, the result of a regular instantiation is a linklet instance, which is container for a mapping of the exported variables to values, along with some other data (e.g. namespace).
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
-			A targeted instantiation on the other hand is where a linklet is given a \emph{target} instance along with some other linklet instances for its imported variables. This kind of instantiation is often used for side-effects, and the result is the value of the last expression in the linklet (instead of a fresh linklet instance).
+			A targeted instantiation on the other hand is where a linklet is given a \emph{target} instance along with some other linklet instances for its imported variables. In this case, the variables in the target instance is used and modified for the linklet definitions and expressions during the evaluation of the body expressions. This kind of instantiation is often used for side-effects, and the result is the value of the last expression in the linklet (instead of a fresh linklet instance).
 		\end{paragraph-here}
-
-
-
 
 		\begin{paragraph-here}
-			When instantiated, a linklet
-
-			The purpose of a linklet instantiation is to produce a \emph{linklet instance}, which is a mapping of variables to values, plus some additional data.
-
-			What do you do with it? Basic instantiation semantics.. figure 3 from quals.
+			The design of linklets do not enforce a particular representation. In other words, a \gls{vm} is free to choose its own representations for linklets and linklet instances. For example, Chez Scheme represents linklets as Scheme functions, while Pycket creates its own runtime class, namely \pycketcode{W_Linklet} to represent a compiled linklet object.
+			The minimal API for a Racket \gls{vm} to implement linklets consists of the functions i) \racketcode{compile-linklet} for preparing a linklet for instantiation and ii) \racketcode{instantiate-linklet} for instantiating a compiled linklet.
 		\end{paragraph-here}
 
-		To run a linklet, it is instantiated as a linklet instance, which is a . When a linklet is instantiated, it receives other linklet instances for its imports, and it extracts a specified set of variables that are exported from each of the given instances. The newly created linklet instance provides its exported variables for use by other linklets. Moreover, an instantiation may be given an additional linklet instance as an input, namely the target instance. In this case, the variables in the target instance is used and modified for the linklet definitions and expressions during the evaluation of the body expressions, and the result is the value of the last expression in the linklet (instead of an instance). In the remainder of this document we will use the names “targeted instantiation” and “regular instantiation” for these two modes. \figref{fig:basic-linklet-instantiation}
-
-
-
-
-
+		\begin{paragraph-here}
+			Loading a linklet into a \gls{vm}'s runtime means compiling, instantiating, and then grabbing the exported variables of a given linklet. In particular, \racketcode{compile-linklet} takes an s-expression for a linklet as input and produce a linklet object in a representation of \gls{vm}'s choice, containing the run-time AST for the code inside the linklet. After instantiation of the linklet, all the variables that the linklet exports are available to the runtime via the resulting linklet instance for other linklets to import. These variables can hold any Racket value, including a closure that the runtime can call, such as the \racketcode{expand} function after loading the expander linklet at boot.  [<---- cliffhanger for more content]
+		\end{paragraph-here}
 
 		\subsection{Operational Example: A Small Top-level REPL Interaction}
 
 		\begin{paragraph-here}
-			Before we jump in to the operational semantics, let's go over an example to see how they work internally to implement a top-level repl.
-
-			Let’s take a look at how a VM that implements linklets can easily implement functionalities such as the Racket top-level repl3 by loading the expander linklet into its run-time. Note that the top-level itself is quite complicated and beyond the scope of our study. The example here aims to provide a general overview of the interaction between the run-time and the functionalities provided by the language through the linklets, for this exercise in particular the expander linklet. Recall that the expander implements functions such as read, expand, eval, and outputs a bundle of linklets for a given Racket code. Let’s first briefly describe what linklets are and how linklets operate. In Section 3.2.2 I will provide linklets’ operational semantics with a formalism in more detail.
+			Let’s take a look at how a \gls{vm} that implements linklets can easily implement high-level Racket functionalities such as the Racket top-level \gls{repl} by loading the expander linklet into its run-time. Note that the top-level itself is quite complicated and beyond the scope of our study. The example here aims to provide a general overview of the interaction between the run-time and the functionalities provided by the language through the linklets, for this exercise in particular the expander linklet. Recall that the expander implements functions such as read, expand, eval, and outputs a bundle of linklets for a given Racket code.
 		\end{paragraph-here}
 
 
-		\begin{paragraph-here}
-			The minimal API for a virtual machine to implement the linklets consists of the functions i) compile-linklet for preparing a linklet for instantiation and ii) instantiate-linklet for running a compiled linklet. In particular, the VM uses the compile-linklet to take an s-expression for a linklet as input and produce a linklet object in a representation of its choice, containing the run-time AST for the codes inside the linklet. Therefore, loading a linklet into its run-time for a VM means that the functions provided by the linklet are callable during the run-time. For example after loading the expander linklet, a VM can call the functions from Racket’s expander such as read, expand, eval to use Racket’s module system, macro system etc.
-		\end{paragraph-here}
+
 
 		\begin{figure-here}
 			Top-level example interaction
