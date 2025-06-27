@@ -4,6 +4,8 @@ all:  thesis
 
 thesis: $(TEXFILES) references.bib
 	latexmk -pdf thesis.tex
+	makeglossaries thesis
+	latexmk -pdf thesis.tex
 
 tidy:
 	$(RM) *.log *.aux \

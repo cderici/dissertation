@@ -17,9 +17,13 @@
 \usepackage[most]{tcolorbox} %for my todo boxes
 \usepackage{bm}
 
+\usepackage{array}
 % For abbreviations
-\usepackage[acronym,toc,nonumberlist]{glossaries}
+\usepackage[nopostdot,style=super,acronym,toc,nonumberlist]{glossaries}
 \makeglossaries
+
+\renewcommand*{\glsnamefont}[1]{\hfill \raggedleft\bfseries #1}
+
 
 \usepackage{amsthm}
 \usepackage{amsmath}
@@ -200,7 +204,6 @@
 % List of abbreviations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \phantomsection
-\addcontentsline{toc}{chapter}{List of Abbreviations}
 \begin{singlespace}
 \setlength\cftbeforesecskip{\baselineskip}
 \printglossary[type=\acronymtype, title=List of Abbreviations]
