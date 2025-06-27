@@ -106,7 +106,7 @@
 		\inputFigure{linklets}{basic-linklet-instantiation-figure}
 
 		\begin{paragraph-here}
-			Regular instantiation is where a linklet is given some linklet instances for its imported variables and evaluates the expressions within its body. As illustrated in \figref{fig:regular-linklet-instantiation}, the result of a regular instantiation is a linklet instance, which is container for a mapping of the exported variables to values, along with some other data (e.g. namespace).
+			Regular instantiation is where a linklet is given some linklet instances for its imported variables and evaluates the expressions within its body. As illustrated in \figref{fig:regular-linklet-instantiation}, the result of a regular instantiation is a linklet instance, which is container for the exported variables, along with some other data (e.g. namespace).
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
@@ -128,34 +128,21 @@
 			Let’s take a look at how a \gls{vm} that implements linklets can easily implement high-level Racket functionalities such as the Racket top-level \gls{repl} by loading the expander linklet into its run-time. Note that the top-level itself is quite complicated and beyond the scope of our study. The example here aims to provide a general overview of the interaction between the run-time and the functionalities provided by the language through the linklets, for this exercise in particular the expander linklet. Recall that the expander implements functions such as read, expand, eval, and outputs a bundle of linklets for a given Racket code.
 		\end{paragraph-here}
 
-
-
-
-		\begin{figure-here}
-			Top-level example interaction
-
-			\begin{todo}[TECH TODO]
-				grab and prep the Fig 5 from proposal
-			\end{todo}
-		\end{figure-here}
-
 		\begin{paragraph-here}
-			As our example, let’s consider the interactions in Figure 5. The key point here is that the variable ”a” is defined after it is used within the function ”k”. To implement this repl, the VM will keep a dedicated linklet instance that we will refer to as the top-level instance. Recall that a linklet instance is (for our example here) a set of linklet variables. In our study we assume that it is implemented as a finite mapping of identifiers to linklet variables. Initially the top-level instance will be an empty instance.
+			As our example, let’s consider the following interactions in a \gls{repl} environment. We first define a closure \racketcode{k} that includes a free variable \racketcode{a}, then we define the variable \racketcode{a}, and invoke the closure to get the result 10.
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			Toplevel example internals at each step.
+		\inputFigure{linklets}{toplevel-example-interaction-listing}
 
-			\begin{todo}[TECH TODO]
-				Create a 1 page big figure for steps in the top-level examples from the proposal document.
-			\end{todo}
-		\end{figure-here}
+		\begin{paragraph-here}
+			Clearly the key point here is that the variable \racketcode{a} is defined after it is used within the function \racketcode{k}. While contradicting with lexical scoping, this is perfectly valid in a \gls{repl} environment since they're historically designed to evaluate expressions in a mutable top-level namespace, allowing things like mutually recursive functions to be written step by step, rather than all at once. To simulate this behavior, our \gls{vm} will keep a dedicated linklet instance that we will refer to as the \emph{top-level} instance. Recall that a linklet instance is (for our example here) just a set of linklet variables. In our study we assume that it is implemented as a finite mapping of identifiers to linklet variables. Initially the top-level instance will be an empty instance.
+		\end{paragraph-here}
+
+		\inputFigure{linklets}{toplevel-example-step-by-step-figure}
 
 		\begin{paragraph-here}
 			The key point is the interaction between the language and the run-time through the expander linklet. At each step in the repl, the VM gets a Racket expression to evaluate. Then it applies the read and expand functions imported from the expander linklet, on the given expression. For clarity, we will omit the non-essential details and focus only on the simplified run-time linklet for the expression. Let’s see what happens at each interaction:
 		\end{paragraph-here}
-
-
 
 		\begin{paragraph-here}
 			The important point about the top-level part in this example is the handling of the undefined identifier ”a”. When the expander generates a linklet containing an unidentified identifier, it puts the identifier among the exported variables of the linklet (despite having no corresponding definition for it), allowing it to be handled via the linklet variables. During the compilation of the linklet on the VM, a new linklet variable is created for it with the special value un-initialized, and when the binding for the identifier is needed, it will be dynamically provided using the target instance (in this case using the top-level instance), essentially forming a low-level dynamic scope. Note that we have the variable mappings for both ”a” and the ”k” within the target instance after the instantiation, containing the values un-initialized and a closure with no arguments and body with a reference to vara respectively.
