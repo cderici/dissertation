@@ -103,8 +103,10 @@
 			Linklets as s-expressions by themselves are as much interesting as an s-expression for a \racketcode{lambda} form. But when \emph{compiled} by a hosting runtime into a linklet object, a linklet becomes ready for \emph{instantiation}. Instantiating a linklet as a \emph{linklet instance} is essentially very similar to a function application where the linklet is provided with the imported variables and starts sequentially running the expressions within its body. The result of an instantiation depends on the mode of the instantiation, which we will refer as the \emph{regular instantiation}, and the \emph{targeted instantiation}.
 		\end{paragraph-here}
 
+		\inputFigure{linklets}{basic-linklet-instantiation-figure}
+
 		\begin{paragraph-here}
-			Regular instantiation is where a linklet is given some linklet instances for its imported variables and evaluates the expressions within its body. The result of a regular instantiation is a linklet instance, which is container for a mapping of the exported variables to values, along with some other data (e.g. namespace).
+			Regular instantiation is where a linklet is given some linklet instances for its imported variables and evaluates the expressions within its body. As illustrated in \figref{fig:basic-linklet-instantiation}, the result of a regular instantiation is a linklet instance, which is container for a mapping of the exported variables to values, along with some other data (e.g. namespace).
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
@@ -125,7 +127,7 @@
 		To run a linklet, it is instantiated as a linklet instance, which is a . When a linklet is instantiated, it receives other linklet instances for its imports, and it extracts a specified set of variables that are exported from each of the given instances. The newly created linklet instance provides its exported variables for use by other linklets. Moreover, an instantiation may be given an additional linklet instance as an input, namely the target instance. In this case, the variables in the target instance is used and modified for the linklet definitions and expressions during the evaluation of the body expressions, and the result is the value of the last expression in the linklet (instead of an instance). In the remainder of this document we will use the names “targeted instantiation” and “regular instantiation” for these two modes. \figref{fig:basic-linklet-instantiation}
 
 
-		\inputFigure{linklets}{basic-linklet-instantiation-figure}
+
 
 
 

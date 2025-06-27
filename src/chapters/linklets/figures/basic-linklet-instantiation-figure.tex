@@ -1,6 +1,37 @@
-\begin{figure}[!htbp]
-    \centering
-    \includegraphics[width=1\linewidth]{\inputFigPath{linklets}{basic-linklet-instantiation.png}}
-    \caption{Basic Linklet Instantiation [PLACEHOLDER]}
-    \label{fig:basic-linklet-instantiation}
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+    font=\footnotesize,
+    instancebox/.style={draw, rounded corners=2pt, minimum width=28mm, minimum height=9mm, fill=white, align=center},
+    linkletbox/.style={draw, rounded corners=2mm, minimum width=49mm, minimum height=22mm, fill=gray!16, font=\ttfamily\scriptsize, inner sep=2mm, text width=44mm, align=left},
+    arr/.style={-Stealth, thick}
+  ]
+    % Input instances
+    \node[instancebox] (a) at (0, 0.7) {Instance\\\texttt{a~$\leftarrow$~5}};
+    \node[instancebox, below=8mm of a] (b) {Instance\\\texttt{b~$\leftarrow$~8}};
+
+    % Curly brace (right)
+    \draw [decorate,decoration={brace,amplitude=8pt,mirror}]
+      ([xshift=4mm]b.south east) -- ([xshift=4mm]a.north east);
+
+    % Get center of brace for arrow start
+    \path ([xshift=15mm]a.north east) -- coordinate (bracecenter) ([xshift=5mm]b.south east);
+
+    % Main linklet box
+    \node[linkletbox, right=15mm of bracecenter, anchor=west] (lk) {
+      \texttt{(linklet\\\ \ ((a) (b))\\\ \ (c)\\\ \ (define-values (c) (+ a b))\\\ \ (set! c 42))}
+    };
+
+    % Arrow from brace to linklet
+    \draw[arr] (bracecenter) -- (lk.west);
+
+    % Output instance
+    \node[instancebox, right=10mm of lk.east, anchor=west] (c) {Instance\\\texttt{c~$\leftarrow$~42}};
+
+    % Arrow: linklet to output instance
+    \draw[arr] (lk.east) -- (c.west);
+
+  \end{tikzpicture}
+  \caption{Regular Instantiation of a Linklet}
+  \label{fig:regular-linklet-instantiation}
 \end{figure}
