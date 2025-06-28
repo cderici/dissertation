@@ -146,8 +146,8 @@
 			programs, extended with the \verb|linklet| form and top-level
 			definitions (i.e. \racketcode{define-values}). In addition to the basic forms such
 			as \racketcode{begin}, \racketcode{set!}, \racketcode{if} etc., the linklet language has
-			some additional forms to manipulate linklet variables
-			(e.g. \emph{var-ref}), as shown in \verb|e| rule. We will go into details about these forms that manipulate variables when we talk about \racketcode{compile-linklet} semantics shortly.
+			some additional forms to manipulate variables
+			(e.g. \emph{var-ref}), as shown in \verb|e| rule. We will go into details about these forms that manipulate variables when we talk about \racketcode{compile-linklet} semantics shortly. For clarity, we'll refer to the variables manipulated specifically by the linklets as \emph{linklet variables}. In reality there's no semantic distinction between a regular variable and a linklet variable, i.e. they can both be represented by cells in the runtime.
 		\end{paragraph-here}
 
 		\begin{paragraph-here}% 3
@@ -158,69 +158,33 @@
 			\gls{lkl} is a subset of the Racket \racketcode{\#\%kernel} language, which makes a rudimentary Racket interpreter a perfect candidate to support linklets by only adding the linklet specific semantics and nothing more.
 		\end{paragraph-here}
 
-		\begin{paragraph-here}
-			Before a linklet is ready for instantiation, as part of the
-			\racketcode{compile-linklet} process, several passes over the linklet are
+		\inputFigure{linklets}{linklet-runtime-language-figure}
+
+		\begin{paragraph-here}% 4
+			compile-linklet
+
+			Before a linklet is ready for the \racketcode{compile-linklet}, several passes over the linklet are
 			performed to ensure a correct information flow between the variables
-			in the run\dash time. For each import and export identifier (and
-			possibly their corresponding renamings), \emph{Import} and
-			\emph{Export} objects are created with the fresh references that
-			will be used to name the variables that are dynamically created during
-			the instantiation. Additionally, a pass on the linklet body collects
-			all the identifiers that are defined within the linklet body and all
-			the mutated identifiers.
+			in the run-time. \figref{fig:linklet-runtime-language} illustrates the runtime representations of compiled linklets and linklet instances. For each imported and exported identifier (also keeping
+			their corresponding renamings if any), \emph{Import} and
+			\emph{Export} objects are created with the fresh (gensymed) references that
+			will be used for the variables that are dynamically created during
+			instantiation. Additionally, all the defined identifiers, as well as the set of mutated ones are collected by a pass on the linklet body.
 		\end{paragraph-here}
 
-
-
-		\begin{paragraph-here}
-			Given a set of \emph{Import}s ($\mathit{C_I}$) and a set of
-			\emph{Export}s ($\mathit{C_E}$), a set of toplevel defined
+		\begin{paragraph-here}% 5 - ONLY PHRASING
+			Given a set of \emph{Import}s ($\mathit{C_I}$), a set of
+			\emph{Export}s ($\mathit{C_E}$), a set of top-level defined
 			identifiers ($\mathit{X_T}$) and a set of mutated identifiers
 			($\mathit{X_M}$), the compilation starts to process each expression in
-			the linklet body one by one, performing the following actions
-			depending on the type of expression:
-
+			the linklet body one by one. We're only interested in compiling forms related to linklets, so we omit, for the sake of clarity, any compilation details of turning s-expressions of basic forms (e.g. \racketcode{begin}, \racketcode{set!}) into runtime \glspl{ast}.
 		\end{paragraph-here}
 
-		\begin{itemize}
-		\small
-		\item For a `(\textbf{define-values} (x) e)` expression where $(\textbf{Export}\; x_{gen}\; x\; x_{ext}) \in \mathit{C_E}$ (i.e. x is exported), add an additional `(\textbf{var-set!} $x_{gen}$ x)` expression.
-		\item For a `(\textbf{set!} x e)` expression where $(\textbf{Export}\; x_{gen}\; x\; x_{ext}) \in \mathit{C_E}$ (i.e. x is exported), turn the expression into \\ `(\textbf{var-set/check-undef!} $x_{gen}$ e)`.
-		\item For any identifier x where $(\textbf{Import}\; x_{gen}\; x\; x_{ext}) \in \mathit{C_I}$  (i.e. x is imported), turn the identifier into \\ `(\textbf{var-ref/no-check} $x_{gen}$)`.
-		\item For any identifier x where $(\textbf{Export}\; x_{gen}\; x\; x_{ext}) \in \mathit{C_E}$ and either $x \in \mathit{X_M}$ or $x \notin \mathit{X_T}$, turn the identifier into \\ `(\textbf{var-ref} $x_{gen}$)`.
-		\item For any other expression e, recurse if e has subforms, return otherwise.
-		\end{itemize}
+		\inputFigure{linklets}{compile-linklet-transformation-rules-table}
 
-		\begin{figure-here}
-			\begin{todo}[TECH TODO]
-				Linklet runtime language
-			\end{todo}
-
-			% \begin{wrapfigure}[14]{r}{0.45\textwidth}
-			% \vspace{-0.6cm}
-			% \footnotesize
-			% %\small
-			% %\begin{figure}[h!]
-			% \begin{mdframed}
-			% 	\begin{align*}
-			% 	CL             &::=\; \bm{\Phi^C}(L)\\
-			% 	L\dash obj     &::= (\la\; c\dash imps \; c\dash exps \; l\dash top \ldots)\\
-			% 	\;           &\;|\; (\lb\; x\; l\dash top\; \ldots) \\
-			% 	LI             &::=\; (\textbf{linklet\dash instance}\; (x\; var)\; \ldots) \\
-			% 	c\dash imps    &::=\; ((imp\dash obj\; \ldots)\; \ldots)\\
-			% 	c\dash exps    &::=\; (exp\dash obj\; \ldots)\\
-			% 	imp\dash obj   &::=\; (\textbf{Import}\; x\; x\; x) \tag*{[id int ext]} \\
-			% 	exp\dash obj   &::=\; (\textbf{Export}\; x\; x\; x) \tag*{[id int ext]} \\
-			% 	\end{align*}
-			% 	\hfill \footnotesize $\Phi^C : \textbf{compile\dash linklet}$
-			% 	\caption[aaa]{Linklet Runtime Language \footref{fnlabel}}
-			% 	\label{fig:linklet-runtime}
-			% \end{mdframed}
-			% %\end{figure}
-			% \end{wrapfigure}
-
-		\end{figure-here}
+		\begin{paragraph-here}
+			\tableRef{table:linklet-compilation-rules} lists the transformation rules for the linklet variables used in \racketcode{compile-linklet} semantics. Any exported and top-level defined identifier is related to a linklet variable that'll get created at the instantiation. An exported identifier that's a target of a \racketcode{set!} is turned to be mutated by a \racketcode{var-set/check-undef!} operation. Imported
+		\end{paragraph-here}
 
 
 		\begin{paragraph-here}

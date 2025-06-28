@@ -1,0 +1,31 @@
+\begin{table}[!htbp]
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{@{}p{0.26\textwidth} p{0.30\textwidth} p{0.40\textwidth}@{}}
+    \toprule
+    \textbf{Expression Pattern} & \textbf{Condition} & \textbf{Transformation / Action} \\
+    \midrule
+    \racketcode{(define-values (x) e)}
+      & $\mathit{(Export\ x_{gen}\ x\ x_{ext})} \in C_E$
+      & Emit \racketcode{(var-set! x_gen x)} \\
+    \addlinespace[0.5ex]
+    \racketcode{(set! x e)}
+      & $\mathit{(Export\ x_{gen}\ x\ x_{ext})} \in C_E$
+      & Transform \racketcode{set!} into \newline \racketcode{(var-set/check-undef! x_gen e)} \\
+    \addlinespace[0.5ex]
+    $x$ (identifier)
+      & $\mathit{(Import\ x_{gen}\ x\ x_{ext})} \in C_I$
+      & Transform $x$ into \newline \racketcode{(var-ref/no-check x_gen)} \\
+    \addlinespace[0.5ex]
+    $x$ (identifier)
+      & $\mathit{(Export\ x_{gen}\ x\ x_{ext})} \in C_E$ \newline and $x \in X_M$ or $x \notin X_T$
+      & Transform $x$ reference into \newline \racketcode{(var-ref x_gen)} \\
+    \addlinespace[0.5ex]
+    Any other $e$
+      & ---
+      & Recurse into sub-forms (if any), otherwise return $e$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Transformation rules for linklet variables used in \racketcode{compile-linklet}.}
+  \label{table:linklet-compilation-rules}
+\end{table}
