@@ -210,46 +210,21 @@
 			Recall that a linklet instantiation can happen in two separate ways; regular instantiation that results in a linklet instance, and a targeted instantiation that results in a single value output, often used for modifications on the given target. As a part of the preparation step in \racketcode{compile-linklet} during transitioning from $\la$ to $\lb$, a target instance that's used during the instantiation is plugged into the $\lb$ (again, for notational convenience in presenting the semantics). If this is a targeted instantiation, then the target instance is already provided to the \racketcode{instantiate-linklet} operation. Otherwise, a fresh empty instance is created and used during instantiation. For simplicity, the result of both instantiations is a pair of the last expression’s value and the target instance being used.
 		\end{paragraph-here}
 
+		\inputFigure{linklets}{program-source-language}
 
-		\begin{paragraph-here}
-			Since the linklets are lambda\dash like binding forms and not capable
-			of starting a computation by themselves, we introduce a top\dash level
-			form, namely \racketcode{program}. A \racketcode{program} consists of
-			a set of given linklets to be loaded and a single top\dash level
-			expression to perform a computation. \figref{fig:linklet-program}
+		\begin{paragraph-here}% 10
+			Since linklets are lambda-like binding forms and not capable
+			of starting a computation by themselves, we introduce a top-level
+			form, namely \racketcode{program} to be able to demonstrate the semantics in action. A \racketcode{program} consists of
+			a set of given linklets to be loaded and a single top-level
+			expression to perform a computation. \figref{fig:linklet-program-source-language}
 			shows part of the grammar for \racketcode{program}s. We provided
 			the \racketcode{let-inst} form to name a linklet instance,
 			and \racketcode{seq} form to perform multiple computations in
-			sequence.
+			sequence. Additionally, $\bm{\Phi^V}$ denotes the \emph{instance-variable-value} function, which simply retrieves the value of an exported variable from a given instance.
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			\begin{todo}[TECH TODO]
-				Linklet program source language
-			\end{todo}
 
-			% \begin{wrapfigure}[13]{r}{0.5\textwidth}
-			% \footnotesize
-			% \vspace{-0.5cm}
-			% %\begin{figure}[h]
-			% \begin{mdframed}
-			% 	\begin{align*}
-			% 	p           &::=\; (\textbf{program}\; ((x\; L)\; \ldots)\; p\dash top) \\
-			% 	p\dash top  &::=\; v\; |\; (\textbf{let\dash inst}\; x\; p\dash top\;p\dash top) \\
-			% 	\;          &\;|\; (\textbf{seq}\; p\dash top\; \ldots) \\
-			% 	\;          &\;|\; \bm{\Phi^I}(l\dash ref\; x\; \ldots)\; |\; \bm{\Phi^I}(l\dash ref\; x\; \ldots\; \textbf{\#:t}\; x) \\
-			% 	\;          &\;|\; \bm{\Phi^V}(x\; x) \\
-			% 	l\dash ref &::=\; x\; |\; L\dash obj \\
-			% 	v           &::=\; ....\;|\;(v\;x) \\
-			% 	\end{align*}
-			% 	\hfill \footnotesize $\Phi^V : \textbf{instance\dash variable\dash value}\:,\: \Phi^I : \textbf{instantiate\dash linklet}$
-			% 	\caption[bbbb]{Linklet Program Source Language \footnotemark}
-			% 	\label{fig:linklet-program}
-			% \end{mdframed}
-			% %\end{figure}
-			% \end{wrapfigure}
-
-		\end{figure-here}
 
 
 		\begin{paragraph-here}

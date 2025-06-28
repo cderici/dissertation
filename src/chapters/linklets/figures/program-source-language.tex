@@ -1,0 +1,20 @@
+\begin{figure}[!htbp]
+    \centering
+    \begin{align*}
+    p           &::=\; (\textbf{program}\; ((x\; L)\; \ldots)\; p\dash top) \\
+    p\dash top  &::=\; v \\
+    \;          &\;\hspace*{1.4em}|\; (\textbf{let\dash inst}\; x\; p\dash top\;p\dash top) \\
+    \;          &\;\hspace*{1.4em}|\; (\textbf{seq}\; p\dash top\; \ldots) \\
+    \;          &\;\hspace*{1.4em}|\; \bm{\Phi^I}(l\dash ref\; x\; \ldots) \\
+    \;          &\;\hspace*{1.4em}|\; \bm{\Phi^I}(l\dash ref\; x\; \ldots\; \textbf{\#:t}\; x) \\
+    \;          &\;\hspace*{1.4em}|\; \bm{\Phi^V}(x\; x) \\
+    l\dash ref &::=\; x\; |\; L\dash obj \\
+    v           &::=\; ....\;|\;(v\;x) \\
+    \end{align*}
+
+    \vspace{-1em}
+
+    \footnotesize $\Phi^V : \textbf{instance\dash variable\dash value}\:,\: \Phi^I : \textbf{instantiate\dash linklet}$
+    \caption{Linklet Program Source Language}
+    \label{fig:linklet-program-source-language}
+\end{figure}
