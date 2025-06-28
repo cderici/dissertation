@@ -25,14 +25,14 @@
   		A practical programming language typically consists of three essential components: first, a \emph{language grammar} defining the syntax—expressions that can be formed; second, \emph{core language semantics}, which determine the meaning of these expressions, typically via reduction rules mapping expressions to values; and third, a \emph{runtime} responsible for realizing these semantics on a computing environment. The runtime provides mechanisms to read and expand user expressions, evaluate them, and produce values, effectively bridging the gap between abstract language semantics and concrete execution.
 
 	\paragraph{}% 2
-  		The \emph{portability} of a programming language refers to its ability to be adapted to run on different runtimes or virtual machines. This notion is distinct from having multiple independent implementations of a language. Rather, portability implies deliberate support at the language's syntax or semantic level, enabling runtimes to more easily adopt the language's core implementation. Languages that explicitly expose an intermediate form or semantics conducive to plugging into different backend runtimes exemplify this approach. Notable examples include Haskell, whose \gls{ghc} toolchain reduces every module to an intermediate typed Core IR, facilitating easy backend integration such as LLVM~\cite{ghc_llvm_backend}; and Common Lisp, particularly implementations like Clasp, which retain high-level runtime elements (macro expander, reader) in Lisp while swapping only the code generator~\cite{clasp_llvm}. Such designs demonstrate how exposing an intermediate representation at the language level significantly simplifies retargeting efforts, reducing engineering overhead.
+  		The \emph{portability} of a programming language refers to its ability to be adapted to run on different runtimes or virtual machines. This notion is distinct from having multiple independent implementations of a language. Rather, portability implies deliberate support at the language's syntax or semantic level, enabling runtimes to more easily adopt the language's core implementation. Languages that explicitly expose an intermediate form or semantics conducive to plugging into different backend runtimes exemplify this approach. Notable examples include Haskell, whose \gls{ghc} toolchain reduces every module to an intermediate typed Core IR, facilitating easy backend integration such as \gls{llvm}~\cite{ghc_llvm_backend}; and Common Lisp, particularly implementations like Clasp, which retain high-level runtime elements (macro expander, reader) in Lisp while swapping only the code generator~\cite{clasp_llvm}. Such designs demonstrate how exposing an intermediate representation at the language level significantly simplifies retargeting efforts, reducing engineering overhead.
 
 
 	\paragraph{Future-proofing and platform agility}% 3
-		When language semantics are lowered to a portable, implementation-independent \gls{ir}, targeting new \glspl{vm} typically involves writing a minimal backend rather than a complete compiler. For instance, the \gls{ghc} gained support for ARM, PowerPC, and WebAssembly virtually \smartQL for free\smartQR upon integrating LLVM~\cite{ghc_llvm_backend}. Reducing engineering costs per new target ensures the language remains viable across evolving hardware ecosystems, preserving the investments made by implementers and users.
+		When language semantics are lowered to a portable, implementation-independent \gls{ir}, targeting new \glspl{vm} typically involves writing a minimal backend rather than a complete compiler. For instance, the \gls{ghc} gained support for ARM, PowerPC, and WebAssembly virtually \smartQL for free\smartQR upon integrating \gls{llvm}~\cite{ghc_llvm_backend}. Reducing engineering costs per new target ensures the language remains viable across evolving hardware ecosystems, preserving the investments made by implementers and users.
 
 	\paragraph{Tooling \& ecosystem leverage}% 4
-		A standardized, information-rich IR allows external tools—such as optimizers, verifiers, and profilers—to uniformly support all eventual backends. Compiler research demonstrates that most optimization efforts naturally gravitate toward the IR layer because benefits propagate globally~\cite{ir_cacm}. Recent advances, such as the SMACK verifier, illustrate that languages emitting LLVM \gls{ir} immediately gain powerful, cross-language verification capabilities without rewriting analysis tools for each source language~\cite{llvm_verification}. Hence, language-level portability not only expands the range of deployment targets but also enhances the reuse potential of infrastructure and tooling around the language.
+		A standardized, information-rich IR allows external tools—such as optimizers, verifiers, and profilers—to uniformly support all eventual backends. Compiler research demonstrates that most optimization efforts naturally gravitate toward the IR layer because benefits propagate globally~\cite{ir_cacm}. Recent advances, such as the SMACK verifier, illustrate that languages emitting \gls{llvm} \gls{ir} immediately gain powerful, cross-language verification capabilities without rewriting analysis tools for each source language~\cite{llvm_verification}. Hence, language-level portability not only expands the range of deployment targets but also enhances the reuse potential of infrastructure and tooling around the language.
 
 	\paragraph{}% 5
   		Improving language portability fundamentally relies on enhancing semantic communication between the language's core semantics and its runtime. Clear, explicit interfaces or intermediate representations are required for languages to effectively instruct runtimes on realizing their semantics, rather than each runtime manually handling tight couplings such as macro expansion, serialization, or user-level threading models.
@@ -136,29 +136,26 @@
 
 	\section[\texorpdfstring{Formal Operational Semantics of Linklets}{Formal Semantics for Linklets}]{Formal Operational Semantics of Linklets}
 
-		\begin{mainpoint}
-			Linklets have well-defined operational semantics.
-
-			This is one of the technical contributions of the thesis.
-		\end{mainpoint}
-
-		\begin{paragraph-here}
-			Now let's introduce formalism for operational semantics of linklets. Figure .... shows the grammar for a linklet language.
-
-			In this section I present a formalism to briefly describe the operational semantics of linklets, which is the basis of the implementation on Pycket. The formalism is developed in the PLT Redex language, therefore it is executable [25]. Randomized testing is used to verify the model [35], and a parallel test suite is used to verify the Pycket implementation and the model with each other
+		\begin{paragraph-here}% 1
+			In this section we present a formalism to describe the operational semantics of linklets, which is the basis of the implementation on Pycket, that'll be discussed in the subsequent chapter. The formalism is developed in the PLT Redex language, therefore it is executable \cite{redexBook}. Randomized testing is used to verify the model \cite{randomizedTesting}.
 		\end{paragraph-here}
 
-
-		\begin{paragraph-here}
-			Figure \ref{fig:linklet-source} shows the grammar of the linklet
-			language, which is a minimal subset of the Fully Expanded Racket
-			Programs extended with the \verb|linklet| form and toplevel
-			definitions. The sub-language that is used within the linklet body,
-			namely the Racket Core (RC) is basically a $\lambda$-calculus with a handful
-			of syntactic extensions. In addition to the basic forms such
-			as \racketcode{begin}, \racketcode{set!}, \racketcode{if} etc., RC has
+		\begin{paragraph-here}% 2
+			\figref{fig:linklet-grammar} shows the grammar of the linklet
+			language\footnote{Some rules (e.g. evaluation contexts etc.) are omitted for clarity.}, which is a minimal subset of the fully expanded Racket
+			programs, extended with the \verb|linklet| form and top-level
+			definitions (i.e. \racketcode{define-values}). In addition to the basic forms such
+			as \racketcode{begin}, \racketcode{set!}, \racketcode{if} etc., the linklet language has
 			some additional forms to manipulate linklet variables
-			(e.g. \emph{var-ref}), as shown in \verb|e| rule. % figure \ref{f
+			(e.g. \emph{var-ref}), as shown in \verb|e| rule. We will go into details about these forms that manipulate variables when we talk about \racketcode{compile-linklet} semantics shortly.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 3
+			The sub-language that is used within the linklet body,
+			namely the \gls{lkl} is essentially a $\lambda$-calculus with a handful
+			of syntactic extensions. A grammar, a standard reduction relation, as well as an evaluator for \gls{lkl} (that the reduction semantics for linklets refer to) is provided in \appendixRef{appendix:linklet-kernel-language}.
+
+			\gls{lkl} is a subset of the Racket \racketcode{\#\%kernel} language, which makes a rudimentary Racket interpreter a perfect candidate to support linklets by only adding the linklet specific semantics and nothing more.
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
