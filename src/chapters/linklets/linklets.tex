@@ -101,6 +101,7 @@
 
 
 		\subsection{Using Linklets: A Small Top-level REPL Interaction}
+		\label{subsec:toplevel-example}
 
 		\paragraph{}% 8
 			To clarify and illustrate the semantics of linklets in a more concrete manner, we introduce a small yet informative example of how a \gls{vm} implements a high-level Racket feature using linklets: the top-level \gls{repl}. Although the top-level implementation itself is quite complex and beyond our scope, this example demonstrates clearly how the runtime utilizes high-level features provided via linklets—particularly those exported by the expander, including \racketcode{read}, \racketcode{expand}, and \racketcode{eval}—to create a \gls{repl} behavior.
@@ -161,64 +162,54 @@
 		\inputFigure{linklets}{linklet-runtime-language-figure}
 
 		\begin{paragraph-here}% 4
-			compile-linklet
+			\figref{fig:linklet-runtime-language} illustrates the runtime representations of compiled linklets and linklet instances. Given a linklet L, \racketcode{compile-linklet} produces a linklet object $\la$ that is ready to be instantiated. $\la$ consists of \emph{Import} and \emph{Export} objects for the identifiers denoting the imported and exported variables respectively. We're only interested in compiling forms related to linklets, so we omit, for the sake of clarity, any compilation details of turning s-expressions of basic forms (e.g. \racketcode{begin}, \racketcode{set!}) into runtime \glspl{ast}. Furthermore, the body expressions containing additional expressions created during the compilation for dynamic variable manipulations in the run-time are elaborated below.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 5
 
 			Before a linklet is ready for the \racketcode{compile-linklet}, several passes over the linklet are
 			performed to ensure a correct information flow between the variables
-			in the run-time. \figref{fig:linklet-runtime-language} illustrates the runtime representations of compiled linklets and linklet instances. For each imported and exported identifier (also keeping
+			in the run-time.  For each imported and exported identifier (also keeping
 			their corresponding renamings if any), \emph{Import} and
 			\emph{Export} objects are created with the fresh (gensymed) references that
 			will be used for the variables that are dynamically created during
 			instantiation. Additionally, all the defined identifiers, as well as the set of mutated ones are collected by a pass on the linklet body.
 		\end{paragraph-here}
 
-		\begin{paragraph-here}% 5 - ONLY PHRASING
+		\begin{paragraph-here}% 6
+			compile-linklet
+
 			Given a set of \emph{Import}s ($\mathit{C_I}$), a set of
 			\emph{Export}s ($\mathit{C_E}$), a set of top-level defined
 			identifiers ($\mathit{X_T}$) and a set of mutated identifiers
 			($\mathit{X_M}$), the compilation starts to process each expression in
-			the linklet body one by one. We're only interested in compiling forms related to linklets, so we omit, for the sake of clarity, any compilation details of turning s-expressions of basic forms (e.g. \racketcode{begin}, \racketcode{set!}) into runtime \glspl{ast}.
+			the linklet body one by one. Each \emph{Import} and \emph{Export} object consists of two
+			identifiers that are internal and external with respect to the linklet
+			body (to accommodate renamings), and one fresh identifier for internal
+			use during the instantiation.
 		\end{paragraph-here}
 
 		\inputFigure{linklets}{compile-linklet-transformation-rules-table}
 
-		\begin{paragraph-here}
-			\tableRef{table:linklet-compilation-rules} lists the transformation rules for the linklet variables used in \racketcode{compile-linklet} semantics. Any exported and top-level defined identifier is related to a linklet variable that'll get created at the instantiation. An exported identifier that's a target of a \racketcode{set!} is turned to be mutated by a \racketcode{var-set/check-undef!} operation. Imported
+		\begin{paragraph-here}% 7
+			\tableRef{table:linklet-compilation-rules} lists the transformation rules for the linklet variables used in \racketcode{compile-linklet} semantics. Any exported and top-level-defined identifier is related to a linklet variable that's assumed to be created later during instantiation. An exported identifier that's a target of a \racketcode{set!} is transformed to be mutated at runtime by a \racketcode{var-set/check-undef!} operation. References to the imported variables are also related to runtime linklet variables. Additionally, an exported identifier that is either mutated, or doesn't have a definition in the linklet also turned into a linklet variable reference, as that will likely be provided by the target instance during instantiation.
 		\end{paragraph-here}
 
+		\begin{paragraph-here}% 8
+			instantiate-linklet
 
-		\begin{paragraph-here}
-			Figure \ref{fig:linklet-runtime} shows the grammar of the run\dash
-			time language for linklets, i.e. expressions that represent the
-			run\dash time objects used during an instantiation of linklets. Given a
-			linklet L, \emph{compile-linklet} produces a linklet object $\la$ that
-			is ready to be instantiated. $\la$ consists of \emph{Import} and
-			\emph{Export} objects for the identifiers denoting the imported and
-			exported variables, and the body expressions with potentially some
-			additional expressions for variable manipulations in the run\dash
-			time.
-		\end{paragraph-here}
-
-
-		\begin{paragraph-here}
-			Each \emph{Import} and \emph{Export} object consists of two
-			identifiers that are internal and external with respect to the linklet
-			body (to accommodate renamings), and one fresh identifier for internal
-			use during the instantiation. The \emph{Import} and \emph{Export}
-			objects are processed as the first step of the instantiation. As we
-			detail below, references for the imported variables are collected from
+			The \emph{Import} and \emph{Export}
+			objects are processed as the first step of the instantiation. References for the imported variables are collected from
 			the given import instances, and additional variables may be created
 			for exported variables depending on the target instance as we have
-			shown in the example in \secref{subsec:toplevel-example}. $\lb$
-			denotes a compiled linklet object after such a preparation step, with
-			which the actual instantition may begin. Note that $\lb$ contains only
-			a reference (to the target instance that is used during the
-			instantiation) and the body expressions, and doesn't contain the
-			import and export objects, as the instantiation uses the variables
-			that are already prepared for them. Finally
-			a \emph{linklet-instance} is a finite mapping from symbols to
-			variables.
+			shown in the example in \secref{subsec:toplevel-example}. For notational convenience in presenting the semantics, $\lb$ in \figref{fig:linklet-runtime-language}
+			denotes a compiled linklet object after such a preparation step. Note that $\lb$ doesn't contain any import and export objects, as they are already resolved during this transition. After such a $\lb$ is constructed, an instantiation may proceed.
 		\end{paragraph-here}
+
+		\begin{paragraph-here}% 9
+			Recall that a linklet instantiation can happen in two separate ways; regular instantiation that results in a linklet instance, and a targeted instantiation that results in a single value output, often used for modifications on the given target. As a part of the preparation step in \racketcode{compile-linklet} during transitioning from $\la$ to $\lb$, a target instance that's used during the instantiation is plugged into the $\lb$ (again, for notational convenience in presenting the semantics). If this is a targeted instantiation, then the target instance is already provided to the \racketcode{instantiate-linklet} operation. Otherwise, a fresh empty instance is created and used during instantiation. For simplicity, the result of both instantiations is a pair of the last expression’s value and the target instance being used.
+		\end{paragraph-here}
+
 
 		\begin{paragraph-here}
 			Since the linklets are lambda\dash like binding forms and not capable
