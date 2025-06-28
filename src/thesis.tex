@@ -19,7 +19,7 @@
 
 \usepackage{array}
 % For abbreviations
-\usepackage[nopostdot,style=super,acronym,toc,nonumberlist]{glossaries}
+\usepackage[nopostdot,style=super,acronym,toc,nonumberlist,nogroupskip]{glossaries}
 \makeglossaries
 
 \renewcommand*{\glsnamefont}[1]{\hfill \raggedleft\bfseries #1}
@@ -204,10 +204,10 @@
 % List of abbreviations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \phantomsection
-\begin{singlespace}
+\begin{doublespace}
 \setlength\cftbeforesecskip{\baselineskip}
 \printglossary[type=\acronymtype, title=List of Abbreviations]
-\end{singlespace}
+\end{doublespace}
 
 \clearpage
 

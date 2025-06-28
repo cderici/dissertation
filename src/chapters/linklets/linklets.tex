@@ -76,7 +76,7 @@
 		\label{section:linklet-semantics}
 
 		\paragraph{}% 1
-			In this section, we introduce \emph{linklets} as a language form and provide both formal operational semantics and a minimal API that a \gls{vm} must implement to support them. We also demonstrate through a practical example how linklets facilitate interesting runtime functionalities, laying the groundwork for improved compiler-runtime communication and, eventually, self-hosting.
+			In this section, we introduce \emph{linklets} as a language form and provide both formal operational semantics and a minimal \gls{api} that a \gls{vm} must implement to support them. We also demonstrate through a practical example how linklets facilitate interesting runtime functionalities, laying the groundwork for improved compiler-runtime communication and, eventually, self-hosting.
 
 		\inputFigure{linklets}{linklet-source-language-figure}
 
@@ -95,7 +95,7 @@
 			A targeted instantiation, by contrast, is where a linklet is provided with a pre-existing \emph{target} instance alongside linklet instances for the imported variables. In this case, the variables in the target instance is used and modified for the linklet definitions and expressions during the evaluation of the expressions within the linklet body. This kind of instantiation is often used for side-effects, and the result is the value of the last expression in the linklet rather than a new linklet instance.
 
 		\paragraph{}% 6
-			The linklet design does not impose a specific internal representation, allowing a \gls{vm} flexibility in selecting preferred representations for linklets and instances. For example, Chez Scheme represents linklets as Scheme functions, whereas Pycket employs a custom runtime class named \pycketcode{W\_Linklet}. To manage these diverse representations uniformly, Racket specifies a minimal runtime API for \glspl{vm}, comprising two functions: \racketcode{compile-linklet} for preparing linklets and \racketcode{instantiate-linklet} for executing them.
+			The linklet design does not impose a specific internal representation, allowing a \gls{vm} flexibility in selecting preferred representations for linklets and instances. For example, Chez Scheme represents linklets as Scheme functions, whereas Pycket employs a custom runtime class named \pycketcode{W\_Linklet}. To manage these diverse representations uniformly, Racket specifies a minimal runtime \gls{api} for \glspl{vm}, comprising two functions: \racketcode{compile-linklet} for preparing linklets and \racketcode{instantiate-linklet} for executing them.
 
 		\paragraph{}% 7
 			Loading linklets into a \gls{vm} runtime involves compiling linklet s-expressions into runtime objects and subsequently instantiating these objects to obtain their exported variables. Specifically, \racketcode{compile-linklet} transforms linklet s-expressions into runtime objects containing the runtime AST for the enclosed code. Once instantiated, all exported variables become immediately available to other linklets via the resulting instance. These variables can encapsulate any Racket value, including callable closures, allowing the runtime to directly invoke powerful functions without explicitly reimplementing them, such as the \racketcode{expand} function from the expander linklet.
