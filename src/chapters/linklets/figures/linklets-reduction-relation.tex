@@ -1,0 +1,91 @@
+\begin{figure}[!htbp]
+  \footnotesize
+  \centering
+  % Adjust the value in hspace* and minipage width as you like
+  \hspace*{-1.7cm}
+  \fbox{%
+    \begin{minipage}{0.93\textwidth}
+      \setlength{\jot}{2pt}
+      \begin{align*}
+        \rcinput{x} \rcrel \rcoutput{\sigma[\rho[x]]}{\rho}{\sigma} \\
+        \rcinput{(\textbf{var\dash ref}\; x))} \rcrel \rcoutput{v}{\rho}{\sigma}\; \where x \in \rho, \rho[x] \in \sigma, v = \sigma[\rho[x]], v \neq uninit\\
+        \rcinput{(\textbf{var\dash ref/no\dash check}\; x))} \rcrel \rcoutput{v}{\rho}{\sigma}\; \where v = \sigma[\rho[x]] \\
+        \rcinput{(\textbf{var\dash set!}\; x\; v)} \rcrel \rcoutput{(void)}{\rho}{\sigma_1} \where \sigma_1 = \sigma[\rho[x]\rightarrow v]\\
+        \rcinput{(\textbf{var\dash set/check\dash undef!}\; x\; v)} \rcrel \rcoutput{(void)}{\rho}{\sigma_1} \where \sigma_1 = \sigma[\rho[x]\rightarrow v], x \in \rho\\
+        \rcinput{(\textbf{set!}\; x\; v)} \rcrel \rcoutput{(void)}{\rho}{\sigma_1} \where \sigma_1 = \sigma[\rho[x]\rightarrow v]\\
+        \\
+        \redinput{\bm{\Phi^V}(x_{li},\; x)} \rel \redoutput{v}{\rho}{\sigma} \where v\; =\; \sigma[(\sigma[x_{li}])[x]] \\
+        \redinput{(\bm{\Phi^I}\; (\lb\; x\; v\; \ldots\; v_{l}))} \rel \redoutput{(v_{l}\; x)}{\rho}{\sigma} \\
+        EP\;\llbracket (\bm{\Phi^I}(\lb\; x_{t}\; v_p\; \ldots\; (\textbf{define\dash values}\; (x)\; v)\; l\dash top\; \ldots)) \rrbracket, \rel \redoutput{\bm{\Phi^I}(\lb\; x_{t}\; v_p\; \ldots\; l\dash top\; \ldots)}{\rho_1}{\sigma_1} \\
+        \;          &\;\; \where \rho_1 = \rho[x\rightarrow cell],\; \sigma_1 = \sigma[cell\rightarrow v] \\
+        \redinput{(\bm{\Phi^I}(\la\; c\dash imps \; c\dash exps \; l\dash top \ldots)\; LI\; \ldots)} \rel \redoutput{(\bm{\Phi^I}(\la\; c\dash imps \; c\dash exps \; l\dash top\; \ldots)\; LI\; \ldots\; \textbf{\#:t}\; x_{t})}{\rho}{\sigma_1} \\
+        \;          &\;\; \where x_t \notin \mathit{dom}(\sigma), \sigma_1 = \sigma[x_t\rightarrow (linklet\dash instance)] \\
+        EP\;\llbracket (\bm{\Phi^I}(\la\; c\dash imps \; c\dash exps \; l\dash top \ldots)\; LI\; \ldots\; \textbf{\#:t}\; x_{t}) \rrbracket, \rho, \sigma\; \rel \redoutput{(\bm{\Phi^I}(\lb\; x_{t}\; l\dash top\; \ldots))}{\rho_2}{\sigma_1} \\
+        \; &\;\; \where \rho_1 = \mathit{V}^I(c\dash imps, (LI\; \ldots), \rho) \\
+        \;          &\;\; \hspace{0.4cm} (\rho_2, \sigma_1) = \mathit{V}^E(c\dash exps, x_t, \rho_1, \sigma) \\
+        (\textbf{program}\; ((x\;L),(x_1\;L_1)\;\ldots)\;p\dash top), \rho, \sigma &\longrightarrow_{\beta p}\; (\textbf{program}\; ((x_1\;L_1)\;\ldots)\;p\dash top[x := \bm{\Phi^C}(L)]), \rho, \sigma \\ \\
+        eval^{\longrightarrow_{\beta p}}(p) &=\; v\; \textbf{if}\; p, (), () \twoheadrightarrow_{\beta p\cup\beta r} \; (\textbf{program}\; ()\;(v\;\_)) \\
+      \end{align*}
+    \end{minipage}%
+  }
+  \vspace{0.6em}
+  \begin{center}
+    \textbf{
+      $\Phi^V$ : instance-variable-value, \quad
+      $\Phi^I$ : instantiate-linklet, \quad
+      $\Phi^C$ : compile-linklet\\
+      $V^I$ : get import variables, \quad
+      $V^E$ : create variables for exports
+    }
+  \end{center}
+  \caption{Reduction Relation}
+  \label{fig:linklets-reduction-relation}
+\end{figure}
+
+
+
+% \begin{figure}[!htbp]
+%     \footnotesize
+%     \centering
+%     \begin{minipage}{\textwidth}
+%     	\begin{align*}
+%     	\rcinput{x} \rcrel \rcoutput{\sigma[\rho[x]]}{\rho}{\sigma} \\
+%     	\rcinput{(\textbf{var\dash ref}\; x))} \rcrel \rcoutput{v}{\rho}{\sigma}\; \where x \in \rho, \rho[x] \in \sigma, v = \sigma[\rho[x]], v \neq uninit\\
+%     	\rcinput{(\textbf{var\dash ref/no\dash check}\; x))} \rcrel \rcoutput{v}{\rho}{\sigma}\; \where v = \sigma[\rho[x]] \\
+%     	\rcinput{(\textbf{var\dash set!}\; x\; v)} \rcrel \rcoutput{(void)}{\rho}{\sigma_1} \where \sigma_1 = \sigma[\rho[x]\rightarrow v]\\
+%     	\rcinput{(\textbf{var\dash set/check\dash undef!}\; x\; v)} \rcrel \rcoutput{(void)}{\rho}{\sigma_1} \where \sigma_1 = \sigma[\rho[x]\rightarrow v], x \in \rho\\
+%     	\rcinput{(\textbf{set!}\; x\; v)} \rcrel \rcoutput{(void)}{\rho}{\sigma_1} \where \sigma_1 = \sigma[\rho[x]\rightarrow v]\\
+%     	\\
+%     	\redinput{\bm{\Phi^V}(x_{li},\; x)} \rel \redoutput{v}{\rho}{\sigma} \where v\; =\; \sigma[(\sigma[x_{li}])[x]] \\
+%     	%% \redinput{(\textbf{let\dash inst}\; x\; (v\;x_i)\; p\dash top)} \rel \redoutput{p\dash top}{\rho}{\sigma_1} \where \sigma_1 = \sigma[x\rightarrow \sigma[x_i]] \\
+%     	%% \redinput{(\textbf{seq}\; v_{1}\; \ldots\; v_{n})} \rel \redoutput{v_{n}}{\rho}{\sigma} \\
+%     	\redinput{(\bm{\Phi^I}\; (\lb\; x\; v\; \ldots\; v_{l}))} \rel \redoutput{(v_{l}\; x)}{\rho}{\sigma} \\
+%     	EP\;\llbracket (\bm{\Phi^I}(\lb\; x_{t}\; v_p\; \ldots\; (\textbf{define\dash values}\; (x)\; v)\; l\dash top\; \ldots)) \rrbracket, \rel \redoutput{\bm{\Phi^I}(\lb\; x_{t}\; v_p\; \ldots\; l\dash top\; \ldots)}{\rho_1}{\sigma_1} \\
+%     	\;          &\;\; \where \rho_1 = \rho[x\rightarrow cell],\; \sigma_1 = \sigma[cell\rightarrow v] \\
+%     	\redinput{(\bm{\Phi^I}(\la\; c\dash imps \; c\dash exps \; l\dash top \ldots)\; LI\; \ldots)} \rel \redoutput{(\bm{\Phi^I}(\la\; c\dash imps \; c\dash exps \; l\dash top\; \ldots)\; LI\; \ldots\; \textbf{\#:t}\; x_{t})}{\rho}{\sigma_1} \\
+%     	\;          &\;\; \where x_t \notin \mathit{dom}(\sigma), \sigma_1 = \sigma[x_t\rightarrow (linklet\dash instance)] \\
+%     	EP\;\llbracket (\bm{\Phi^I}(\la\; c\dash imps \; c\dash exps \; l\dash top \ldots)\; LI\; \ldots\; \textbf{\#:t}\; x_{t}) \rrbracket, \rho, \sigma\; \rel \redoutput{(\bm{\Phi^I}(\lb\; x_{t}\; l\dash top\; \ldots))}{\rho_2}{\sigma_1} \\
+%     	\; &\;\; \where \rho_1 = \mathit{V}^I(c\dash imps, (LI\; \ldots), \rho) \\
+%     	\;          &\;\; \hspace{0.4cm} (\rho_2, \sigma_1) = \mathit{V}^E(c\dash exps, x_t, \rho_1, \sigma) \\
+%     	(\textbf{program}\; ((x\;L),(x_1\;L_1)\;\ldots)\;p\dash top), \rho, \sigma &\longrightarrow_{\beta p}\; (\textbf{program}\; ((x_1\;L_1)\;\ldots)\;p\dash top[x := \bm{\Phi^C}(L)]), \rho, \sigma \\ \\
+%     	eval^{\longrightarrow_{\beta p}}(p) &=\; v\; \textbf{if}\; p, (), () \twoheadrightarrow_{\beta p\cup\beta r} \; (\textbf{program}\; ()\;(v\;\_)) \\ \\
+%     	%% \mathit{V}^I : c\dash imps \times (LI\;\ldots) \times \rho &\longrightarrow \rho \\
+%     	%% \mathit{V}^I((\overline{(\overline{(\textbf{Import}\; x_{id}\;x_{int}\;x_{ext})})_n}), (\overline{LI_n}), \rho) &= \rho\overline{[x_{id}\rightarrow LI_n[x_{ext}]]}\\ \\
+%     	%% \mathit{V}^E : c\dash exps \times x \times \rho \times \sigma &\longrightarrow \rho \times \sigma \\
+%     	%% \mathit{V}^E((exp\dash obj\;\ldots), x_t, \rho, \sigma) &= \mathit{P}(exp\dash obj, x_t, \sigma[x_t], \rho, \sigma)\;\ldots\\
+%     	%% \mathit{P}((\textbf{Export}\;x_{id}\;x_{int}\;x_{ext}), x_t, LI_t, \rho, \sigma) &= \begin{cases*}
+%     	%%   \rho_1, \sigma & if $\;x_{ext} \in dom(LI_t)$, \where $\rho_1 = \rho[x_{id}\rightarrow LI_t[x_{ext}]]$ \\
+%     	%%   \rho_1, \sigma_1 & if $\;x_{ext} \notin dom(LI_t)$, \where $\rho_1 = \rho[x_{id}\rightarrow var_{new}]$\\
+%     	%%   \;        &\; \hspace{2.6cm} $var_{new} \notin \sigma$ \\
+%     	%%   \;        &\; \hspace{2.6cm} $\sigma_1 = \sigma[var_{new}\rightarrow uninit,$ \\
+%     	%%     \;        &\; \hspace{3.2cm} $x_t\rightarrow LI_t[x_{ext}\rightarrow var_{new}]]$
+%     	%% \end{cases*} \\
+%     	\end{align*}
+%         \end{minipage}
+%     	\centering
+%     	\footnotesize $\Phi^V : \textbf{instance\dash variable\dash value}\:,\: \Phi^I : \textbf{instantiate\dash linklet},\:\Phi^C : \textbf{compile\dash linklet}$
+
+%     	\footnotesize $\mathit{V}^I : \textbf{get  import variables},\: \mathit{V}^E : \textbf{create variables for exports}$
+%     	\caption{Reduction Relation}
+%     	\label{fig:reduction}
+% \end{figure}
