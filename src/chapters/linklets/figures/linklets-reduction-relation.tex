@@ -24,7 +24,18 @@
         \; &\;\; \where \rho_1 = \mathit{V}^I(c\dash imps, (LI\; \ldots), \rho) \\
         \;          &\;\; \hspace{0.4cm} (\rho_2, \sigma_1) = \mathit{V}^E(c\dash exps, x_t, \rho_1, \sigma) \\
         (\textbf{program}\; ((x\;L),(x_1\;L_1)\;\ldots)\;p\dash top), \rho, \sigma &\longrightarrow_{\beta_p}\; (\textbf{program}\; ((x_1\;L_1)\;\ldots)\;p\dash top[x := \bm{\Phi^C}(L)]), \rho, \sigma \\ \\
-        eval^{\longrightarrow_{\beta_p}}(p) &=\; v\; \textbf{if}\; p, (), () \twoheadrightarrow_{\beta_p\cup\beta_l} \; (\textbf{program}\; ()\;(v\;\_)) \\
+        eval^{\longrightarrow_{\beta_p}}(p) &=\; v\; \textbf{if}\; p, (), () \twoheadrightarrow_{\beta_p\cup\beta_l} \; (\textbf{program}\; ()\;(v\;\_)) \\ \\
+        \mathit{V}^I : c\dash imps \times (LI\;\ldots) \times \rho &\longrightarrow \rho \\
+        \mathit{V}^I((\overline{(\overline{(\textbf{Import}\; x_{id}\;x_{int}\;x_{ext})})_n}), (\overline{LI_n}), \rho) &= \rho\overline{[x_{id}\rightarrow LI_n[x_{ext}]]}\\ \\
+        \mathit{V}^E : c\dash exps \times x \times \rho \times \sigma &\longrightarrow \rho \times \sigma \\
+        \mathit{V}^E((exp\dash obj\;\ldots), x_t, \rho, \sigma) &= \mathit{P}(exp\dash obj, x_t, \sigma[x_t], \rho, \sigma)\;\ldots\\
+        \mathit{P}((\textbf{Export}\;x_{id}\;x_{int}\;x_{ext}), x_t, LI_t, \rho, \sigma) &= \begin{cases*}
+          \rho_1, \sigma & if $\;x_{ext} \in dom(LI_t)$, \where $\rho_1 = \rho[x_{id}\rightarrow LI_t[x_{ext}]]$ \\
+          \rho_1, \sigma_1 & if $\;x_{ext} \notin dom(LI_t)$, \where $\rho_1 = \rho[x_{id}\rightarrow var_{new}]$\\
+          \;        &\; \hspace{2.6cm} $var_{new} \notin \sigma$ \\
+          \;        &\; \hspace{2.6cm} $\sigma_1 = \sigma[var_{new}\rightarrow uninit,$ \\
+            \;        &\; \hspace{3.2cm} $x_t\rightarrow LI_t[x_{ext}\rightarrow var_{new}]]$
+        \end{cases*} \\
       \end{align*}
     \end{minipage}%
   }
