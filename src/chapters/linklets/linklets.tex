@@ -107,7 +107,7 @@
 			To clarify and illustrate the semantics of linklets in a more concrete manner, we introduce a small yet informative example of how a \gls{vm} implements a high-level Racket feature using linklets: the top-level \gls{repl}. Although the top-level implementation itself is quite complex and beyond our scope, this example demonstrates clearly how the runtime utilizes high-level features provided via linklets—particularly those exported by the expander, including \racketcode{read}, \racketcode{expand}, and \racketcode{eval}—to create a \gls{repl} behavior.
 
 		\paragraph{}% 9
-			As a running example, consider the following simple \gls{repl} interaction, in which a closure \racketcode{k} references an initially undefined variable \racketcode{a}. Subsequently, the variable \racketcode{a} is defined, and the closure is invoked, yielding the result 10. This scenario is intended to illustrate how linklets implement dynamic variable bindings.
+			As a running example, consider the simple \gls{repl} interaction in \figref{fig:toplevel-example-repl-interactions}, in which a closure \racketcode{k} references an initially undefined variable \racketcode{a}. Subsequently, the variable \racketcode{a} is defined, and the closure is invoked, yielding the result 10. This scenario is intended to illustrate how linklets implement dynamic variable bindings.
 
 		\inputFigure{linklets}{toplevel-example-interaction-listing}
 
@@ -231,18 +231,22 @@
 			\gls{lkl}, $\beta_l$. For clarity, the reduction of the programs and the linklet
 			instantiation is defined together by the same relation ($\beta_p$) so that
 			the whole evaluation generating a single small-step sequence of
-			reductions from programs to values.
+			reductions from programs to values. Some of the reduction rules for trivial forms such as \racketcode{seq} and \racketcode{let-inst} are omitted for brevity.
 		\end{paragraph-here}
 
+		\subsection{Emulating Top-level REPL Example on Formalism}
+		\label{subsec:toplevel-example-formal}
 
-		\begin{paragraph-here}
-			As an example, we can represent the top-level repl example from the
+		\inputFigure{linklets}{toplevel-example-formal-program}
+
+		\begin{paragraph-here}% 12
+			As an example, we can represent the top-level \gls{repl} example from the
 			previous section as a linklet \emph{program}, and simulate the
-			process. The (multi-step) reduction below demonstrate the compilation of each
-			linklet, representing the linklets produced by the expander at each
-			repl interaction. After the compilation, the linklets are substituted
-			in the body and the evaluation starts with reducing the
-			body.
+			process. \figref{fig:toplevel-example-repl-interactions-formal} shows the description of the example top-level \gls{repl} interaction from \secref{subsec:toplevel-example} (in \figref{fig:toplevel-example-repl-interactions}) as a \emph{program} form. We prepare the linklets representing each \gls{repl} interaction, and instantiate (execute) them using a target instance we introduce using the \racketcode{let-inst} form.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 13
+			\figref{table:toplevel-example-step-by-step-formal} shows the initial (multi-step) reduction steps for $\betaprel$ on our program, conforming to the reduction relation defined in \figref{fig:linklets-reduction-relation}. The reduction begins by running \racketcode{compile-linklet} on all the linklets provided to the \emph{program} form. And after the compilation, the linklets are substituted in the body and the evaluation begins. For clarity in the section, the rest of the reduction steps, reducing the program all the way to the value 10 is moved into the \appendixRef{appendix:formal-reduction-steps-toplevel-example}.
 		\end{paragraph-here}
 
 
@@ -292,55 +296,7 @@
 			\verb|seq| form.
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			\begin{todo}[TECH TODO]
-				Step by step toplevel example
-			\end{todo}
-
-			% \begin{adjustbox}{center}
-			% %\begin{table}[h!]
-			% %\vspace{-0.3cm}
-			% %\centering
-			% %\scriptsize
-			% \footnotesize
-			% \begin{tabular}{lc|c|c}
-			% 	&\textbf{program} & \textbf{$\rho$} & \textbf{$\sigma$} \\ \hline \hline
-			% 	&\begin{lstlisting}[mathescape]
-			% (program ([l1 (linklet () (a k) (define-values (k) (lambda () a)) (void))]
-			% 		[l2 (linklet () (a) (define-values (a) 10) (void))]
-			% 		[l3 (linklet () (k) (k))])
-			% (let-inst t (make-instance)
-			% 	(seq ($\phi^I$ l1 #:t t) ($\phi^I$ l2 #:t t) ($\phi^I$ l3 #:t t))))
-			% 	\end{lstlisting} & [] & [] \\ \hline
-			% 	$\longrightarrow_{\beta p}*$&\begin{lstlisting}[mathescape]
-			% (program ()
-			% (let-inst t (make-instance)
-			% 	(seq ($\phi^I$ (L$\alpha$ () ((Export a1 a a) (Export k1 k k))
-			% 				(define-values (k) (lambda () (var-ref a1)))
-			% 				(var-set! k1 k) (void)) #:t t)
-			% 		($\phi^I$ (L$\alpha$ () ((Export a1 a a))
-			% 				(define-values (a) 10) (var-set! a1 a) (void)) #:t t)
-			% 		($\phi^I$ (L$\alpha$ () ((Export k1 k k)) ((var-ref k1))) #:t t))))
-			% 	\end{lstlisting} & [] & [] \\ \hline
-			% 	$\longrightarrow_{\beta p}*$&\begin{lstlisting}[mathescape]
-			% (program ()
-			% (seq ($\phi^I$ (L$\beta$ t (define-values (k) (lambda () (var-ref a1))) (var-set! k1 k) (void)))
-			% 		($\phi^I$ (L$\alpha$ () ((Export a1 a a))
-			% 				(define-values (a) 10) (var-set! a1 a) (void)) #:t t)
-			% 		($\phi^I$ (L$\alpha$ () ((Export k1 k k)) ((var-ref k1))) #:t t))))
-			% 	\end{lstlisting} & \thead{[k1 $\rightarrow$ $var_k$, \\a1 $\rightarrow$ $var_a$]} & \thead{[$var_a,var_k$ $\rightarrow$ uninit,\\ t $\rightarrow$ (linklet-instance \\ (a $var_a$) (k $var_k$)), \\li $\rightarrow$ (linklet-instance)]} \\ \hline
-			% 	$\longrightarrow_{\beta p}*$&\begin{lstlisting}[mathescape]
-			% (program ()
-			% (seq ($\phi^I$ (L$\beta$ t (var-set! k1 k) (void)))
-			% 		($\phi^I$ (L$\alpha$ () ((Export a1 a a))
-			% 				(define-values (a) 10) (var-set! a1 a) (void)) #:t t)
-			% 		($\phi^I$ (L$\alpha$ () ((Export k1 k k)) ((var-ref k1))) #:t t))))
-			% 	\end{lstlisting} & \thead{[k $\rightarrow$ $cell_1$,\\k1 $\rightarrow$ $var_k$,\\a1 $\rightarrow$ $var_a$]} & \thead{[$cell_1$ $\rightarrow$ closure,\\$var_a,var_k$ $\rightarrow$ uninit,\\t $\rightarrow$ (linklet-instance\\(a $var_a$) (k $var_k$)),\\li $\rightarrow$ (linklet-instance)]} \\ \hline
-			% \end{tabular}
-			% %\end{table}
-			% \end{adjustbox}
-
-		\end{figure-here}
+		\inputFigure{linklets}{toplevel-example-step-by-step-formal-table}
 
 
 

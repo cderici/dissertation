@@ -1,0 +1,40 @@
+\begin{table}[!h]
+  \footnotesize
+   %\renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{l >{\centering\arraybackslash}m{0.45\textwidth} c c}  % {@{}p{0.26\textwidth} p{0.30\textwidth} p{0.40\textwidth}@{}}
+	&\textbf{program} & \textbf{$\rho$} & \textbf{$\sigma$} \\ \hline \hline
+	&\begin{lstlisting}[style=numberless]
+(program ([l1 (linklet () (a k) (define-values (k) (lambda () a)) (void))]
+		[l2 (linklet () (a) (define-values (a) 10) (void))]
+		[l3 (linklet () (k) (k))])
+(let-inst t (make-instance)
+	(seq ($\phi^I$ l1 #:t t) ($\phi^I$ l2 #:t t) ($\phi^I$ l3 #:t t))))
+	\end{lstlisting} & [] & [] \\ \hline
+	$\longrightarrow_{\beta p}*$&\begin{lstlisting}[style=numberless]
+(program ()
+(let-inst t (make-instance)
+	(seq ($\phi^I$ (L$\alpha$ () ((Export a1 a a) (Export k1 k k))
+				(define-values (k) (lambda () (var-ref a1)))
+				(var-set! k1 k) (void)) #:t t)
+		($\phi^I$ (L$\alpha$ () ((Export a1 a a))
+				(define-values (a) 10) (var-set! a1 a) (void)) #:t t)
+		($\phi^I$ (L$\alpha$ () ((Export k1 k k)) ((var-ref k1))) #:t t))))
+	\end{lstlisting} & [] & [] \\ \hline
+	$\longrightarrow_{\beta p}*$&\begin{lstlisting}[style=numberless]
+(program ()
+(seq ($\phi^I$ (L$\beta$ t (define-values (k) (lambda () (var-ref a1))) (var-set! k1 k) (void)))
+		($\phi^I$ (L$\alpha$ () ((Export a1 a a))
+				(define-values (a) 10) (var-set! a1 a) (void)) #:t t)
+		($\phi^I$ (L$\alpha$ () ((Export k1 k k)) ((var-ref k1))) #:t t))))
+	\end{lstlisting} & \thead{[k1 $\rightarrow$ $var_k$, \\a1 $\rightarrow$ $var_a$]} & \thead{[$var_a,var_k$ $\rightarrow$ uninit,\\ t $\rightarrow$ (linklet-instance \\ (a $var_a$) (k $var_k$)), \\li $\rightarrow$ (linklet-instance)]} \\ \hline
+	$\longrightarrow_{\beta p}*$&\begin{lstlisting}[style=numberless]
+(program ()
+(seq ($\phi^I$ (L$\beta$ t (var-set! k1 k) (void)))
+		($\phi^I$ (L$\alpha$ () ((Export a1 a a))
+				(define-values (a) 10) (var-set! a1 a) (void)) #:t t)
+		($\phi^I$ (L$\alpha$ () ((Export k1 k k)) ((var-ref k1))) #:t t))))
+	\end{lstlisting} & \thead{[k $\rightarrow$ $cell_1$,\\k1 $\rightarrow$ $var_k$,\\a1 $\rightarrow$ $var_a$]} & \thead{[$cell_1$ $\rightarrow$ closure,\\$var_a,var_k$ $\rightarrow$ uninit,\\t $\rightarrow$ (linklet-instance\\(a $var_a$) (k $var_k$)),\\li $\rightarrow$ (linklet-instance)]} \\ \hline
+  \end{tabular}
+  \caption{Top-level REPL Example Reduction Steps using $\betaprel$}
+  \label{table:toplevel-example-step-by-step-formal}
+\end{table}
