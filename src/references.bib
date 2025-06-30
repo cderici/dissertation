@@ -425,6 +425,33 @@
   file = {C:\Users\caner\Zotero\storage\B2QBSUWA\pypy.html}
 }
 
+@article{randomizedTesting,
+  title = {Random Testing for Higher-Order, Stateful Programs},
+  author = {Klein, Casey and Flatt, Matthew and Findler, Robert Bruce},
+  year = {2010},
+  month = oct,
+  journal = {SIGPLAN Not.},
+  volume = {45},
+  number = {10},
+  pages = {555--566},
+  issn = {0362-1340},
+  doi = {10.1145/1932682.1869505},
+  urldate = {2025-06-28},
+  abstract = {Testing is among the most effective tools available for finding bugs. Still, we know of no automatic technique for generating test cases that expose bugs involving a combination of mutable state and callbacks, even though objects and method overriding set up exactly that combination. For such cases, a test generator must create callbacks or subclasses that aggressively exercise side-effecting operations using combinations of generated objects.This paper presents a new algorithm for randomly testing programs that use state and callbacks. Our algorithm exploits a combination of contracts and environment bindings to guide the test-case generator toward interesting inputs. Our prototype implementation for Racket (formerly PLT Scheme) - which has a Java-like class system, but with first-class classes as well as gbeta-like augmentable methods - uncovered dozens of bugs in a well-tested and widely used text-editor library.We describe our approach in a precise, formal notation, borrowing the techniques used to describe operational semantics and type systems. The formalism enables us to provide a compact and self-contained explanation of the core of our technique without the ambiguity usually present in pseudo-code descriptions.},
+  file = {C:\Users\caner\Zotero\storage\Q29ZZ87P\Klein et al. - 2010 - Random testing for higher-order, stateful programs.pdf}
+}
+
+@book{redexBook,
+  title = {Semantics {{Engineering}} with {{PLT Redex}}},
+  author = {Felleisen, Matthias and Findler, Robert Bruce and Flatt, Matthew},
+  year = {2009},
+  month = jul,
+  edition = {1st},
+  publisher = {The MIT Press},
+  abstract = {This text is the first comprehensive presentation of reduction semantics in one volume; it also introduces the first reliable and easy-to-use tool set for such forms of semantics. Software engineers have long known that automatic tool support is critical for rapid prototyping and modeling, and this book is addressed to the working semantics engineer (graduate student or professional language designer). The book comes with a prototyping tool suite to develop, explore, test, debug, and publish semantic models of programming languages. With PLT Redex, semanticists can formulate models as grammars and reduction models on their computers with the ease of paper and pencil. The text first presents a framework for the formulation of language models, focusing on equational calculi and abstract machines, then introduces PLT Redex, a suite of software tools for expressing these models as PLT Redex models. Finally, experts describe a range of models formulated in Redex. PLT Redex comes with the PLT Scheme implementation, available free at http://www.plt-scheme.org/. Readers can download the software and experiment with Redex as they work their way through the book. For more information (including the preface, a sample syllabus, and a quick introduction to Redex), see the Redex website at http://redex.plt-scheme.org/. Matthias Felleisen, Robert Bruce Findler, and Matthew Flatt are the authors (with Shiram Krishnamurthi) of How to Design Programs: An Introduction to Programming and Computing, also published by the MIT Press.},
+  isbn = {978-0-262-06275-6}
+}
+
 @inproceedings{rpython07,
   title = {{{RPython}}: {{A Step Towards Reconciling Dynamically}} and {{Statically Typed OO Languages}}},
   shorttitle = {{{RPython}}},
