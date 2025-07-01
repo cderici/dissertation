@@ -1,5 +1,5 @@
 \chapter[\texorpdfstring{PROGRAMMING LANGUAGES \& PORTABILITY}
-                          {Linklets}]{PROGRAMMING LANGUAGES \& PORTABILITY}
+                          {3. Linklets}]{PROGRAMMING LANGUAGES \& PORTABILITY}
 \label{chapter:linklets}
 
 	\begin{chaptersynopsis}
@@ -41,7 +41,7 @@
 		In this chapter, we examine improvements to language portability, using Racket's linklets as a concrete example. We introduce a formal specification along with an executable PLT Redex model to describe the operational semantics of linklets. This formalism forms the basis for understanding how self-hosting is achieved in the meta-tracing JIT-compiled Pycket implementation described in \chapterRef{chapter:pycket}, supporting the main thesis statement.
 
 
-	\section[\texorpdfstring{Enriching Compiler \& Runtime Communication}{Motivation for Linklets}]{Enriching Compiler \& Runtime Communication}
+	\section[\texorpdfstring{Enriching Compiler \& Runtime Communication}{Motivation}]{Enriching Compiler \& Runtime Communication}
 
 		\paragraph{}% 1
 			A tight coupling exists between the runtime and the reduction semantics of a programming language. This coupling arises because the runtime must concretely implement the abstract semantics specified by the language. For example, languages with macro systems may require runtimes to adopt specialized parsing mechanisms to handle macro expansions, differing from standard reading approaches. Similarly, custom serialization semantics defined by a language necessitate that the runtime can correctly serialize and deserialize language-specific objects. Additionally, languages that define semantics for user-level (green) threads demand explicit runtime support for mapping these constructs to \gls{os} threads. Clearly specifying these interactions is essential for streamlined and efficient language implementations.
@@ -71,7 +71,7 @@
 		\paragraph{}% 8
 			In the next section, we delve into the semantics of the central construct enabling this enhanced portability—linklets. We present a formal operational semantics for linklets and describe an executable PLT Redex model that captures their compilation and execution semantics.
 
-	\section[\texorpdfstring{Linklets as Units of Compilation}{Using Linklets}]{Linklets as Units of Compilation}
+	\section[\texorpdfstring{Linklets as Units of Compilation}{Example Use: REPL}]{Linklets as Units of Compilation}
 		\label{section:linklet-semantics}
 
 		\paragraph{}% 1
@@ -135,7 +135,7 @@
 			This dynamic interplay of linklets is made possible by the clever use of linklet variables and target instances, specified by the semantics that are embedded in the \racketcode{compile-linklet}. In the subsequent section, we present these formal operational semantics in detail, underpinning the correctness and robustness of linklet interactions and their use in runtime implementations.
 
 
-	\section[\texorpdfstring{Formal Operational Semantics of Linklets}{Formal Semantics for Linklets}]{Formal Operational Semantics of Linklets}
+	\section[\texorpdfstring{Formal Operational Semantics of Linklets}{Formal Semantics}]{Formal Operational Semantics of Linklets}
 
 		\paragraph{}% 1
 			In this section, we present a formal specification of the operational semantics of linklets, which serves as the foundation for their implementation in Pycket, discussed in the following chapter (\chapterRef{chapter:pycket}). We develop this formalism using the PLT Redex language, making it executable and enabling rigorous validation through randomized testing~\cite{redexBook, randomizedTesting}. The validation methodology, including details of randomized testing and model correctness, is further elaborated in \chapterRef{chapter:validation}.

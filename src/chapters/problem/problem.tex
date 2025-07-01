@@ -1,5 +1,5 @@
 \chapter[\texorpdfstring{PERFORMANCE EVALUATION OF SELF-HOSTING ON META-TRACING}
-                          {Performance Evaluation}]{PERFORMANCE EVALUATION OF SELF-HOSTING ON META-TRACING}
+                          {6. Performance Evaluation}]{PERFORMANCE EVALUATION OF SELF-HOSTING ON META-TRACING}
 
 	\label{chapter:problem}
 
@@ -42,7 +42,7 @@
 	\paragraph{}%
 		In Chapter~\ref{chapter:solution}, we propose concrete remedies for each challenge we expose and, supported by preliminary evidence, argues that these directions warrant deeper investigation as a general strategy for improving the performance of self-hosting on meta-tracing systems.
 
-	\section{Pycket's Performance Characteristics}
+	\section[\texorpdfstring{Pycket's Performance Characteristics}{Pycket's Performance}]{Pycket's Performance Characteristics}
 	\label{section:pycket-performance-characteristics}
 
 	% \begin{sectionpoint}
@@ -73,7 +73,7 @@
 	\paragraph{}%
 		Any functionality that Pycket now imports as Racket code\footnote{i.e., bootstrapping linklets} would, in a handwritten RPython interpreter, exploit meta-interpreter hints-such as \verb|@jit.unroll_safe|-to guide the JIT back-end. Because the imported modules arrive as opaque ASTs, Pycket cannot inject such hints, so the tracer sees long interpreter-style dispatch loops without guidance. Moreover, introducing the linklet layer lets Pycket execute large Racket programs—including the 2642-function expander—entirely inside the JIT. Bootstrapping the \emph{racket/base} language alone instantiates close to a hundred modules before user code starts. Although micro-benchmarks are unaffected (the back-end is unchanged), these large workloads exacerbate all the aforementioned issues. In short, the very extensibility that makes self-hosting attractive also deprives the meta-tracer of inside information, limiting trace quality and prolonging warm-up.
 
-	\section{Module and Language Loading}
+	\section[\texorpdfstring{Module and Language Loading}{Loading a Language}]{Module and Language Loading}
 	\label{section:module-and-language-loading}
 
 		% \begin{sectionpoint}
@@ -164,7 +164,7 @@
 		\paragraph{}%
 			Regardless of the source of each module, every macro expansion of user code ultimately depends on the performance of the underlying expander. Pycket's ability to inline into, and sometimes across, expander helpers opens new optimization opportunities, but it also means that deficiencies in the expander's own performance now directly affect application start-up. The next sections discuss those interactions in detail.
 
-	\section{The Nature of the Beast: Tracing Data-Dependent Computation}
+	\section[\texorpdfstring{The Nature of the Beast: Tracing Data-Dependent Computation}{The Nature of the Beast}]{The Nature of the Beast: Tracing Data-Dependent Computation}
 	\label{section:nature-of-the-beast}
 
 		% \begin{sectionpoint}
@@ -332,7 +332,7 @@
 			\paragraph{}%
 				Addressing this challenge requires further research and careful consideration. At the heart of this challenge is the fundamental violation of the second assumption underlying tracing JITs, as previously discussed in \chapterRef{chapter:rpython}. The second assumption—that multiple iterations of the same loop are likely to traverse similar code paths—is directly contradicted by the highly data-dependent, branch-heavy nature of interpreter-style computations such as those found in the expander. This inherent violation explains why such computations, although critical for self-hosting, remain particularly ill-suited to meta-tracing and tracing JITs in general.
 
-	\section{Memory Issues with Self-Hosting}
+	\section[\texorpdfstring{Memory Issues with Self-Hosting}{Memory Issues}]{Memory Issues with Self-Hosting}
 	\label{section:memory}
 
 		\begin{mainpoint}
@@ -360,7 +360,7 @@
 			Various paragraphs discussing experiments.
 		\end{paragraph-here}
 
-	\section{Overall Performance of Pycket Self-hosting Racket}
+	\section[\texorpdfstring{Overall Performance of Pycket Self-hosting Racket}{Overall Performance}]{Overall Performance of Pycket Self-hosting Racket}
 	\label{section:cross-benchmarks}
 
 		\begin{mainpoint}

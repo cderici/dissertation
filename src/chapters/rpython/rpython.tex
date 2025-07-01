@@ -1,7 +1,7 @@
 % Tracing JITs and Meta-Tracing Frameworks
 % Tracing Just-in-time (JIT) Compilers and Meta-tracing
 \chapter[\texorpdfstring{META-TRACING JUST-IN-TIME (JIT) COMPILERS}
-                          {RPython \& Meta-tracing}]{META-TRACING JUST-IN-TIME (JIT) COMPILERS}
+                          {2. RPython \& Meta-tracing}]{META-TRACING JUST-IN-TIME (JIT) COMPILERS}
     \label{chapter:rpython}
 
     \begin{chaptersynopsis}
@@ -174,7 +174,7 @@
         \paragraph{}%
             While we will explore Pycket’s performance characteristics further in \secref{section:pycket-performance-characteristics}, we first turn to relevant RPython trace optimizations, which will provide the context necessary for a detailed technical discussion about performance considerations in \chapterRef{chapter:problem}.
 
-    \section{Trace Optimizations \& Runtime Feedback}
+    \section[\texorpdfstring{Trace Optimizations \& Runtime Feedback}{Trace Optimizations}]{Trace Optimizations \& Runtime Feedback}
 
         \paragraph{}%
             Traces are central to the performance characteristics of tracing \gls{jit} compilers. Good-quality traces directly influence the efficiency and effectiveness of \gls{jit} compilation. Quality here implies that traces capture frequently executed execution paths clearly and succinctly, avoiding excessive guards or unnecessary complexity. For example, traces that are tighter—having fewer exits—maximize the value derived from compiled machine code and facilitate other optimization opportunities, such as allocation removal. In contrast, poor-quality traces, characterized by multiple exit points or redundant control-flow checks, can introduce significant performance penalties, leading to frequent trace invalidations or costly fallbacks to interpreter execution.

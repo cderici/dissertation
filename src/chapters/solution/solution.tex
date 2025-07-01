@@ -1,5 +1,5 @@
 \chapter[\texorpdfstring{APPROACHES TO IMPROVE SELF-HOSTING PERFORMANCE}
-                          {Improving Performance}]{APPROACHES TO IMPROVE SELF-HOSTING PERFORMANCE}
+                          {7. Improving Performance}]{APPROACHES TO IMPROVE SELF-HOSTING PERFORMANCE}
 
 	\label{chapter:solution}
 
@@ -41,7 +41,7 @@
   \paragraph{}%
     In this chapter, we explore targeted strategies to enhance performance specifically for branch-heavy computations on meta-tracing JIT compilers and propose viable directions for addressing these central performance challenges. First, we discuss techniques to guide the JIT compiler away from generating extensive, non-reusable traces that degrade performance. Second, we propose methods aimed explicitly at mitigating memory pressure—a critical bottleneck in self-hosting environments. While recognizing the preliminary nature of our current evidence, as discussed in detail in \chapterRef{chapter:problem}, we nonetheless demonstrate the potential efficacy of these approaches, providing motivation for further research and investigation.
 
-	\section{Guiding Tracer Away from Branch-Heavy Computation}
+	\section[\texorpdfstring{Guiding Tracer Away from Branch-Heavy Computation}{Hot Branches}]{Guiding Tracer Away from Branch-Heavy Computation}
     \label{section:hot-branches}
 		\begin{mainpoint}
 			Trying to detect branch-heavy computations and help the tracer forgo them seems like a promising idea.
@@ -69,7 +69,7 @@
       Talk about the experiment, further breakdown if needed.
     \end{paragraph-here}
 
-	\section{Mitigating Memory Pressure in Branch-Heavy Computation}
+	\section[\texorpdfstring{Mitigating Memory Pressure in Branch-Heavy Computation}{CEK + Stackful Model}]{Mitigating Memory Pressure in Branch-Heavy Computation}
     \label{section:stackful}
 
 		\begin{mainpoint}
