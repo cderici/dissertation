@@ -1,10 +1,10 @@
-\chapter[\texorpdfstring{LANGUAGE-POWERED RUNTIMES}
-                          {4. Self-hosting Pycket}]{LANGUAGE-POWERED RUNTIMES}
+\chapter[\texorpdfstring{LANGUAGE-ENHANCED RUN-TIMES}
+                          {4. Pycket as Full Racket}]{LANGUAGE-ENHANCED RUN-TIMES}
 	\label{chapter:pycket}
 
 	\begin{chaptersynopsis}
 
-        Languages can influence the capabilities of the runtime they are implemented on.
+        Languages can influence the capabilities of the run-time they are implemented on.
 
 		Concrete realization of self-hosting of Racket on Pycket.
 
@@ -12,7 +12,7 @@
 
         Sections:
 		\begin{itemize}
-			\item Concrete Implementations of Linklets
+			\item Implementing Linklets on Pycket
 
 			This is how Pycket is enhanced to interface with linklets. Representation choices, etc.
 
@@ -31,7 +31,7 @@
 		Pycket is a suitable host and environment for proving the self-hosting hypothesis.
 	\end{paragraph-here}
 
-	\section{Concrete Implementations of Linklets}
+	\section[\texorpdfstring{Implementing Linklets on Pycket}{Linklets on Pycket}]{Implementing Linklets on Pycket}
 
 		\begin{mainpoint}
 			This is how Pycket is enhanced to interface with linklets. Representation choices, etc.
@@ -41,7 +41,7 @@
 
 		Chez Scheme represents them as functions, here's how Pycket represents and implements them.
 
-	\section{Enhancing Runtime with Bootstrapping Linklets}
+	\section[\texorpdfstring{Enhancing Run-time with Bootstrapping Linklets}{Bootstrapping Linklets}]{Enhancing Run-time with Bootstrapping Linklets}
 		\begin{mainpoint}
 			Importing functionality straight from the language in the form of linklets allows the language to shape the behavior of the run-time.
 		\end{mainpoint}
@@ -57,7 +57,7 @@
 			\end{todo}
 		\subsection{Language Utilities: Fasl \& Regexp Linklets}
 
-	\section{From Rudimentary Interpreter to Full Language Implementation}
+	\section[\texorpdfstring{From Rudimentary Interpreter to Full Language Implementation}{Pycket Elevated}]{From Rudimentary Interpreter to Full Language Implementation}
 
 		\begin{mainpoint}
             Pycket becomes a full working Racket, proving the self-hosting hypothesis.
@@ -66,7 +66,7 @@
         \end{mainpoint}
 
         \begin{todo}
-			A rudimentary interpreter can be bootstrapped into a full language implementation by importing linklets into the runtime.
+			A rudimentary interpreter can be bootstrapped into a full language implementation by importing linklets into the run-time.
 		\end{todo}
 
 		\begin{todo}[Import]
