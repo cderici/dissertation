@@ -14,7 +14,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ghcr.io/xu-cheng/texlive-full:20240420
+    container: ghcr.io/xu-cheng/texlive-full:20250401
 
     steps:
       - uses: actions/checkout@v4
