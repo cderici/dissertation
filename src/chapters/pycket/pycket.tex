@@ -3,11 +3,29 @@
 	\label{chapter:pycket}
 
 	\begin{chaptersynopsis}
-		Languages can influence the capabilities of the runtime they are implemented on.
 
-		Self-hosting of Racket is realized on Pycket.
+        Languages can influence the capabilities of the runtime they are implemented on.
 
-	\end{chaptersynopsis}
+		Concrete realization of self-hosting of Racket on Pycket.
+
+        \vspace{2em}
+
+        Sections:
+		\begin{itemize}
+			\item Concrete Implementations of Linklets
+
+			This is how Pycket is enhanced to interface with linklets. Representation choices, etc.
+
+			\item Enhancing Run-time with Bootstrapping Linklets
+
+			Importing functionality straight from the language in the form of linklets allows the language to shape the behavior of the run-time.
+
+			\item From Rudimentary Interpreter to Full Language Implementation
+
+			Pycket becomes a full working Racket, proving the self-hosting hypothesis.
+
+		\end{itemize}
+    \end{chaptersynopsis}
 
 	\begin{paragraph-here}
 		Pycket is a suitable host and environment for proving the self-hosting hypothesis.
@@ -16,15 +34,18 @@
 	\section{Concrete Implementations of Linklets}
 
 		\begin{mainpoint}
-			Runtimes can represent linklets however they want.
-
-			Chez Scheme represents them as functions, here's how Pycket represents and implements them.
+			This is how Pycket is enhanced to interface with linklets. Representation choices, etc.
 		\end{mainpoint}
+
+		Runtimes can represent linklets however they want.
+
+		Chez Scheme represents them as functions, here's how Pycket represents and implements them.
 
 	\section{Enhancing Runtime with Bootstrapping Linklets}
 		\begin{mainpoint}
-			Importing functionality straight from the language in the form of linklets allows the language to shape the runtime.
+			Importing functionality straight from the language in the form of linklets allows the language to shape the behavior of the run-time.
 		\end{mainpoint}
+
 		\subsection{Interfacing with the Compiler: Expander Linklet}
 
 		\subsection{Interfacing with the Host Environment: IO \& Thread Linklets}
@@ -36,10 +57,10 @@
 			\end{todo}
 		\subsection{Language Utilities: Fasl \& Regexp Linklets}
 
-	\section{Growing Pycket into full a Racket Implementation}
+	\section{From Rudimentary Interpreter to Full Language Implementation}
 
 		\begin{mainpoint}
-            How it's all tied up together to demonstrate the self-hosting hypothesis.
+            Pycket becomes a full working Racket, proving the self-hosting hypothesis.
 
 			\textit{Self-hosting of full-scale functional languages on meta-tracing just-in-time (JIT) compilers is achievable.}
         \end{mainpoint}
