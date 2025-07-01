@@ -1,7 +1,7 @@
 name: Build dissertation
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   push:
     branches: [ main ]
   schedule:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ghcr.io/xu-cheng/texlive-full:latest
+    container: ghcr.io/xu-cheng/texlive-full:20240420
 
     steps:
       - uses: actions/checkout@v4
