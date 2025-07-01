@@ -27,8 +27,27 @@
 		\end{itemize}
     \end{chaptersynopsis}
 
-	\begin{paragraph-here}
-		Pycket is a suitable host and environment for proving the self-hosting hypothesis.
+	\begin{paragraph-here}% 1
+		Languages that influence/enhance their run-times/VMs that implement them.
+
+		\begin{todo}[TECH TODO]
+			fidn some examples for this
+		\end{todo}
+	\end{paragraph-here}
+
+	\begin{paragraph-here}% 2
+		Some are greater than others. With Racket's linklets, self-hosting is possible.
+	\end{paragraph-here}
+
+	\begin{paragraph-here}% 3
+		Recall Pycket from chapter:rpython, a rudimentary interpreter for Racket.	\end{paragraph-here}
+
+	\begin{paragraph-here}% 4
+		What does "a full Racket implementation" mean, then?
+	\end{paragraph-here}
+
+	\begin{paragraph-here}% 5
+		With realizing what we talked about in chapter:linklets, in this chapter we provide implementation details for turning Pycket from a rudimentary interpreter into a working full Racket implementation
 	\end{paragraph-here}
 
 	\section[\texorpdfstring{Implementing Linklets on Pycket}{Linklets on Pycket}]{Implementing Linklets on Pycket}
@@ -37,9 +56,58 @@
 			This is how Pycket is enhanced to interface with linklets. Representation choices, etc.
 		\end{mainpoint}
 
-		Runtimes can represent linklets however they want.
+		\begin{paragraph-here}% 6
+			The first step in establishing an interface with linklets is to establish a representation for linklets. In Pycket we represent linklets with a first-class Racket value W\_Linklet class (that's derived from W\_Object) that looks like this.......
+
+			and maybe "because"? like, why did we choose a class, while Chez chose a function..
+
+			Runtimes can represent linklets however they want.
 
 		Chez Scheme represents them as functions, here's how Pycket represents and implements them.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 7
+			The representation of linklets directly effect the implementation of `compile-linklet` and `instantiate-linklet`. Recall that the design of linklets doesn't enforce a particular representation, so `compile-linklet` and `instantiate-linklet` are therefore the manifestations of the hosting run-time's representation.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 8
+			`compile-linklet` does this high-level stuff... recall that we introduced its semantics earlier.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 9
+			We start with processing inputs and exports... gensym stuff
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 10
+			Then we move on to processing the body. We first make a pass for collecting all the targets of `set!` calls and the ones defined in `define-values` forms. Then we process the body forms one by one. This compilation is largely s-exp->ast, the only interesting cases are the linklet-variable related forms, defined in Table 3.1 in chapter:linklets.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 11
+			Recall that linklet variables are just variables. They're represented with W\_Cell. and W\_Cell are ...............
+
+				check pycketmain for this.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 12
+			For each toplevel defined identifier that's also exported, we emit an additional `variable-set!` form. For every exported identifier that's a target for `set!` we turn the `set!` form into a `variable-set!/check-undefined` form. For every reference to an exported id that's not defined at the toplevel, or one that's a target of a `set!`, we emit a `variable-ref` form. Finally for every reference to an imported variable, we introduce a `variable-ref/no-check` that retrieves a value from a linklet variable without checking existence. We can get away with not checking for the existence of such a variable at run-time because the instantiation would fail if the variable can't be imported to start with.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 13
+			After the whole s-expression for a linklet is processed, the `compile-linklet` outputs a W\_Linklet object that contains.....
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 14
+			`instantiate-linklet` does this high-level stuff... essentially implementing the reduction relation in the Figure..
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 15
+			It first determines if this is a targeted or regular inst and ensures we have a target instance to work with... Then processes imports and exports.. Finally it goes into the CEK loop, loading its own type of continuations (e.g. instantiate\_def\_cont, instantiate\_val\_cont, etc) to carry out the instantiation, plugging in either a value or an instance to its own continuation depending on the mode of the instantiation.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 16
+			Having `compile-linklet` and `instantiate-linklet` enables Pycket to take any `\#\%kernel` code in the form of a linklet s-expression, and execute it. Together with the linklet representation, they provide the foundation for Pycket to load Racket's own extensions to its runtime that we'll refer to as the bootstrapping linklets. These linklets contain the implementations for major high-level Racket subsystems such as the macro expander and the module system and more that allows the language to self-host on any run-time that can load them. In the next section, we'll explore the details of this.
+		\end{paragraph-here}
+
 
 	\section[\texorpdfstring{Enhancing Run-time with Bootstrapping Linklets}{Bootstrapping Linklets}]{Enhancing Run-time with Bootstrapping Linklets}
 		\begin{mainpoint}
@@ -72,6 +140,9 @@
 		\begin{todo}[Import]
 			Section 3.3 Making Pycket an Independent Self-Hosting Racket of the proposal document is relevant for this section.
 		\end{todo}
+
+Recall from \secref{section:pycket-primer} that Pycket uses Racket binary.
+\figref{fig:old-pycket-workflow-vertical}
 
 
 
