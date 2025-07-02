@@ -1,0 +1,33 @@
+\begin{figure}[!htbp]
+  \centering
+  \begin{minipage}{0.7\textwidth}
+  \begin{lstlisting}[style=bashstyle]
+(namespace-require (lib "racket/base")) ...                1
+making instance : "'stx"                                   2
+making instance : "'#%runtime"                             3
+making instance : "'qq-and-or"                             4
+making instance : "'gen-temp"                              5
+making instance : "'cond"                                  6
+making instance : "'member"                                7
+making instance : "'define-et-al"                          8
+making instance : "'#%paramz"                              9
+making instance : "'#%unsafe"                             10
+making instance : "'ellipses"                             11
+making instance : "'sc"                                   12
+... <100 lines removed>
+making instance : "'submodule"                           112
+making instance : "'generic-interfaces"                  113
+making instance : "'print-value-columns"                 114
+making instance : "'kw-syntax-binding"                   115
+making instance : "'kw-syntax-binding"                   116
+"module-prefetch: (syntax/readerr) in: #<path>"          117
+making instance : "'readerr"                             118
+making instance : "'module-reader"                       119
+making instance : "'module-reader"                       120
+making instance : "(submod 'base reader)"                121
+Init lib : racket/base loaded...                         122
+  \end{lstlisting}
+  \end{minipage}
+  \caption{Loading racket/base Modules}
+  \label{fig:racket-base-loading-no-compiled}
+\end{figure}

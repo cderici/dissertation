@@ -172,14 +172,6 @@ which will be transitively applied by the interpreter loop.
 
 		\inputFigure{pycket}{figure-new-pycket-frontend-compare-old}
 
-		\begin{figure-here}
-			 New Pycket workflow, compare with Old Pycket figure
-
-			 \begin{todo}[TECH TODO]
-				figure NP side by side with OP
-			\end{todo}
-		\end{figure-here}
-
 		\begin{paragraph-here}% 7
 			 \figref{fig:racket-base-loading-no-compiled} shows the comparison with the old front-end vs the new front-end. Pycket now can apply the macro expander in-house (as opposed to running the Racket binary) to a given Racket module to fully expand and run it on the CEK core.
 		\end{paragraph-here}
@@ -189,14 +181,6 @@ which will be transitively applied by the interpreter loop.
 		\end{paragraph-here}
 
 		\inputFigure{pycket}{figure-racket-base-loading-no-compiled}
-
-		\begin{figure-here}
-			 show loading screen for a given program in racket/base...
-
-			 \begin{todo}[TECH TODO]
-				racket/base loading modules
-			\end{todo}
-		\end{figure-here}
 
 		\begin{paragraph-here}% 9
 			This is the central mechanism in self-hosting. Being able to do this means Pycket is able to read and expand any Racket module because it can utilize the module system and the macro system to load all the Racket modules that a language such as `\#lang racket/base` might require. Figure shows all the modules being loaded for racket/base.
@@ -340,13 +324,7 @@ which will be transitively applied by the interpreter loop.
 			The REPL is Racket's repl, we didn't write any code for it. And it needs the racket/base.
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			show loading screen for racket/base that uses compiled code.
-
-			\begin{todo}[TECH TODO]
-				loading of racket/base using compiled code
-			\end{todo}
-		\end{figure-here}
+		\inputFigure{pycket}{figure-racket-base-loading-with-compiled}
 
 		\begin{paragraph-here}% 4
 			The figure shows the loading of the repl with racket/base with some debug output. Note that we don't see anymore the modules that were being loaded via linklets in the figure we showed earlier. That's because Pycket utilizes the `write` and `fasl` functions to serialize the Racket modules into compiled `.zo` files. `.zo` is a Racket specific compiled bytecodes that's in fasl format. Just like, Racket, by providing the parameter `(use-compiled-file-paths compiled/pycket)` at boot, Pycket also uses compiled code for loaded Racket modules. Doing that cuts the loading of racket/base by .......\%.
