@@ -298,31 +298,42 @@ which will be transitively applied by the interpreter loop.
 
 	\section[\texorpdfstring{From Rudimentary Interpreter to Full Language Implementation}{Pycket as Full Racket}]{From Rudimentary Interpreter to Full Language Implementation}
 
-		\begin{mainpoint}
-            Pycket becomes a full working Racket, proving the self-hosting hypothesis.
+		\begin{figure-here}
+			Welcome to Pycket prompt
+		\end{figure-here}
 
-			\textit{Self-hosting of full-scale functional languages on meta-tracing just-in-time (JIT) compilers is achievable.}
-        \end{mainpoint}
+		\begin{paragraph-here}% 1
+			With all the bootstrap linklets loaded into its runtime, Racket's self-hosting on Pycket is now complete and ready to run some Racket code.
+		\end{paragraph-here}
 
-        \begin{todo}
-			A rudimentary interpreter can be bootstrapped into a full language implementation by importing linklets into the run-time.
-		\end{todo}
+		\begin{paragraph-here}% 2
+			Pycket's front-end allows it to be run with many options, including running a rkt file, as well as with no option to load the Racket repl, which you can see in the FIGURE above.
+		\end{paragraph-here}
 
-		\begin{todo}[Import]
-			Section 3.3 Making Pycket an Independent Self-Hosting Racket of the proposal document is relevant for this section.
-		\end{todo}
+		\begin{paragraph-here}% 3
+			The REPL is Racket's repl, we didn't write any code for it. And it needs the racket/base.
+		\end{paragraph-here}
 
-Recall from \secref{section:pycket-primer} that Pycket uses Racket binary.
-\figref{fig:old-pycket-workflow-vertical}
+		\begin{figure-here}
+			show loading screen for racket/base that uses compiled code.
+		\end{figure-here}
 
+		\begin{paragraph-here}% 4
+			The figure shows the loading of the repl with racket/base with some debug output. Note that we don't see anymore the modules that were being loaded via linklets in the figure we showed earlier. That's because Pycket utilizes the `write` and `fasl` functions to serialize the Racket modules into compiled `.zo` files. `.zo` is a Racket specific compiled bytecodes that's in fasl format. Just like, Racket, by providing the parameter `(use-compiled-file-paths compiled/pycket)` at boot, Pycket also uses compiled code for loaded Racket modules. Doing that cuts the loading of racket/base by .......\%.
+		\end{paragraph-here}
 
+		\begin{paragraph-here}% 5
+			Furthermore, thanks to the expander linklet, Pycket can run further languages, such as `\#lang racket`. Consider the following program in FIGURE that uses contracts. That can't work in racket/base because of the contracts, and need full Racket. It works on Pycket.
+		\end{paragraph-here}
 
-After implementing the \emph{compile-linklet} and
-\emph{instantiate-linklet}, the next step is to load the bootstrapping
-linklets into the run-time as described in
-\secref{subsec:racket-expand}.
+		\begin{figure-here}
+			LISTING: the contract program written in `\#lang racket`
+		\end{figure-here}
 
-
+		\begin{paragraph-here}% 6
+			We therefore conclude the first part of our thesis statement, the self-hosting hypothesis, and demonstrated that a rudimentary interpreter can be enhanced into a full language implementation, thereby proving that it is indeed possible to have a self-hosting full-scale functional programming language on a meta-tracing JIT compiler.
+			In the next chapter we discuss how we ensure correctness in everything we introduced so far, and in further chapters we study the performance profile and talk about a fundamental issue we uncovered about this self-hosting on meta-tracing, and provide some solution approaches.
+		\end{paragraph-here}
 
 
 % \begin{figure}[h!]
