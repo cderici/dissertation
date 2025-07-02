@@ -1,0 +1,25 @@
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}{0.6\textwidth}
+\begin{lstlisting}[language=racket,
+                basicstyle=\ttfamily\footnotesize,
+                numbers=left, xleftmargin=2em]
+#lang racket
+
+;; fibonacci with contract
+(define/contract (fib n)
+  (-> exact-nonnegative-integer?
+      exact-nonnegative-integer?)
+  (match n
+    [0 0]
+    [1 1]
+    [_ (+ (fib (- n 1)) (fib (- n 2)))]))
+
+(module+ main
+  (displayln (for/list ([i (in-range 10)])
+               (fib i))))
+\end{lstlisting}
+\end{minipage}
+\caption{A Racket program that uses entire \#lang racket}
+\label{fig:racket-contract-example}
+\end{figure}

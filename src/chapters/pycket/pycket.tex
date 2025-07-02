@@ -228,14 +228,6 @@ which will be transitively applied by the interpreter loop.
 					The full preemption is supported via Metacontinuations, which are .......
 				\end{paragraph-here}
 
-				\begin{figure-here}
-					get the meta-continuation image
-
-					\begin{todo}[TECH TODO]
-						Metacontinuations
-					\end{todo}
-				\end{figure-here}
-
 				\begin{paragraph-here}% 18
 					Pycket doesn't support full preemption, engines run to completion because RPython assumes a single thread + GIL.
 				\end{paragraph-here}
@@ -328,13 +320,7 @@ which will be transitively applied by the interpreter loop.
 			Furthermore, thanks to the expander linklet, Pycket can run further languages, such as `\#lang racket`. Consider the following program in FIGURE that uses contracts. That can't work in racket/base because of the contracts, and need full Racket. It works on Pycket.
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			LISTING: the contract program written in `\#lang racket`
-
-			\begin{todo}[TECH TODO]
-				listing for lang racket program with contract code.
-			\end{todo}
-		\end{figure-here}
+		\inputFigure{pycket}{racket-contract-example}
 
 		\begin{paragraph-here}% 6
 			We therefore conclude the first part of our thesis statement, the self-hosting hypothesis, and demonstrated that a rudimentary interpreter can be enhanced into a full language implementation, thereby proving that it is indeed possible to have a self-hosting full-scale functional programming language on a meta-tracing JIT compiler.
