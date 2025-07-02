@@ -148,11 +148,7 @@ which will be transitively applied by the interpreter loop.
 			Armed with the `compile-linklet` and `instantiate-linklet`, Pycket now can completely transform its front-end to load these linklets into its runtime at boot. We had a related discussion about this in the linklet motivation section.
 		\end{paragraph-here}
 
-		\begin{figure-here}
-			\begin{todo}[TECH TODO]
-				new figure for loading a linklet at boot in the front-end.. take s-exp, run compile-linklet, expose vars, etc.
-			\end{todo}
-		\end{figure-here}
+		\inputFigure{pycket}{figure-loading-linklet-at-boot}
 
 		\begin{paragraph-here}% 4
 			Figure shows; after grabbing the s-expression for a linklet, Pycket runs the `compile-linklet` to produce a `W\_Linklet` object. Then it applies `instantiate-linklet` to this linklet object to generate a linklet instance. Recall that a linklet instance is as container for linklet variables. These variables contain everything that this linklet defines and exports. Note that the contents of those variables are valid Racket values, most often callable closures. So all Pycket needs to do to complete loading a linklet is to grab those variables and expose them in the global primitive environment that contains all the primitives that Pycket can pull out and call on demand.

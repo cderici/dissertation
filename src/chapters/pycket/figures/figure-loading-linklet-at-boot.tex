@@ -1,0 +1,36 @@
+\newcommand{\arrowslength}{6mm}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[scale=1.0, font=\footnotesize,
+      node distance=0mm and 4mm,
+      val/.style ={draw, circle, minimum size=5.5mm, inner sep=0pt, fill=gray!8},
+      fun/.style ={draw, rounded corners, minimum width=30mm, minimum height=8mm, align=center, fill=white, font=\footnotesize},
+      arr/.style ={->, thick},
+      every node/.style={text height=1.5ex, text depth=.25ex}
+    ]
+    % Small circles for values
+    \node[val] (sexp) {};
+    \node[fun, right=of sexp, xshift=2mm] (compile) {compile-linklet};
+    \node[val, right=of compile, xshift=4mm] (wlinklet) {};
+    \node[fun, right=of wlinklet, xshift=4mm] (instantiate) {instantiate-linklet};
+    \node[val, right=of instantiate, xshift=6mm] (instance) {};
+    \node[fun, right=of instance, xshift=6mm] (expose) {expose-to-pycket};
+
+    % Draw arrows between all
+    \draw[arr] (sexp) -- (compile);
+    \draw[arr] (compile) -- (wlinklet);
+    \draw[arr] (wlinklet) -- (instantiate);
+    \draw[arr] (instantiate) -- (instance);
+    \draw[arr] (instance) -- (expose);
+
+    % Value labels, below the circles
+    \node[below=7mm of sexp, align=center] {Linklet\\S-expression};
+    \node[below=7mm of wlinklet, align=center] {W\_Linklet\\object};
+    \node[below=7mm of instance, align=center] {Linklet\\Instance\\(vars $\rightarrow$ values)};
+    \node[below=7mm of expose, align=center] {Pycket\\Primitive\\Environment};
+
+  \end{tikzpicture}
+  \caption{Overview of Pycket exposing values from a linklet at boot.}
+  \label{fig:pycket-linklet-stretched}
+\end{figure}
