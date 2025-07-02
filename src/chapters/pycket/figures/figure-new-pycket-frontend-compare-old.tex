@@ -1,0 +1,49 @@
+\newcommand{\pyckethsep}{10cm} % tweak this value for horizontal gap
+
+\begin{figure}[!h]
+  \centering
+  \begin{tikzpicture}[scale=0.6, font=\footnotesize]
+    % LEFT: Old workflow (A)
+    \begin{scope}[shift={(0,0)}]
+      \node[circle, draw, minimum size=10mm, fill=gray!8] (n1) {input.rkt};
+      \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=10mm of n1] (n2) {Pycket\\Entry};
+      \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=10mm of n2] (n3) {Racket\\Executable};
+      \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=10mm of n3] (n4) {Pycket\\Expand};
+      \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=10mm of n4] (n5) {JITted CEK};
+      \draw[-Stealth, thick] (n1) -- (n2);
+      \draw[-Stealth, thick] (n2.south west) to[out=180,in=180,looseness=1.25] node[left, font=\footnotesize] {input.rkt} (n3.north west);
+      \draw[-Stealth, thick] (n3.south west) to[out=180,in=180,looseness=1.25] node[left, font=\footnotesize, yshift=-2mm] {input.rkt (expanded)} (n4.north west);
+      \draw[-Stealth, thick] (n4.south west) to[out=180,in=180,looseness=1.25] node[left, font=\footnotesize, yshift=-3mm] {Pycket AST} (n5.north west);
+
+      \node (captionA) at ($(n5) + (0,-1.5)$) {\footnotesize (A) Original Pycket};
+    \end{scope}
+
+    % RIGHT: New workflow (B)
+    \begin{scope}[shift={(\pyckethsep,0)}] % Use the variable here!
+      % Main vertical flow
+      \node[circle, draw, minimum size=10mm, fill=gray!8] (m1) {input.rkt};
+      \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=10mm of m1] (m2) {Pycket\\Entry};
+      \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=10mm of m2] (m3) {Racket\\Entry};
+      \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=10mm of m3] (m4) {JITted CEK};
+      \draw[-Stealth, thick] (m1) -- (m2);
+
+      \draw[-Stealth, thick] (m2.south east) to[out=0,in=0,looseness=1.25] node[right, font=\footnotesize] {input.rkt} (m3.north east);
+      \draw[-Stealth, thick] (m3.south east) to[out=0,in=0,looseness=1.25] node[left=4mm, pos=0.48, font=\footnotesize, yshift=-1mm] {dynamic-require} (m4.north east);
+
+      % Expander linklet - higher and centered between m3 and m4
+      \node[draw, rounded corners, align=center, minimum width=15mm, minimum height=13mm, fill=gray!8, right=12mm of m3, yshift=-10mm] (expander) {Expander\\Linklet};
+
+      % Horizontal, then vertical arrows into the north/south sides of expander
+      \draw[-Stealth, thick] (m3.east) -| (expander.north);
+      \draw[-Stealth, thick] (expander.south) |- (m4.east);
+
+      % Subcaption B: use x of m4, y of captionA
+      \node at (m4 |- captionA) {\footnotesize (B) Pycket with Expander Linklet};
+    \end{scope}
+
+    % Center vertical separator
+    \draw[very thick, gray!40] (5,0) -- (5,-12.1);
+  \end{tikzpicture}
+  \caption{Comparison of two Pycket front-ends. (A) The original front-end with offline expansion; (B) The new front-end with expansion in run-time.}
+  \label{fig:pycket-sidebyside-workflow-AB}
+\end{figure}

@@ -151,7 +151,7 @@ which will be transitively applied by the interpreter loop.
 		\inputFigure{pycket}{figure-loading-linklet-at-boot}
 
 		\begin{paragraph-here}% 4
-			Figure shows; after grabbing the s-expression for a linklet, Pycket runs the `compile-linklet` to produce a `W\_Linklet` object. Then it applies `instantiate-linklet` to this linklet object to generate a linklet instance. Recall that a linklet instance is as container for linklet variables. These variables contain everything that this linklet defines and exports. Note that the contents of those variables are valid Racket values, most often callable closures. So all Pycket needs to do to complete loading a linklet is to grab those variables and expose them in the global primitive environment that contains all the primitives that Pycket can pull out and call on demand.
+			\figref{fig:pycket-linklet-loading} shows; after grabbing the s-expression for a linklet, Pycket runs the `compile-linklet` to produce a `W\_Linklet` object. Then it applies `instantiate-linklet` to this linklet object to generate a linklet instance. Recall that a linklet instance is as container for linklet variables. These variables contain everything that this linklet defines and exports. Note that the contents of those variables are valid Racket values, most often callable closures. So all Pycket needs to do to complete loading a linklet is to grab those variables and expose them in the global primitive environment that contains all the primitives that Pycket can pull out and call on demand.
 		\end{paragraph-here}
 
 		\begin{table-here}
@@ -170,6 +170,8 @@ which will be transitively applied by the interpreter loop.
 			In addition to these, Pycket also loads an additional linklet called the `pycket\_boot` that's custom made for Pycket to call stuff like `dynamic-require` to start loading Racket languages (e.g. racket/base). Before this linklet, Pycket used to manually pull Racket's `dynamic-require` from the global primitive environment (the expander linklet exposed it in there) and call it synthetically. This also includes some setup functions/parameters on Racket level such as `current-library-collection-links` , `read-accept-compiled`, `use-compiled-file-paths`, etc. Now that we have the capability of loading linklets, all that front-end code that was used to be in RPython can be written in Racket and loaded as a linklet.
 		\end{paragraph-here}
 
+		\inputFigure{pycket}{figure-new-pycket-frontend-compare-old}
+
 		\begin{figure-here}
 			 New Pycket workflow, compare with Old Pycket figure
 
@@ -179,12 +181,14 @@ which will be transitively applied by the interpreter loop.
 		\end{figure-here}
 
 		\begin{paragraph-here}% 7
-			 Figure shows the comparison with the old front-end vs the new front-end. Pycket now can apply the macro expander in-house (as opposed to running the Racket binary) to a given Racket module to fully expand and run it on the CEK core.
+			 \figref{fig:racket-base-loading-no-compiled} shows the comparison with the old front-end vs the new front-end. Pycket now can apply the macro expander in-house (as opposed to running the Racket binary) to a given Racket module to fully expand and run it on the CEK core.
 		\end{paragraph-here}
 
 		\begin{paragraph-here}% 8
 			Loading these linklets require additional runtime support, and a lot of primitives to be provided by Pycket.
 		\end{paragraph-here}
+
+		\inputFigure{pycket}{figure-racket-base-loading-no-compiled}
 
 		\begin{figure-here}
 			 show loading screen for a given program in racket/base...

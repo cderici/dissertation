@@ -19,9 +19,8 @@
     \node[box,  below=of n3] (n4) {Pycket\\Expand};
     \node[box,  below=of n4] (n5) {JITted CEK};
 
-    % spine arrows ------------------------------------------------------
-    \foreach \a/\b in {n1/n2,n2/n3,n3/n4,n4/n5}
-      {\draw[spine] (\a.south) -- (\b.north);}
+    % spine arrow ------------------------------------------------------
+    \draw[spine] (n1.south) -- (n2.north);
 
     % helper for curved annotation arrows -------------------------------
     \newcommand{\carrow}[3]{%
@@ -35,6 +34,6 @@
     \carrow{n4}{n5}{Pycket AST}
 
   \end{tikzpicture}
-  \caption{Pycket's original design used to run the Racket executable to expand before running it on the CEK.}
+  \caption{Pycket's original front-end}
   \label{fig:old-pycket-workflow-vertical}
 \end{figure}
