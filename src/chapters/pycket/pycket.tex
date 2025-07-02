@@ -66,6 +66,28 @@
 		Chez Scheme represents them as functions, here's how Pycket represents and implements them.
 		\end{paragraph-here}
 
+Exploiting the increased portability in Racket, here we turn the
+Pycket from being a rudimentary compiler to an implementation of
+Racket, independent of the Racket binary. First step is building the
+\emph{linklets} layer by implementing the \emph{compile-linklet} and
+\emph{instantiate-linklet} functions in RPython, thereby allowing
+Pycket to process and evaluate linklets. The \emph{compile-linklet}
+takes an s-expression for a linklet to produce a linklet object as
+described in \secref{subsec:linklets-semantics}. It makes several
+passes on the s-expression to determine the identifiers that are
+defined within the linklet and the ones that are mutated. Then it
+processes the imported and exported identifiers to produce the Import
+and Export run-time objects, freshly generating identifiers (gensym)
+as needed. Then it makes a final recursive pass to produce the RPython
+AST for the body, and puts all the information within a linklet
+object. The \emph{instantiate-linklet} on the other hand, carries out
+the steps for running a linklet object. First it processes the Import
+and Export objects and collects and creates variables as necessary,
+and prepares the target instance (i.e. creates a new instance if it's
+a regular instantiation) and interprets the body, effectively
+implementing the $\longrightarrow_{\beta p}$ reduction in the \figref{fig:reduction}
+which will be transitively applied by the interpreter loop.
+
 		\begin{paragraph-here}% 7
 			The representation of linklets directly effect the implementation of `compile-linklet` and `instantiate-linklet`. Recall that the design of linklets doesn't enforce a particular representation, so `compile-linklet` and `instantiate-linklet` are therefore the manifestations of the hosting run-time's representation.
 		\end{paragraph-here}
@@ -114,6 +136,58 @@
 			Importing functionality straight from the language in the form of linklets allows the language to shape the behavior of the run-time.
 		\end{mainpoint}
 
+		\begin{paragraph-here}% 1
+			Recall from that section, that applying Racket macro expander to any Racket module generates linklets for it and those linklets can be flattened into one single linklet. When this is applied to Racket's subsystems such as the module system and a single flat linklet is generated and serialized as a linklet s-expression, a standalone independently loadable linklet is born.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 2
+			With this way, Racket exposes independent linklets for some major components such as the expander, IO, threads, as well as some utility linklets such as fasl and regexp, that we'll talk in detail in the subsections below.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 3
+			Armed with the `compile-linklet` and `instantiate-linklet`, Pycket now can completely transform its front-end to load these linklets into its runtime at boot. We had a related discussion about this in the linklet motivation section.
+		\end{paragraph-here}
+
+		\begin{figure-here}
+			new figure for loading a linklet at boot in the front-end.. take s-exp, run compile-linklet, expose vars, etc.
+		\end{figure-here}
+
+		\begin{paragraph-here}% 4
+			Figure shows; after grabbing the s-expression for a linklet, Pycket runs the `compile-linklet` to produce a `W\_Linklet` object. Then it applies `instantiate-linklet` to this linklet object to generate a linklet instance. Recall that a linklet instance is as container for linklet variables. These variables contain everything that this linklet defines and exports. Note that the contents of those variables are valid Racket values, most often callable closures. So all Pycket needs to do to complete loading a linklet is to grab those variables and expose them in the global primitive environment that contains all the primitives that Pycket can pull out and call on demand.
+		\end{paragraph-here}
+
+		\begin{table-here}
+			linklets, lines of code, number of defined primitives.
+		\end{table-here}
+
+		\begin{paragraph-here}% 5
+			Applying this method, Pycket loads the regexp, thread, io, fasl, and expander linklets in this order, and exposes all the functions these linklets define. These functions include very powerful Racket functionalities such as `read`, `expand`, `namespace-require`. Table shows the sizes and the number of exposed primitives for each bootstrapping linklet.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 6
+			In addition to these, Pycket also loads an additional linklet called the `pycket\_boot` that's custom made for Pycket to call stuff like `dynamic-require` to start loading Racket languages (e.g. racket/base). Before this linklet, Pycket used to manually pull Racket's `dynamic-require` from the global primitive environment (the expander linklet exposed it in there) and call it synthetically. This also includes some setup functions/parameters on Racket level such as `current-library-collection-links` , `read-accept-compiled`, `use-compiled-file-paths`, etc. Now that we have the capability of loading linklets, all that front-end code that was used to be in RPython can be written in Racket and loaded as a linklet.
+		\end{paragraph-here}
+
+		\begin{figure-here}
+			 New Pycket workflow, compare with Old Pycket figure
+		\end{figure-here}
+
+		\begin{paragraph-here}% 7
+			 Figure shows the comparison with the old front-end vs the new front-end. Pycket now can apply the macro expander in-house (as opposed to running the Racket binary) to a given Racket module to fully expand and run it on the CEK core.
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 8
+			Loading these linklets require additional runtime support, and a lot of primitives to be provided by Pycket.
+		\end{paragraph-here}
+
+		\begin{figure-here}
+			 show loading screen for a given program in racket/base...
+		\end{figure-here}
+
+		\begin{paragraph-here}% 9
+			This is the central mechanism in self-hosting. Being able to do this means Pycket is able to read and expand any Racket module because it can utilize the module system and the macro system to load all the Racket modules that a language such as `\#lang racket/base` might require. Figure shows all the modules being loaded for racket/base.
+		\end{paragraph-here}
+
 		\subsection{Interfacing with the Compiler: Expander Linklet}
 
 		\subsection{Interfacing with the Host Environment: IO \& Thread Linklets}
@@ -125,7 +199,7 @@
 			\end{todo}
 		\subsection{Language Utilities: Fasl \& Regexp Linklets}
 
-	\section[\texorpdfstring{From Rudimentary Interpreter to Full Language Implementation}{Pycket Elevated}]{From Rudimentary Interpreter to Full Language Implementation}
+	\section[\texorpdfstring{From Rudimentary Interpreter to Full Language Implementation}{Pycket as Full Racket}]{From Rudimentary Interpreter to Full Language Implementation}
 
 		\begin{mainpoint}
             Pycket becomes a full working Racket, proving the self-hosting hypothesis.
@@ -146,36 +220,13 @@ Recall from \secref{section:pycket-primer} that Pycket uses Racket binary.
 
 
 
-		Exploiting the increased portability in Racket, here we turn the
-Pycket from being a rudimentary compiler to an implementation of
-Racket, independent of the Racket binary. First step is building the
-\emph{linklets} layer by implementing the \emph{compile-linklet} and
-\emph{instantiate-linklet} functions in RPython, thereby allowing
-Pycket to process and evaluate linklets. The \emph{compile-linklet}
-takes an s-expression for a linklet to produce a linklet object as
-described in \secref{subsec:linklets-semantics}. It makes several
-passes on the s-expression to determine the identifiers that are
-defined within the linklet and the ones that are mutated. Then it
-processes the imported and exported identifiers to produce the Import
-and Export run-time objects, freshly generating identifiers (gensym)
-as needed. Then it makes a final recursive pass to produce the RPython
-AST for the body, and puts all the information within a linklet
-object. The \emph{instantiate-linklet} on the other hand, carries out
-the steps for running a linklet object. First it processes the Import
-and Export objects and collects and creates variables as necessary,
-and prepares the target instance (i.e. creates a new instance if it's
-a regular instantiation) and interprets the body, effectively
-implementing the $\longrightarrow_{\beta p}$ reduction in the \figref{fig:reduction}
-which will be transitively applied by the interpreter loop.
-
 After implementing the \emph{compile-linklet} and
 \emph{instantiate-linklet}, the next step is to load the bootstrapping
 linklets into the run-time as described in
-\secref{subsec:racket-expand}. For simplicity, we are only concerned
-with loading the \emph{expander} linklet, as it's the most essential
-one for bootstrapping (also it's the biggest one). Loading the other
-linklets are essentially the same process (modulo the run-time support
-they need).
+\secref{subsec:racket-expand}.
+
+
+
 
 % \begin{figure}[h!]
 %   \centering

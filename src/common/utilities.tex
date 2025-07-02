@@ -25,7 +25,7 @@
    title=\textsc{#1},      % small-caps heading
    before skip=1em, after skip=1em}
 
-   \NewTColorBox{show-experiment}{O{Show Experiment}}
+\NewTColorBox{show-experiment}{O{Show Experiment}}
   {enhanced,
    colback=white,          % interior left plain
    colframe=lime!70!black,  % visible red border
@@ -37,7 +37,19 @@
    title=\textsc{#1},      % small-caps heading
    before skip=1em, after skip=1em}
 
-      \NewTColorBox{figure-here}{O{Figure Here}}
+\NewTColorBox{figure-here}{O{Figure Here}}
+  {enhanced,
+   colback=white,          % interior left plain
+   colframe=orange!70!black,  % visible red border
+   boxrule=1pt,            % border thickness
+   sharp corners,          % square corners
+   width=\linewidth,       % full text width
+   enlarge top by=0.5\baselineskip,
+   enlarge bottom by=0.5\baselineskip,
+   title=\textsc{#1},      % small-caps heading
+   before skip=1em, after skip=1em}
+
+\NewTColorBox{table-here}{O{Table Here}}
   {enhanced,
    colback=white,          % interior left plain
    colframe=orange!70!black,  % visible red border
