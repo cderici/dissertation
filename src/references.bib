@@ -41,6 +41,22 @@
   isbn = {978-2-9557474-2-1}
 }
 
+@inproceedings{clos_overview_mop,
+  title = {The {{Common Lisp Object System}}: {{An Overview}}},
+  shorttitle = {The {{Common Lisp Object System}}},
+  booktitle = {Proceedings of the {{European Conference}} on {{Object-Oriented Programming}}},
+  author = {DeMichiel, Linda G. and Gabriel, Richard P.},
+  year = {1987},
+  month = jun,
+  series = {{{ECOOP}} '87},
+  pages = {151--170},
+  publisher = {Springer-Verlag},
+  address = {Berlin, Heidelberg},
+  urldate = {2025-07-03},
+  abstract = {The Common Lisp Object System is an object-oriented system that is based on the concepts of generic functions, multiple inheritance, and method combination. All objects in the Object System are instances of classes that form an extension to the Common Lisp type system. The Common Lisp Object System is based on a meta-object protocol that renders it possible to alter the fundamental structure of the Object System itself. The Common Lisp Object System has been proposed as a standard for ANSI Common Lisp and has been tentatively endorsed by X3J13.},
+  isbn = {978-3-540-18353-2}
+}
+
 @inproceedings{danvy:93,
   title = {Separating Stages in the Continuation-Passing Style Transformation},
   booktitle = {Proceedings of the 20th {{ACM SIGPLAN-SIGACT}} Symposium on {{Principles}} of Programming Languages},
@@ -64,6 +80,23 @@
   pages = {12},
   abstract = {We describe the design and implementation of Dynamo, a software dynamic optimization system that is capable of transparently improving the performance of a native instruction stream as it executes on the processor. The input native instruction stream to Dynamo can be dynamically generated (by a JIT for example), or it can come from the execution of a statically compiled native binary. This paper evaluates the Dynamo system in the latter, more challenging situation, in order to emphasize the limits, rather than the potential, of the system. Our experiments demonstrate that even statically optimized native binaries can be accelerated Dynamo, and often by a significant degree. For example, the average performance of --O optimized SpecInt95 benchmark binaries created by the HP product C compiler is improved to a level comparable to their --O4 optimized version running without Dynamo. Dynamo achieves this by focusing its efforts on optimization opportunities that tend to manifest only at runtime, and hence opportunities that might be difficult for a static compiler to exploit. Dynamo's operation is transparent in the sense that it does not depend on any user annotations or binary instrumentation, and does not require multiple runs, or any special compiler, operating system or hardware support. The Dynamo prototype presented here is a realistic implementation running on an HP PA-8000 workstation under the HPUX 10.20 operating system.},
   langid = {english}
+}
+
+@inproceedings{erlang_otp_hpc,
+  title = {High-Performance Technical Computing with Erlang},
+  booktitle = {Proceedings of the 7th {{ACM SIGPLAN}} Workshop on {{ERLANG}}},
+  author = {Scalas, Alceste and Casu, Giovanni and Pili, Piero},
+  year = {2008},
+  month = sep,
+  series = {{{ERLANG}} '08},
+  pages = {49--60},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  doi = {10.1145/1411273.1411281},
+  urldate = {2025-07-03},
+  abstract = {High-performance Technical Computing (HPTC) is a branch of HPC (High-performance Computing) that deals with scientific applications, such as physics simulations. Due to its numerical nature, it has been traditionally based on low-level or mathematically-oriented languages (C, C++, Fortran), extended with libraries that implement remote execution and inter-process communication (like MPI and PVM).But those libraries just provide what Erlang does out-of-the-box: networking, process distribution, concurrency, interprocess communication and fault tolerance. So, is it possible to use Erlang as a foundation for developing HPTC applications?This paper shows our experiences in using Erlang for distributed number-crunching systems. We introduce two extensions: a simple and efficient foreign function interface (FFI), and an Erlang binding for numerical libraries. We use them as a basis for developing a simple mathematically-oriented programming language (in the style of Matlab™) compiled into Core Erlang. These tools are later used for creating a HPTC framework (based on message-passing) and an IDE for distributed applications.The results of this research and development show that Erlang/OTP can be used as a platform for developing large and scalable numerical applications.},
+  isbn = {978-1-60558-065-4},
+  file = {C:\Users\caner\Zotero\storage\PWQBJDAV\Scalas et al. - 2008 - High-performance technical computing with erlang.pdf}
 }
 
 @inproceedings{felleisen87,
@@ -523,6 +556,24 @@
   abstract = {Tracing just-in-time (JIT) compilers record linear control flow paths, inserting operations called guards at points of possible divergence. These operations occur frequently in generated traces and therefore it is important to design and implement them carefully to find the right trade-off between deoptimization, memory overhead, and (partly) execution speed. In this paper, we perform an empirical analysis of runtime properties of guards. This is used to guide the design of guards in the RPython tracing JIT.},
   isbn = {978-1-4503-1633-0},
   file = {C:\Users\caner\Zotero\storage\2PWWZY7I\Schneider and Bolz - 2012 - The efficient handling of guards in the design of RPython's tracing JIT.pdf}
+}
+
+@inproceedings{squeak_smalltalk_vm,
+  title = {Back to the Future: The Story of {{Squeak}}, a Practical {{Smalltalk}} Written in Itself},
+  shorttitle = {Back to the Future},
+  booktitle = {Proceedings of the 12th {{ACM SIGPLAN}} Conference on {{Object-oriented}} Programming, Systems, Languages, and Applications},
+  author = {Ingalls, Dan and Kaehler, Ted and Maloney, John and Wallace, Scott and Kay, Alan},
+  year = {1997},
+  month = oct,
+  series = {{{OOPSLA}} '97},
+  pages = {318--326},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  doi = {10.1145/263698.263754},
+  urldate = {2025-07-03},
+  abstract = {Squeak is an open, highly-portable Smalltalk implementation whose virtual machine is written entirely in Smalltalk, making it easy to. debug, analyze, and change. To achieve practical performance, a translator produces an equivalent C program whose performance is comparable to commercial Smalltalks.Other noteworthy aspects of Squeak include: a compact object format that typically requires only a single word of overhead per object; a simple yet efficient incremental garbage collector for 32-bit direct pointers; efficient bulk-mutation of objects; extensions of BitBlt to handle color of any depth and anti-aliased image rotation and scaling; and real-time sound and music synthesis written entirely in Smalltalk.},
+  isbn = {978-0-89791-908-1},
+  file = {C:\Users\caner\Zotero\storage\EL25R8Z5\Ingalls et al. - 1997 - Back to the future the story of Squeak, a practical Smalltalk written in itself.pdf}
 }
 
 @article{survey:05,

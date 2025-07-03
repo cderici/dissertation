@@ -27,28 +27,17 @@
 		\end{itemize}
     \end{chaptersynopsis}
 
-	\begin{paragraph-here}% 1
-		Languages that influence/enhance their run-times/VMs that implement them.
+	\paragraph{}% 1
+		Languages can influence and enhance the capabilities of the run-time environments or \glspl{vm} they are implemented on. This influence is evident in mature language implementations such as Smalltalk's Squeak, Erlang's OTP on the BEAM \gls{vm}, and Common Lisp's CLOS Meta-Object Protocol (MOP). For example, Smalltalk allows core image manipulation within Smalltalk itself, extending \gls{vm} semantics dynamically \cite{squeak_smalltalk_vm}. Erlang uses its OTP libraries written in Erlang to dynamically control crucial runtime semantics like process scheduling and fault tolerance \cite{erlang_otp_hpc}. Similarly, Common Lisp employs the CLOS MOP to redefine fundamental object system semantics at runtime without altering the native runtime \cite{clos_overview_mop}.
 
-		\begin{todo}[TECH TODO]
-			find some examples for this
-		\end{todo}
-	\end{paragraph-here}
+	\paragraph{}% 2
+		While the extent of language influence on the runtime varies considerably, Racket's linklets stand out by enabling the language to self-host itself. Linklets can carry crucial Racket subsystems, including the macro expander, the module system, and essential runtime components, to be expressed and distributed as language-level constructs that are supported by a thin primitive layer by the \gls{vm}. This mechanism significantly reduces dependency on the underlying runtime, thereby simplifying portability across different \glspl{vm}.
 
-	\begin{paragraph-here}% 2
-		Some are greater than others. With Racket's linklets, self-hosting is possible.
-	\end{paragraph-here}
+	\paragraph{}% 3
+		Recall Pycket from \secref{section:pycket-primer}, initially introduced as a rudimentary interpreter for Racket, lacking significant capabilities required to independently execute real-world Racket programs. Pycket's initial design relied on the existing Racket executable to read and expand Racket modules before evaluation, highlighting its dependence on external functionality. In contrast, a \emph{full language implementation} refers to an environment capable of independently performing all necessary tasks required to load and execute programs written in that language. Such implementation can read source code, expand macros (load languages), evaluate modules, and provide the full spectrum of runtime facilities, such as a \gls{repl}, error handling, I/O operations, and more, without external assistance.
 
-	\begin{paragraph-here}% 3
-		Recall Pycket from chapter:rpython, a rudimentary interpreter for Racket.	\end{paragraph-here}
-
-	\begin{paragraph-here}% 4
-		What does "a full Racket implementation" mean, then?
-	\end{paragraph-here}
-
-	\begin{paragraph-here}% 5
-		With realizing what we talked about in chapter:linklets, in this chapter we provide implementation details for turning Pycket from a rudimentary interpreter into a working full Racket implementation
-	\end{paragraph-here}
+	\paragraph{}% 5
+		Building upon the concepts introduced in \chapterRef{chapter:linklets}, this chapter presents concrete implementation details that transition Pycket from a rudimentary interpreter into a fully operational Racket implementation. By incorporating linklets, Pycket gains the ability to independently load, expand, and evaluate Racket modules, thus substantiating the self-hosting hypothesis outlined earlier. The following sections elaborate on the representation and implementation choices involved in this transition, highlighting runtime enhancements.
 
 	\section[\texorpdfstring{Implementing Linklets on Pycket}{Linklets on Pycket}]{Implementing Linklets on Pycket}
 
