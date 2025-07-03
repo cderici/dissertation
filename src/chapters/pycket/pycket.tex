@@ -46,7 +46,7 @@
 		\end{mainpoint}
 
 		\begin{paragraph-here}% 6
-			The first step in establishing an interface with linklets is to establish a representation for linklets. In Pycket we represent linklets with a first-class Racket value W\_Linklet class (that's derived from W\_Object) that looks like this.......
+			The first step in establishing an interface with linklets is to establish a representation for linklets. In Pycket we represent linklets with a first-class Racket value W\_Linklet class (that's derived from W\_Object) that looks like in figure
 
 			and maybe "because"? like, why did we choose a class, while Chez chose a function..
 
@@ -54,6 +54,8 @@
 
 		Chez Scheme represents them as functions, here's how Pycket represents and implements them.
 		\end{paragraph-here}
+
+		\inputFigure{pycket}{pycket-linklet-representation-figure}
 
 Exploiting the increased portability in Racket, here we turn the
 Pycket from being a rudimentary compiler to an implementation of

@@ -1,0 +1,26 @@
+\begin{figure}[!htbp]
+  \centering
+  \begin{minipage}{0.7\textwidth}
+\begin{lstlisting}[style=python-style,numbers=none]
+class W_Linklet(W_Object):
+    _attrs_ = _immutable_fields_ = ["name", "importss", "exports", "forms"]
+
+    def __init__(self, name, importss, exports, all_forms):
+        self.name = name
+        self.importss = importss    # [[Import ...] ...]
+        self.exports = exports      # {int_id:Export ...}
+        self.forms = all_forms      # [..., AST ,...]
+
+class W_LinkletInstance(W_Object):
+    _attrs_ = ["name", "vars", "data"]
+    _immutable_fields_ = ["name", "data"]
+
+    def __init__(self, name, vars, data=w_false):
+        self.name = name
+        self.vars = vars # {W_Symbol:W_Cell}
+        self.data = data
+\end{lstlisting}
+  \end{minipage}
+  \caption{Representation of Linklets and Linklet Instances on Pycket}
+  \label{fig:pycket-linklet-representation}
+\end{figure}
