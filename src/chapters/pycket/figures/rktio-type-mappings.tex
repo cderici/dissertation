@@ -1,0 +1,22 @@
+\begin{table}[!h]
+  \centering
+  \begin{tabular}{l | l | l}
+    \toprule
+    \multicolumn{1}{c|}{\textbf{rktio}} &
+    \multicolumn{1}{c|}{\textbf{Pycket}} &
+    \multicolumn{1}{c}{\textbf{rffi}} \\
+    \midrule
+    \pycketcode{rktio_ok_t}            & \pycketcode{W_Fixnum} & \pycketcode{rffi.INT} \\
+    \pycketcode{rktio_bool_t}          & \pycketcode{W_Bool}   & \pycketcode{rffi.INT} \\
+    \pycketcode{rktio_const_string_t}  & \pycketcode{W_Bytes}  & \pycketcode{rffi.CCHARP} \\
+    \pycketcode{rktio_filesize_t}      & \pycketcode{W_Fixnum} & \pycketcode{rffi.LONGLONG} \\
+    \pycketcode{intptr_t}              & \pycketcode{W_Fixnum} & \pycketcode{rffi.SSIZE_T} \\
+    \pycketcode{untptr_t}              & \pycketcode{W_Fixnum} & \pycketcode{rffi.SIZE_T} \\
+    \pycketcode{unsigned-8}            & \pycketcode{W_Fixnum} & \pycketcode{rffi.UNSIGNED} \\
+    \pycketcode{(ref void)}            & \pycketcode{W_CPointer} & \pycketcode{rffi.VOIDP} \\
+    \pycketcode{(*ref (ref char))}     & \pycketcode{W_STAR_REF_CCHARP} & \pycketcode{rffi.CCHARP} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Some notable type mappings for \emph{rktio} FFI layer}
+  \label{table:rktio-type-mappings}
+\end{table}

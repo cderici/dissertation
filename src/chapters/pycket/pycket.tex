@@ -136,93 +136,130 @@
 				Programs executed through the bootstrapping linklets, including the linklets themselves, often require additional run-time support beyond basic primitives. For instance, running Racket's REPL necessitates implementing delimited continuations at the run-time level. Similarly, handling exceptions originating from Racket code demands robust Racket-level exception handling within Pycket. Pycket's existing implementation provides basic exception handling by translating Racket-level exceptions (implemented as Racket structs) into RPython exceptions. However, fully supporting Racket-level exceptions requires Pycket to handle the installation of exception handlers via continuation marks and dynamically propagate Racket-level exceptions to the appropriate (Racket level) handlers.
 
 			\paragraph{}% 12
-				Among the critical functions exposed by the expander linklet are \racketcode{namespace-require}, \racketcode{read}, \racketcode{expand}, and \racketcode{eval}, each of which embodies substantial and complex functionality. \racketcode{namespace-require} implements the core of the module system; \racketcode{eval} functions effectively as an interpreter; and \racketcode{read} and \racketcode{expand} collectively represent the complete macro expander. Thus, the expander linklet itself encapsulates the entire compilation phase required by Racket modules.
+				Among the critical functions exposed by the expander linklet are \racketcode{namespace-require}, \racketcode{read}, \racketcode{expand}, and \racketcode{eval}, each of which embodies substantial and complex functionality. \racketcode{eval} functions effectively as an interpreter; \racketcode{namespace-require} implements the core of the module system; and \racketcode{read} and \racketcode{expand} collectively represent the complete macro expander. Thus, the expander linklet itself encapsulates the entire compilation phase required by Racket modules.
 
 			\paragraph{}% 13
 				Given the complexity and breadth of these functions—including extensive indirection, numerous cross-module references, and deeply nested loops—the resulting behavior severely complicates tracing and optimization by the meta-tracing JIT. Specifically, the meta-tracer and trace optimizer struggle to generate effective, reusable traces from such highly indirect and dynamic code paths. The \chapterRef{chapter:problem} is dedicated entirely to analyzing the performance implications of this complexity, detailing specific cases and investigating substantial runtime overhead caused by the introduction of these internally evaluated Racket sub-systems.
 
 		\subsection{Interfacing with the Host Environment: IO \& Thread Linklets}
 
+			\begin{paragraph-here}% 131
+				Growing into a full implementation also means interacting with the host environment. For this, the thread linklet implements and provides Racket level green (user level) threads, and the io linklet provides the input/output capabilities such as \gls{os} abstractions like files, ports all the way to powerful Racket primitives such as \racketcode{write}. Together they provide more than 300 primitives. IO linklet uses some of the primitives defined in the thread linklet.
+			\end{paragraph-here}
+
 			\begin{paragraph-here}% 14
-				Some bootstrapping linklets require a bit more support from the hosting runtime because they assume a certain functionality or they depend on external functionality. Thread requires engines, and IO requires ffi rktio. Also they both define and expose internal primitives that used to be just stubs on Pycket (e.g. unsafe-start-atomic), now they all work as intended.
+				We mentioned earlier with the expander linklet that some bootstrapping linklets require a bit more support from the hosting runtime because they assume a certain functionality, or they depend on external functionality. Thread linklet requires engines, and IO requires ffi rktio. Also they both define and expose bunch of internal primitives that used to be just stubs on Pycket (e.g. unsafe-start-atomic), now they all work as intended.
 			\end{paragraph-here}
 
 			\subsubsection{Thread Linklet}
 
 				\begin{paragraph-here}% 15
-					Thread linket defines the Racket level green threads and provides preemption using engines. It exports useful stuff like ....
+					Thread linket defines the Racket level green threads and provides preemption using engines. It defines and exports useful high-level Racket stuff like channels, threads (obviously), futures, and places, as well as powerful low-level stuff like (Racket level) semaphores, custodians, start-atomic \& end-atomic to provide critical section support. Thanks to the enhanced portability via linklets, any run-time that wants to implement Racket doesn't need to worry about how to implement any of these. It is sufficient to implement a minimal primitive support that the linklet requires and all the high-level stuff comes for free.
 				\end{paragraph-here}
 
 				\begin{paragraph-here}% 16
-					Engines are ..... they differentiate Racket level continnuations from the host continuations.
+					One of those primitive supports for the Thread linklet is engines.
+
+					Engines is a powerful abstraction that abstracts the notion of timed preemption. They provide a low level mechanism that allows time-sharing implementation of arbitrary process abstractions. Therefore, engines itself is not a model for a process abstraction. Rather, it's a model for time-sharing of any process abstraction. Engines are used as the central computation piece within Racket threads. Each thread is given an engine, and given enough \emph{fuel}, the engines carry out the computation that the thread is given. So just like how the engines make the cars go, engines allow threads to go in Racket. They can be interrupted/blocked by either running out of fuel or via an external event. In that case a new engine with the rest of the leftover computation is returned, waiting to be given some fuel and resumed.
+					\cite{enginesOriginal}
 				\end{paragraph-here}
 
 				\begin{paragraph-here}% 17
-					The full preemption is supported via Metacontinuations, which are .......
+					Engines in Racket differentiate Racket level continuations from the host continuations to support full preemption.
+					The interruption and resumption is done via what's called \racketcode{meta-continuations}, where the host's notion of continuation is used as a part of logically higher notion of Racket level continuations. Engines operate with meta-continuations that capture a string of host's continuations with the use of prompt tags to delimit the dynamic extend of their computations. Whenever an engine is interrupted, hosts continuation stack needs to be adjusted/unwinded to reflect the abortion of the meta-continuation. And whenever an engine is resumed, the host needs to be able to install the resume meta-continuation saved within the engine created at the interruption.
 				\end{paragraph-here}
 
 				\begin{paragraph-here}% 18
-					Pycket doesn't support full preemption, engines run to completion because RPython assumes a single thread + GIL.
+					Pycket implements engines to support the Thread linklet. However, Pycket doesn't support full preemption, engines run to completion because RPython assumes a single thread + GIL so we won't ever need true mapping with pthreads anyway. [ELABORATE]
+				\end{paragraph-here}
+
+				\begin{paragraph-here}% 181
+					With the threads enabled, now everything in Pycket runs in a thread context (\racketcode{call-in-main-thread}), and additional threads are created using that main thread. For example, consider the following interaction in the \gls{repl}.
+				\end{paragraph-here}
+
+				\begin{center}
+					\begin{minipage}{0.6\textwidth}
+						\begin{lstlisting}[style=bashstyle,frame=lines,numbers=none]
+						Welcome to Pycket v8.17.0.3
+						> (define ch (make-channel))
+						> (thread (lambda () (channel-put ch 3)))
+						#<thread>
+						> (channel-get ch)
+						3
+						>\end{lstlisting}
+					\end{minipage}
+				\end{center}
+
+				\begin{paragraph-here}% 182
+					This looks like nothing much is happening, but there's some action there. Most interesting one is about that value transfer from the new thread to the main thread (the one running the repl) via a channel. For a channel to transfer a value from a sender thread to a receiver thread, both threads need to be suspended.
+					In the repl above:
+
+					The main thread is suspended (by engine-blocking the engine within) for the new thread to run.
+					The channel-put in the new thread's body suspends the new thread.
+					The value inside the channel is passed through,
+					then the new thread resumes and finishes (engine-returned),
+					then the main thread is resumed (its engine is invoked again), getting us back to the repl.
 				\end{paragraph-here}
 
 				\begin{paragraph-here}% 19
-					Thread linklet also exports some functions that the IO linklet uses.
+					Threads are also used in the IO linklet as well, which is why the thread linklet is loaded earlier than the IO linklet so when IO linklet's stuff is evaluated (the linklet is instantiated), all the primitives related to the threads from the Thread linklet are ready in the primitive environment.
 				\end{paragraph-here}
 
 			\subsubsection{IO Linklet}
 
 				\begin{paragraph-here}% 20
-					IO linklet defines the input-output facilities, it exports important functions such as `write`. It uses 49 primitives that are defined and exported by the thread linklet.
+					IO linklet defines the input-output facilities, it exports important abstractions for file system, networking, process management (e.g. subprocesses), exports powerful primitives such as  `write`, as well as defines low-level stuff like handling and encoding of bytes. It uses 49 primitives that are defined and exported by the thread linklet.
 				\end{paragraph-here}
 
 				\begin{paragraph-here}% 21
-					rktio is a C library of functions that the IO linklet relies on.
+					In order to have such a tight coupling with the underlying \gls{os}, the IO linklet assumes a small layer called \emph{rktio} that's implemented in C. \emph{rktio} is a standalone C library, with more than 200 functions, it provides the backbone of all things in Racket needing system support, e.g. file system, networking, processes, etc.
 				\end{paragraph-here}
 
 				\begin{paragraph-here}% 22
-					The host needs to load this library via ffi and expose all the functions to the Racket runtime.
+					To be able to use the IO linklet, a host (Pycket) needs to load this library and make it available in runtime so the linklet can call those functions. Since Pycket is written in RPython (and most notably, not C), just like Chez Scheme, it constructs this layer by loading rktio via \gls{ffi}. Taking the registry of these functions (rktio.rktl), Pycket automatically generates this layer offline, creating wrapper primitives around every C function and exposees them to the Racket's namespace.
 				\end{paragraph-here}
 
 				\begin{paragraph-here}% 23
-					Like all ffi implementations, we need to agree on some representations across the sides of the ffi.
+					Like all ffi implementations, Pycket needs to establish a mapping of representations across both sides of the ffi. Just to be clear, we have struct and primitive types in C that the rktio uses, we have the Pycket types that capture Racket values (\racketcode{W_Object}), and we have RPython rffi layer's primitive types that are translated to C types at code-gen when the \gls{jit} binary is created.
+
+					Here we have three sets of types that we're working with.
+						1. rktio types: the types that reside in rktio.rktl that refer by name to
+						the actual C types that reside in librktio.a.
+						2. rffi (lltype) types that lives in the RPython land.
+						3. Pycket (W\_Object) types that are used in Pycket runtime
+
 				\end{paragraph-here}
 
-				\begin{table-here}
-					type mapping for rktio
-
-					\begin{todo}[TECH TODO]
-						rktio type mapping
-					\end{todo}
-				\end{table-here}
-
-				\begin{paragraph-here}% 24
-					Table shows the type mapping between rktio - pycket - rffi. With this mapping, Pycket generates this entire layer automatically from rktio.rktl. This many functions.. error handling, the works........
-				\end{paragraph-here}
+				\inputFigure{pycket}{rktio-type-mappings}
 
 				\begin{paragraph-here}% 25
-					There's a small ABI between rktio and Racket that the host needs to respect. rktio layer recognizes memory chunks that are opaque (`ref`) vs transparent (`*ref`) to Racket. Opaque to Racket memory chunks are easy, we just pass around c-pointers (W\_CPointer in Pycket). Howeever, transparent to Racket memory space requires a bit attention by the host.
+					\tableRef{table:rktio-type-mappings} shows some of the notable type mapping between rktio - pycket - rffi.
+					Aside from the flat type mappings, there's a small \gls{abi} between rktio and Racket regarding the pointers to memory that the host needs to respect. rktio layer recognizes memory chunks that are opaque (that the rktio refers with \emph{ref}) vs transparent (that the rktio refers with \emph{*ref}) to Racket. Opaque to Racket memory chunks are easy, Pycket uses a generic \pycketcode{rffi.VOIDP}, we just pass around C-pointers in Racket layer, and Pycket doesn't need to know anything about the size of the contents of the memory that the pointer is pointing to.. However, transparent to Racket memory space requires a bit attention by the host. Transparent to Racket memory means the memory is owned (created and managed) by Racket, so no C function tries to free that kind of space. For example, a rktio C function can take `(*ref char)` type input for a buffer it wants to write into-via in-place mutation-, which is a pointer to a byte string. Since `*ref` signifies that the memory is managed by Racket, Racket then can pass a bytes object directly to such function. Therefore the host (Pycket in our case) needs to respect this, and make sure the mutations that the C function is reflected back to the whatever representation the host uses for bytes (W\_MutableBytes in Pycket's case).
 				\end{paragraph-here}
 
-				\begin{paragraph-here}% 26
-					Transparent to Racket memory means the memory is owned and managed (and freed) by Racket, so no C function tries to free that kind of space. For example, a rktio C function can take `(*ref char)` type input for a buffer it wants to write into-via in-place mutation-, which is a pointer to a byte string. Since `*ref` signifies that the memory is managed by Racket, Racket then can pass a bytes object directly to such function. Therefore the host (Pycket in our case) needs to respect this, and make sure the mutations that the C function is reflected back to the whatever representation the host uses for bytes (W\_MutableBytes in Pycket's case).
+				\begin{paragraph-here}%26
+					[COMPOSE ALL THE INFO HERE, ORDER DOESN'T MATTER, YOU MAY OMIT SOME DETAILS]
+
+					With this mapping, Pycket generates this entire layer automatically from rktio.rktl.
+					With more than 200 functions are generated, along with 26 implemented manually., with *ref mutation reflections, special error handling, the works..
+
+					We have some stuff that we bring from Racketland (the .h header files, as well as the librktio.a static library that contains all the C functions we call. The bootstrap\_structs.py and rktio.py modules contain hand-rolled primitives and struct definitions and form what I call "the connector layer". These are the only primitives that need to know about the layout of certain structs and pointers (to be able to dereference) from rktio. Because, some struct pointers require special treatment because they're accessed (dereferenced) in some of the primitives in the rktio connector layer. For them, we need to generate code that uses its own pointer types at both rffi and pycket. (e.g. rktio\_date\_t is a good example, we have RKTIO\_DATE\_PTR and W\_RKTIO\_DATE\_PTR types that the `rktio\_seconds\_to\_date\_star` dereference after calling rktio\_seconds\_to\_date). Everything else can be opaque to Pycket.
 				\end{paragraph-here}
+
 
 		\subsection{Language Utilities: Fasl \& Regexp Linklets}
 
 			\begin{paragraph-here}% 27
-				There's also some linklets exposed by Racket for utility, such as fasl and regexp linklets. These linklets define .......
+				There's also some linklets exposed by Racket for utility, such as fasl and regexp linklets. These linklets define and provide implementations for the \gls{fasl} and the regular expressions implementations respectively. They are relatively smaller compared to the other linklets, however, their utilities are used extensively in Pycket's frontend and more.. For instance, Pycket uses the \racketcode{fasl->sexp} to load the actual bootstrapping linklets themselves.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}% 28
-				These functionalities used to exist in Pycket, implemented in RPython. in fact we'll use this for some experimentts in the chapter:problem
-			\end{paragraph-here}
-
-			\begin{paragraph-here}% 29
-				Fasl linklet provides a `fasl->s-exp` and `s-exp->fasl`. Regexp linklet impllements regexps in Racket.
+				These functionalities used to exist in Pycket, they were manually implemented in RPython. In fact we'll exploit this for some experiments in the chapter:problem. In there, we provide an in-depth performance comparison between the linklet implementation and the RPython implementation of regexps.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}% 30
-				With the linklets enabled, we can just plug-in the Racket's implementation for these, so anything that's loaded after that, for example the expander linklet starts using Racket's own regexp implementation for its internal regexp use.
+				These utility linklets actually emphasize the plug-and-play nature of this setup as well.
+				With the linklets enabled, we can just plug-in the Racket's implementation for these, so anything that's loaded after that, for example the expander linklet starts using Racket's own regexp implementation for its internal regexp use. If the regexp linklet is not loaded, then the expander naturally uses the RPython implementation. It doesn't know that it's using the RPYthon implementation. The primitives that it calls (such as \racketcode{regexp-match}) from the global primitive environment happen to be exposed by either RPython or the regexp linklet.
 			\end{paragraph-here}
 
 	\section[\texorpdfstring{Growing Pycket into Full Racket}{Pycket as Full Racket}]{Growing Pycket into Full Racket}
