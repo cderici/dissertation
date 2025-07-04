@@ -42,6 +42,7 @@
 
 
 	\section[\texorpdfstring{Enriching Compiler \& Runtime Communication}{Motivation}]{Enriching Compiler \& Runtime Communication}
+	\label{section:linklet-motivation}
 
 		\paragraph{}% 1
 			A tight coupling exists between the runtime and the reduction semantics of a programming language. This coupling arises because the runtime must concretely implement the abstract semantics specified by the language. For example, languages with macro systems may require runtimes to adopt specialized parsing mechanisms to handle macro expansions, differing from standard reading approaches. Similarly, custom serialization semantics defined by a language necessitate that the runtime can correctly serialize and deserialize language-specific objects. Additionally, languages that define semantics for user-level (green) threads demand explicit runtime support for mapping these constructs to \gls{os} threads. Clearly specifying these interactions is essential for streamlined and efficient language implementations.

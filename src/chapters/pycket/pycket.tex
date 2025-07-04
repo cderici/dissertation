@@ -125,15 +125,11 @@ contain 32 linklet related functions including the
 
 
 		\begin{paragraph-here}% 1
-			Recall from that section, that applying Racket macro expander to any Racket module generates linklets for it and those linklets can be flattened into one single linklet. When this is applied to Racket's subsystems such as the module system and a single flat linklet is generated and serialized as a linklet s-expression, a standalone independently loadable linklet is born.
-		\end{paragraph-here}
-
-		\begin{paragraph-here}% 2
-			With this way, Racket exposes independent linklets for some major components such as the expander, IO, threads, as well as some utility linklets such as fasl and regexp, that we'll talk in detail in the subsections below.
+			Recall from \chapterRef{chapter:linklets}, that applying Racket macro expander to any Racket module generates linklets for it and those linklets can be flattened into one single linklet. When this is applied to Racket's subsystems such as the module system and a single flat linklet is generated and serialized as a linklet s-expression, a standalone independently loadable linklet is born. With this way, Racket exposes the bootstrapping linklets, which are independent linklets for some major components such as the expander, IO, threads, as well as some utility linklets such as fasl and regexp, that we'll talk in detail in the subsections below.
 		\end{paragraph-here}
 
 		\begin{paragraph-here}% 3
-			Armed with the `compile-linklet` and `instantiate-linklet`, Pycket now can completely transform its front-end to load these linklets into its runtime at boot. We had a related discussion about this in the linklet motivation section.
+			Armed with `compile-linklet` and `instantiate-linklet`, Pycket now can completely transform its front-end to load these linklets into its runtime at boot. We had a related discussion about this in the \secref{section:linklet-motivation}.
 		\end{paragraph-here}
 
 		\inputFigure{pycket}{figure-loading-linklet-at-boot}
@@ -142,16 +138,10 @@ contain 32 linklet related functions including the
 			\figref{fig:pycket-linklet-loading} shows; after grabbing the s-expression for a linklet, Pycket runs the `compile-linklet` to produce a `W\_Linklet` object. Then it applies `instantiate-linklet` to this linklet object to generate a linklet instance. Recall that a linklet instance is as container for linklet variables. These variables contain everything that this linklet defines and exports. Note that the contents of those variables are valid Racket values, most often callable closures. So all Pycket needs to do to complete loading a linklet is to grab those variables and expose them in the global primitive environment that contains all the primitives that Pycket can pull out and call on demand.
 		\end{paragraph-here}
 
-		\begin{table-here}
-			linklets, lines of code, number of defined primitives.
-
-			\begin{todo}[TECH TODO]
-				table for bootstrapping linklets
-			\end{todo}
-		\end{table-here}
+		\inputFigure{pycket}{table-bootstrapping-linklets-info}
 
 		\begin{paragraph-here}% 5
-			Applying this method, Pycket loads the regexp, thread, io, fasl, and expander linklets in this order, and exposes all the functions these linklets define. These functions include very powerful Racket functionalities such as `read`, `expand`, `namespace-require`. Table shows the sizes and the number of exposed primitives for each bootstrapping linklet.
+			Applying this method, Pycket loads the regexp, thread, io, fasl, and expander linklets in this order, and exposes all the functions these linklets define. These functions include very powerful Racket functionalities such as `read`, `expand`, `namespace-require`. \tableRef{table:bootstrapping-linklets} shows the sizes and the number of exposed primitives for each bootstrapping linklet. Note that the expander linklet exports half the number of primitives that the IO linklet exports despite having almost three times the lines of code than the IO linklet.
 		\end{paragraph-here}
 
 		\begin{paragraph-here}% 6
@@ -227,7 +217,7 @@ contain 32 linklet related functions including the
 			\subsubsection{IO Linklet}
 
 				\begin{paragraph-here}% 20
-					IO linklet defines the input-output facilities, it exports important functions such as `write`.
+					IO linklet defines the input-output facilities, it exports important functions such as `write`. It uses 49 primitives that are defined and exported by the thread linklet.
 				\end{paragraph-here}
 
 				\begin{paragraph-here}% 21
