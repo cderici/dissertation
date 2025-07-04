@@ -68,95 +68,46 @@
 			Having implemented both \emph{compile-linklet} and \emph{instantiate-linklet}, Pycket gains the capability to independently execute any code expressed in Racket's core language (\pycketcode{#\%kernel}) provided in the form of linklet s-expressions. Together with the internal representations and runtime mechanisms for linklets detailed earlier, these functions establish the foundation that allows Pycket to import and execute Racket’s own runtime extensions, referred to as the bootstrapping linklets. These bootstrapping linklets carry implementations of substantial high-level Racket subsystems—including the macro expander, module system, and other critical runtime components—thereby enabling self-hosting on any runtime environment capable of loading and instantiating linklets. The next section explores the integration and utilization of these bootstrapping linklets within Pycket in detail.
 
 	\section[\texorpdfstring{Enhancing Run-time with Bootstrapping Linklets}{Bootstrapping Linklets}]{Enhancing Run-time with Bootstrapping Linklets}
-		\begin{mainpoint}
-			Importing functionality straight from the language in the form of linklets allows the language to shape the behavior of the run-time.
-		\end{mainpoint}
+		% \begin{mainpoint}
+		% 	Importing functionality straight from the language in the form of linklets allows the language to shape the behavior of the run-time.
+		% \end{mainpoint}
 
+		\paragraph{}% 1
+			Bootstrapping linklets, as introduced in \chapterRef{chapter:linklets}, provide a powerful mechanism for encapsulating major Racket subsystems, such as the macro expander, module system, and runtime components, into independently loadable units. By applying the Racket macro expander to any given module (including itself), one can generate a collection of linklets that may then be flattened and merged into a single, standalone linklet s-expression. Using this technique, Racket exposes essential functionalities as separate bootstrapping linklets, notably the expander, IO, threads, and additional utility linklets like fasl and regexp, each of which will be discussed in subsequent subsections.
 
-
-
-
-
-These programs, including the bootstrapping linklets themselves often
-require additional run-time support such as \emph{correlated} objects
-(which are syntax objects without the lexical-content information),
-Racket-level exception handling and primitive functions. For example,
-running Racket's repl requires delimited continuations. Also handling
-exceptions in Racket code in the run-time requires Racket-level
-exception handling on Pycket. The existing Pycket implementation has a
-rudimentary exception handling mechanism via transforming the
-Racket-level exceptions (which are implemented by Racket structs) into
-the RPython exceptions. However, having Racket-level exceptions
-requires the run-time to support installing Racket-level handlers via
-continuation-marks and dynamically pass the Racket-level exceptions to
-the appropriate handlers.
-
-Moreover, the Racket itself (including the bootstrapping linklets)
-generally relies on a large number ($\sim$1500) of primitives, aroud 900
-of which we already have in the existing Pycket implementation. An
-additional $\sim$200 primitives need to be implemented, along with the
-addition of the run-time liblaray \texttt{\#\%linklet} that will
-contain 32 linklet related functions including the
-\emph{compile-linklet}, \emph{instantiate-linklet} and
-\emph{instance-variable-value}.
-
-
-
-		\begin{paragraph-here}% 1
-			Recall from \chapterRef{chapter:linklets}, that applying Racket macro expander to any Racket module generates linklets for it and those linklets can be flattened into one single linklet. When this is applied to Racket's subsystems such as the module system and a single flat linklet is generated and serialized as a linklet s-expression, a standalone independently loadable linklet is born. With this way, Racket exposes the bootstrapping linklets, which are independent linklets for some major components such as the expander, IO, threads, as well as some utility linklets such as fasl and regexp, that we'll talk in detail in the subsections below.
-		\end{paragraph-here}
-
-		\begin{paragraph-here}% 3
-			Armed with `compile-linklet` and `instantiate-linklet`, Pycket now can completely transform its front-end to load these linklets into its runtime at boot. We had a related discussion about this in the \secref{section:linklet-motivation}.
-		\end{paragraph-here}
+		\paragraph{}% 3
+			With the capabilities provided by \racketcode{compile-linklet} and \racketcode{instantiate-linklet}, Pycket significantly transforms its startup process. Previously, Pycket depended on external tools for reading and expanding modules, as discussed in \secref{section:linklet-motivation}. Now, Pycket is able to independently load the bootstrapping linklets directly into its runtime during initialization, eliminating this dependency and enabling a fully self-contained bootstrapping phase.
 
 		\inputFigure{pycket}{figure-loading-linklet-at-boot}
 
-		\begin{paragraph-here}% 4
-			\figref{fig:pycket-linklet-loading} shows; after grabbing the s-expression for a linklet, Pycket runs the `compile-linklet` to produce a `W\_Linklet` object. Then it applies `instantiate-linklet` to this linklet object to generate a linklet instance. Recall that a linklet instance is as container for linklet variables. These variables contain everything that this linklet defines and exports. Note that the contents of those variables are valid Racket values, most often callable closures. So all Pycket needs to do to complete loading a linklet is to grab those variables and expose them in the global primitive environment that contains all the primitives that Pycket can pull out and call on demand.
-		\end{paragraph-here}
+		\paragraph{}% 4
+			\figref{fig:pycket-linklet-loading} illustrates Pycket's process of loading a linklet at startup. Pycket begins by reading the linklet s-expression, then compiles it into a \pycketcode{W_Linklet} object using \racketcode{compile-linklet}. Subsequently, it instantiates this compiled linklet via \racketcode{instantiate-linklet} to produce a linklet instance, which serves as a container holding all variables defined and exported by the linklet. These variables typically represent callable closures and other valid Racket values. Finally, Pycket exposes these variables in its global primitive environment, thereby making Racket-defined values—and more significantly, functions—directly callable from Pycket in a manner indistinguishable from its own primitives implemented in RPython.
+
+		\paragraph{}% 5
+			Applying this loading mechanism, Pycket sequentially imports and integrates the bootstrapping linklets in the following order: \emph{regexp}, \emph{thread}, \emph{io}, \emph{fasl}, and \emph{expander}. Each linklet enhances Pycket's runtime environment with specific Racket functionalities, exposing powerful primitives such as \racketcode{read}, \racketcode{write}, \racketcode{expand}, and \racketcode{namespace-require}. \tableRef{table:bootstrapping-linklets} summarizes the size of each linklet and the number of primitives each exposes. Notably, the expander linklet exports fewer primitives than the IO linklet despite having nearly three times as many lines of code.
 
 		\inputFigure{pycket}{table-bootstrapping-linklets-info}
 
-		\begin{paragraph-here}% 5
-			Applying this method, Pycket loads the regexp, thread, io, fasl, and expander linklets in this order, and exposes all the functions these linklets define. These functions include very powerful Racket functionalities such as `read`, `expand`, `namespace-require`. \tableRef{table:bootstrapping-linklets} shows the sizes and the number of exposed primitives for each bootstrapping linklet. Note that the expander linklet exports half the number of primitives that the IO linklet exports despite having almost three times the lines of code than the IO linklet.
-		\end{paragraph-here}
-
-		\begin{paragraph-here}% 6
-			In addition to these, Pycket also loads an additional linklet called the `pycket\_boot` that's custom made for Pycket to call stuff like `dynamic-require` to start loading Racket languages (e.g. racket/base). Before this linklet, Pycket used to manually pull Racket's `dynamic-require` from the global primitive environment (the expander linklet exposed it in there) and call it synthetically in RPython. This also includes some setup functions/parameters on Racket level such as \racketcode{current-library-collection-links}, `read-accept-compiled`, `use-compiled-file-paths`, etc. Now that we have the capability of loading linklets, all that front-end code that was used to be in RPython can be written in Racket and loaded as a linklet very conveniently.
-		\end{paragraph-here}
+		\paragraph{}% 6
+			In addition to standard bootstrapping linklets, Pycket loads a specialized linklet named \pycketcode{pycket_boot}, designed specifically for Pycket's internal use. Previously, Pycket manually invoked Racket’s \racketcode{dynamic-require} primitive from the global primitive environment to initialize the runtime, including loading core languages such as \racketcode{racket/base}. With the availability of the linklet infrastructure, all such startup procedures—previously implemented directly in RPython—can now be written directly in Racket, encapsulated within the \pycketcode{pycket_boot} linklet. This approach significantly simplifies Pycket’s frontend initialization code, integrating setup procedures and configuration parameters like \racketcode{current-library-collection-links}, \racketcode{read-accept-compiled}, and \racketcode{use-compiled-file-paths} entirely at the Racket level.
 
 		\inputFigure{pycket}{figure-new-pycket-frontend-compare-old}
 
-		\begin{paragraph-here}% 7
-			 \figref{fig:racket-base-loading-no-compiled} shows the comparison with the old front-end vs the new front-end. Pycket now can apply the macro expander in-house (as opposed to running the Racket binary) to a given Racket module to fully expand and run it on the CEK core. This is the main difference in the new Pycket architecture. From Pycket's perspective, the expansion of a Racket module is included within the runtime of that module, while in the old architecture, the only code that the Pycket's CEK core used to see was the expanded Racket module itself. Now all the phases of evaluation for a Racket module are within in Pycket's runtime. Naturally, this will have performance repercussions, and we'll talk about that in detail in \chapterRef{chapter:problem}.
-		\end{paragraph-here}
+		\paragraph{}% 7
+			The integration of the bootstrapping and custom linklets fundamentally transforms Pycket's frontend architecture, as depicted in \figref{fig:pycket-frontend-new-vs-old}. Whereas previously Pycket had to invoke the Racket executable externally to expand Racket modules before evaluation, it now applies Racket's macro expander internally to a given module and evaluates the resulting fully-expanded form-all directly within its CEK core. This architectural shift places all phases of module evaluation—reading, expansion, and execution—fully within Pycket’s runtime, thereby providing self-containment and independence. However, embedding the entire expansion phase internally has substantial implications for runtime performance, a topic examined in depth in \chapterRef{chapter:problem}.
 
-		\begin{paragraph-here}% 8
-			Note that these linklets themselves assume a lot of primitives from the hosting \gls{vm} (Pycket) to be able to function. During compilation, we'll create AST nodes for everything in these linklets, and all the primitives that the linklets assume need to be in the Pycket's own namespace (global primitive environment). In other words, they should be able to be resolved, otherwise Pycket won't be able to compile the linklet, and won't be able to start at all. Luckily, recall from \chapterRef{chapter:rpython} that Pycket already implements substantial amount of Racket primitives, so that helps, however, some linklets such as thread and io linklets require some specific primitive systems to be built, such as engines and an ffi layer, that we'll talk in depth down below.
-		\end{paragraph-here}
+		\paragraph{}% 8
+			The bootstrapping linklets provided by Racket depend on primitives supplied by the host runtime—in this case, Pycket. When compiling these linklets, Pycket generates \gls{ast} nodes for each primitive reference. To ensure successful compilation, these primitives must be resolvable within Pycket's global primitive environment. While Pycket already implements a many Racket primitives in RPython—as detailed in \chapterRef{chapter:rpython}—some linklets, notably \emph{thread} and \emph{io}, require additional sub-systems such as engines and a \gls{ffi} layer, which will be discussed further in subsequent sections.
 
 		\inputFigure{pycket}{figure-racket-base-loading-no-compiled}
 
-		\begin{paragraph-here}% 9
-			Being able to load the bootstrap linklets into the run-time is the central mechanism in self-hosting. Pycket is able to read and expand any Racket module because it can utilize the module system and the macro system to load all the Racket modules that a language such as `\#lang racket/base` might require. \figref{fig:racket-base-loading-no-compiled} demonstrates all the modules being loaded for racket/base. Note that for each Racket module in the dependency tree of the \racketcode{\#lang racket/base}, the module system and the macro expander work together to create linklets so the hosting run-time can compile and instantiate separately. We will exploit this mechanism in the next section to utilize compiled code for Racket modules to make the startup significantly faster.
-		\end{paragraph-here}
+		\paragraph{}% 9
+			Loading bootstrapping linklets into the runtime environment serves as the central mechanism enabling self-hosting. Pycket can read and expand any Racket module by leveraging Racket's own module and macro systems, provided by the expander linklet. For example, loading a language such as \racketcode{#lang racket/base} involves the macro expander and module system generating individual linklets for each required module in its dependency tree. As illustrated in \figref{fig:racket-base-loading-no-compiled}, these modules are compiled and instantiated separately by Pycket. This mechanism is utilized in the next section, where we describe the use of pre-compiled Racket modules to achieve significantly faster startup performance.
 
 		\subsection{Interfacing with the Compiler: Expander Linklet}
 
-
-
-			\begin{paragraph-here}% 10
-				As we described in \secref{subsec:racket-expand}, the expander linklet
-				is generated offline by running the expander on itself using the
-				Racket's executable, and serialized as an s-expression. Pycket, then
-				reads this s-expression and runs \racketcode{compile-linklet} to produce a
-				linklet object, which is then instantiated using the
-				\racketcode{instantiate-linklet}, and the functions from the expander
-				linklet is load into the run-time. At this point, Pycket has all the
-				functionalities implemented and exported by the expander, such as
-				read, expand, eval etc., in its run-time to call.
-			\end{paragraph-here}
+			\paragraph{}% 10
+				As described in \chapterRef{chapter:linklets}, the expander linklet is generated offline by running the expander on itself, resulting in a serialized s-expression. Pycket reads this serialized s-expression, compiles it into a linklet object using \racketcode{compile-linklet}, and then instantiates it using \racketcode{instantiate-linklet}. Once instantiated, Pycket incorporates all exported functions from the expander—such as \racketcode{read}, \racketcode{expand}, and \racketcode{eval}—into its runtime environment, allowing direct invocation of these functions as native primitives.
 
 			\begin{center}
 				\begin{minipage}{0.7\textwidth}
@@ -167,22 +118,8 @@ contain 32 linklet related functions including the
 				\end{minipage}
 			\end{center}
 
-			\begin{paragraph-here}% 101
-				Having the expander and all the functions that it provides in its
-				run-time allows Pycket to run a wide variety of Racket programs and
-				easily implement run-time functionalities. For example, a very simple
-				implementation of our running example top-level repl can directly use
-				Racket's read, expand and eval functions, as shown in
-				\figref{fig:repl-rpython}. The \verb|call_racket| is a wrapper that
-				handles the setup to call Racket functions within the CEK loop.
-				Moreover, since the expander provides the implementations of Racket's
-				macro-system and the module-system, Pycket is able to run programs
-				that are in languages built on top of Racket core, such as
-				\emph{racket/base}. Therefore, instead of implementing the top-level
-				repl itself, Pycket can directly run Racket's own repl, which is
-				implemented as a \emph{racket/base} program, through the
-				\racketcode{dynamic-require} function exported by the expander.
-			\end{paragraph-here}
+			\paragraph{}% 101
+				Having direct access to the expander's runtime functions enables Pycket to implement language-level operations such as a top-level \gls{repl} through Racket's own primitives. A minimal implementation of a \gls{repl} can be realized simply by invoking Racket's \racketcode{read}, \racketcode{expand}, and \racketcode{eval} functions within Pycket, as illustrated in the small inline example below. Furthermore, since the expander linklet provides the complete implementations of Racket's macro and module systems, Pycket can directly execute programs written in languages layered on top of the Racket core, such as \racketcode{racket/base}. As a result, instead of implementing a custom \gls{repl}, Pycket can directly apply \racketcode{dynamic-require} to Racket's standard \racketcode{racket/repl} module. This yields a REPL functionally identical to Racket’s own, executed within Pycket’s meta-tracing JIT environment.
 
 			\begin{center}
 				\begin{minipage}{0.6\textwidth}
@@ -195,21 +132,14 @@ contain 32 linklet related functions including the
 				\end{minipage}
 			\end{center}
 
-			\begin{paragraph-here}% 11
-				It brings in this many primitives, and it requires this many primitives from the host.
-			\end{paragraph-here}
+			\paragraph{}% 11
+				Programs executed through the bootstrapping linklets, including the linklets themselves, often require additional run-time support beyond basic primitives. For instance, running Racket's REPL necessitates implementing delimited continuations at the run-time level. Similarly, handling exceptions originating from Racket code demands robust Racket-level exception handling within Pycket. Pycket's existing implementation provides basic exception handling by translating Racket-level exceptions (implemented as Racket structs) into RPython exceptions. However, fully supporting Racket-level exceptions requires Pycket to handle the installation of exception handlers via continuation marks and dynamically propagate Racket-level exceptions to the appropriate (Racket level) handlers.
 
-			\begin{todo}[TECH TODO]
-				how many primitives from Pycket does the expander require to work?
-			\end{todo}
+			\paragraph{}% 12
+				Among the critical functions exposed by the expander linklet are \racketcode{namespace-require}, \racketcode{read}, \racketcode{expand}, and \racketcode{eval}, each of which embodies substantial and complex functionality. \racketcode{namespace-require} implements the core of the module system; \racketcode{eval} functions effectively as an interpreter; and \racketcode{read} and \racketcode{expand} collectively represent the complete macro expander. Thus, the expander linklet itself encapsulates the entire compilation phase required by Racket modules.
 
-			\begin{paragraph-here}% 12
-				Some of the critical functions are `namespace-require`, `read`, `expand`, `eval`, etc..
-			\end{paragraph-here}
-
-			\begin{paragraph-here}% 13
-				It also brings massive issues to tracing, as we'll discuss in chapter:problem.
-			\end{paragraph-here}
+			\paragraph{}% 13
+				Given the complexity and breadth of these functions—including extensive indirection, numerous cross-module references, and deeply nested loops—the resulting behavior severely complicates tracing and optimization by the meta-tracing JIT. Specifically, the meta-tracer and trace optimizer struggle to generate effective, reusable traces from such highly indirect and dynamic code paths. The \chapterRef{chapter:problem} is dedicated entirely to analyzing the performance implications of this complexity, detailing specific cases and investigating substantial runtime overhead caused by the introduction of these internally evaluated Racket sub-systems.
 
 		\subsection{Interfacing with the Host Environment: IO \& Thread Linklets}
 
