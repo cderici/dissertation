@@ -53,7 +53,7 @@
 			The \emph{compile-linklet} function transforms a linklet expressed as an s-expression into a runnable linklet object, following the formal semantics described in \secref{section:linklet-formal-semantics}. It begins by analyzing the s-expression through multiple passes to identify identifiers defined or mutated within the linklet body. Next, it processes the identifiers for imports and exports, creating runtime objects (\emph{Import} and \emph{Export}) and generating (via \emph{gensym}) fresh identifiers for internal use as needed. Finally, it recursively converts the linklet body into an RPython \gls{ast}, encapsulating all this information within a \pycketcode{W_Linklet} object ready for instantiation.
 
 		\paragraph{}% 9
-			The first phase of linklet compilation involves handling imports and exports. Each import specification, kept in a linklet as \pycketcode{[Import ...]} as seen in \figref{fig:pycket-linklet-representation-figure}, references a specific imported instance, with each \pycketcode{Import} object corresponding to a variable provided by that instance. If the linklet specifies distinct names for external (provided by the imported instance) and internal (used within the linklet body) references, these mappings are recorded explicitly within an \pycketcode{Import} object. Likewise, exports are treated similarly; each exported variable may have separate external and internal identifiers, the former visible to importing linklets and the latter used internally within the body. This explicit mapping simplifies variable management and prevents naming conflicts across linklet boundaries.
+			The first phase of linklet compilation involves handling imports and exports. Each import specification, kept in a linklet as \pycketcode{[Import ...]} as seen in \figref{fig:pycket-linklet-representation}, references a specific imported instance, with each \pycketcode{Import} object corresponding to a variable provided by that instance. If the linklet specifies distinct names for external (provided by the imported instance) and internal (used within the linklet body) references, these mappings are recorded explicitly within an \pycketcode{Import} object. Likewise, exports are treated similarly; each exported variable may have separate external and internal identifiers, the former visible to importing linklets and the latter used internally within the body. This explicit mapping simplifies variable management and prevents naming conflicts across linklet boundaries.
 
 		\paragraph{}% 10
 			After imports and exports are handled, the compilation proceeds with processing the linklet body. Initially, it identifies all targets of \pycketcode{set!} expressions and variables introduced by \pycketcode{define-values} forms. Subsequently, each form within the body is individually compiled from s-expression to Pycket \gls{ast}. Most compilation rules follow straightforward translations, with the notable exceptions involving linklet-variable-specific forms—such as \pycketcode{variable-ref}, \pycketcode{variable-set!}, and related variations—rules of which are detailed in \tableRef{table:linklet-compilation-rules} in \chapterRef{chapter:linklets}. These forms explicitly handle interactions with linklet variables, ensuring correct runtime semantics during instantiation.
@@ -167,15 +167,15 @@
 					With thread support enabled, all operations in Pycket run within the context of a Racket-level thread, initiated through the primitive \racketcode{call-in-main-thread}. Additional threads are spawned from this main thread, including a thread responsible for running a \gls{repl}, as well as any threads created during interactions within that \gls{repl}. To illustrate this clearly, consider the following example within Pycket's \gls{repl}:
 
 				\begin{center}
-					\begin{minipage}{0.6\textwidth}
-						\begin{lstlisting}[style=bashstyle,frame=lines,numbers=none]
-						Welcome to Pycket v8.17.0.3
-						> (define ch (make-channel))
-						> (thread (lambda () (channel-put ch 3)))
-						#<thread>
-						> (channel-get ch)
-						3
-						>\end{lstlisting}
+					\begin{minipage}{0.5\textwidth}
+						\begin{lstlisting}[style=bashstyle,frame=lines,numbers=none,basicstyle=\scriptsize\ttfamily\linespread{0.85}\selectfont]
+				Welcome to Pycket v8.17.0.3
+				> (define ch (make-channel))
+				> (thread (lambda () (channel-put ch 3)))
+				#<thread>
+				> (channel-get ch)
+				3
+				>\end{lstlisting}
 					\end{minipage}
 				\end{center}
 
