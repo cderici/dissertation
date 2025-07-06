@@ -1,0 +1,37 @@
+\begin{figure}[!h]
+\centering
+
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[language=racket,
+                basicstyle=\ttfamily\footnotesize,
+                numbers=left, xleftmargin=2em, numberstyle=\tiny]
+#lang racket
+
+(require racket/control racket/stxparam (for-syntax racket/base))
+
+(define-syntax-parameter acc
+  (lambda (stx) (raise-syntax-error #f "used outside of with-accum" stx)))
+
+(define-syntax (with-accum stx)
+  (syntax-case stx ()
+    [(_ body ...)
+     (with-syntax ([acc-id (datum->syntax stx (gensym 'acc))])
+       #'(let ([acc-id (box '())])
+           (syntax-parameterize ([acc (make-rename-transformer #'acc-id)])
+             (reset0 (begin body ...)))
+           (unbox acc-id)))]))
+
+(define-syntax-rule (accumulate! v)
+  (shift0 k (begin (set-box! acc (cons v (unbox acc))) (k (void)))))
+
+(define (macro-delim-demo)
+  (with-accum
+    (for ([i (in-range 5)]) (when (even? i) (accumulate! i)))
+    (for ([j (in-range 3)]) (accumulate! (* 100 j)))))
+
+(displayln (macro-delim-demo))
+\end{lstlisting}
+\caption{Example \racketcode{\#lang racket} program running on Pycket.}
+\label{fig:pycket-works-big-example}
+\end{minipage}
+\end{figure}
