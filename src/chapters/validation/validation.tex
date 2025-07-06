@@ -1,14 +1,32 @@
-\chapter[\texorpdfstring{PYCKET AS A FULL RACKET RUN-TIME: VALIDATION \& CORRECTNESS}
-                          {5. Validation \& Correctness}]{PYCKET AS A FULL RACKET RUN-TIME: VALIDATION \& CORRECTNESS}
+\chapter[\texorpdfstring{PYCKET AS A FULL RACKET RUN-TIME: CORRECTNESS \& COMPLETENESS}
+                          {5. Validation}]{PYCKET AS A FULL RACKET RUN-TIME: CORRECTNESS \& COMPLETENESS}
 
 	\label{chapter:validation}
 
 	\begin{chaptersynopsis}
-		Bootstrapped Racket on Pycket works, and is correct and complete.
-	\end{chaptersynopsis}
 
+        We demonstrate three things in this chapter:
 
-	\section{Correctness by Construction}
+        1. Self-hosted Racket on Pycket works.
+
+        2. Semantics of the self-hosted Racket on Pycket are identical to the semantics of Racket on Chez Scheme (Racket's own default runtime).
+
+        3. You can evaluate on Pycket anything you can express in Racket.
+
+        \vspace{2em}
+
+        Sections:
+		\begin{itemize}
+			\item Correctness by Construction
+
+                Semantics of the self-hosted Racket on Pycket are identical to the semantics of Racket on Chez Scheme (Racket's own default runtime).
+			\item Completeness under Self-Hosting
+
+                Pycket can evaluate any \#lang that Racket can evaluate.
+		\end{itemize}
+    \end{chaptersynopsis}
+
+	\section[\texorpdfstring{Correctness by Construction}{Correctness}]{Correctness by Construction}
 
 		\begin{mainpoint}
 			Pycket is correct wrt Racket.
@@ -35,7 +53,7 @@
 			Overall Correctness of the System is ensured by the Old and New Unit and end-to-end/integration tests.
 		\end{paragraph-here}
 
-	\section{Completeness under Self-Hosting}
+	\section[\texorpdfstring{Completeness under Self-Hosting}{Completeness}]{Completeness under Self-Hosting}
 
 		\begin{mainpoint}
 			Pycket can evaluate any \#lang that Racket evaluates.
