@@ -1,0 +1,28 @@
+\begin{figure}[!h]
+\centering
+
+\begin{minipage}{0.95\textwidth}
+\begin{lstlisting}[language=racket,
+                basicstyle=\ttfamily\footnotesize,
+                numbers=left, xleftmargin=2em, numberstyle=\tiny]
+> (term
+  (to-actual-racket
+    (program (use-linklets
+              [l1 (linklet () ())]
+              [l2 (linklet ((b)) () (define-values (a) 5) (+ a b))]
+              [l3 (linklet () (b) (define-values (b) 3))]
+        (let-inst t3 (instantiate l3))
+        (let-inst t1 (instantiate l1))
+        (instantiate l2 t3 #:target t1)))))
+
+'(let ((l1 (compile-linklet '(linklet () ())))
+       (l2 (compile-linklet '(linklet ((b)) () (define-values (a) 5) (+ a b))))
+       (l3 (compile-linklet '(linklet () (b) (define-values (b) 3)))))
+   (define t3 (instantiate-linklet l3 (list)))
+   (define t1 (instantiate-linklet l1 (list)))
+   (instantiate-linklet l2 (list t3) t1))
+\end{lstlisting}
+\caption{Meta-function converting the \emph{program} form to Racket}
+\label{fig:convert-program-to-racket}
+\end{minipage}
+\end{figure}

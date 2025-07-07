@@ -106,19 +106,17 @@
 				Testing the Linklets model was a little bit more elaborate than testing the LKL model, for two reasons: 1. Because that the terms are randomly generated, in the Linklets model we had to deal with almost every corner case there is to evaluate linklets. Imagine randomly generating Racket modules based on a full Racket grammar and running them. They would be syntactically valid, but one would expect a plethora of runtime errors from reference to undefined identifiers to arity errors in function applications, or type errors like trying to add a number with a string, etc. 2. Terms of the LKL language are syntactically valid for Racket language too, so we could easily feed the terms to both Racket and RC evaluators without making any changes. However, this is not possible for the Linklets language, since Racket doesn’t know about the program form.
 			\end{paragraph-here}
 
-			\begin{figure-here}
-				FIGURE -- eval-prog initial checks -- Fig 12 in quals main
-			\end{figure-here}
+			\inputFigure{validation}{initial-checks-for-test-redex}
 
 			\begin{paragraph-here}% 14
+				\figref{fig:restricted-lkl-eval-prog}
 				To deal with the former case, where we have lots of semantically invalid test inputs, we had two options. First, to use mechanism like \#:prepare in redex-check, to ensure that a generated term is semantically valid, discard otherwise, without applying the predicate. Second, add checks to the Linklets evaluator to catch and produce errors for the corner cases. While the former is a perfectly good solution for the testing per se, we decided to choose the second option to get the model closer to the actual implementation. This, unfortunately left us with the majority of the test cases being rejected by both systems, as opposed to having them being interesting with respect to the instantiation semantics. However, we expect that to be solved when we further improve the testing with the first option as well. As can be seen in Figure 12 below, we have ahead of time checks for a bunch of error cases. The reason for these checks to be done ahead of time instead of the runtime is that the Racket catches these errors in the function compile-linklet, where it constructs linklet objects from s-expressions, while the Linklet model clearly doesn’t have the compile-linklet since the model is syntax-driven, i.e. the representation is the object itself.
 			\end{paragraph-here}
 
-			\begin{figure-here}
-				FIGURE -- converting program form back into Racket -- Fig 13 in quals main
-			\end{figure-here}
+			\inputFigure{validation}{convert-program-to-racket}
 
 			\begin{paragraph-here}% 15
+				\figref{fig:convert-program-to-racket}
 				To address the second issue, where we can not invoke the Racket evaluator on program forms, we implemented a basic converter to rewrite the program forms to use the Racket forms like let-values, etc. Figure 13 shows such a conversion as an example.
 
 			\end{paragraph-here}
