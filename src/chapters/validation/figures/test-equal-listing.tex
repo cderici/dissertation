@@ -1,0 +1,29 @@
+\begin{figure}[!h]
+\centering
+
+\begin{minipage}{0.8\textwidth}
+\begin{lstlisting}[language=racket,
+                basicstyle=\ttfamily\footnotesize,
+                numbers=left, xleftmargin=2em, numberstyle=\tiny]
+(test-equal
+ (term
+  (eval-prog
+   (program (use-linklets
+             [l1 (linklet () (x) (define-values (x) 1))]
+             [l2 (linklet ((x)) (y g)
+                          (define-values (y) 10)
+                          (define-values (g) (lambda (p) (+ x y)))
+                          (set! y 50))]
+             [l3 (linklet () (y g)
+                          (set! y 200)
+                          (g -1))])
+        (let-inst t1 (linklet-instance ()))
+        (let-inst l1 (instantiate l1))
+        (instantiate l2 l1 #:target t1)  ; fill in the target
+        (instantiate l3 #:target t1))))
+ 201)
+\end{lstlisting}
+\caption{An example test case for linklet semantics}
+\label{fig:test-equal-listing}
+\end{minipage}
+\end{figure}

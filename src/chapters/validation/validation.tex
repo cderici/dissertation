@@ -74,9 +74,7 @@
 				To ensure correctness of linklet semantics, we manually adapted Pycket's own tests for linklets into the program form in the Redex model to have a symmetric setup (refer to chapter:linklet / or figure for the "program" form). In the end, we ran these tests on Racket itself, Pycket and on the Redex model simultaneously, which made sure everyone agree about the operational semantics, and all the test pass everywhere.
 			\end{paragraph-here}
 
-			\begin{figure-here}
-				FIGURE -- test-equal in plt redex
-			\end{figure-here}
+			\inputFigure{validation}{test-equal-listing}
 
 			\begin{paragraph-here}% 7
 				Figure shows one of those test cases as an example, where the linklet l2 exports a closure that has a free variable “y” inside, defined as 10 at the time of closure creation. We start by filling the target t1 with the variables that l2 exports, including the closure “g”, and use the same target t1 in instantiating the linklet l3. The linklet l3 exports the undefined variable “y”, and because that the target t1 now has the variable “y”, it uses the target’s variable. l3 sets the variable to 200 and invokes the closure. Thanks to lexical scope, the closure uses the environment that it captures at the time of its creation, which had the value 10 for the variable “y”. However that variable “y” is now modified to be 200, therefore the result is 201, instead of 11. Note that the value for “y” inside the target has been modified too, so (instance-variable-value t1 ’y) would give us 200.
