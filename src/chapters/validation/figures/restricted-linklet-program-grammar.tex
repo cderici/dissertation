@@ -1,0 +1,13 @@
+\begin{figure}[!h]
+    \centering
+    \begin{align*}
+      \textit{linkl-ref-test}~::=~&~x~|~L \\
+      \textit{p-test}~::=~&~\texttt{(program (use-linklets (}x\!_{\_}~L\texttt{) }\ldots\texttt{)}~p\textit{-top-test}~\ldots~\textit{final-expr-test}\texttt{)} \\
+      \textit{p-top-test}~::=~&~T\textit{-test}~|~n~|~b~|~\texttt{(void)}~|~\texttt{stuck}~|~\texttt{(let-inst }x~I\textit{-test}\texttt{)} \\
+      \textit{I-test}~::=~&~\texttt{(instantiate } \textit{linkl-ref-test}~x~\ldots\texttt{)} \\
+      T\textit{-test}~::=~&~\texttt{(instantiate } \textit{linkl-ref-test}~x~\ldots~\texttt{\#:target }x\texttt{)} \\
+      \textit{final-expr-test}~::=~&~n~|~b~|~\texttt{(void)}~|~\texttt{stuck}~|~\texttt{(instance-variable-value }x~x\texttt{)}~|~T\textit{-test}
+    \end{align*}
+    \caption{Restricted Linklet \emph{program} grammar for testing}
+    \label{fig:restricted-linklet-program}
+\end{figure}
