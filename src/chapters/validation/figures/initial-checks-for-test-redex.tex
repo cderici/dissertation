@@ -1,0 +1,20 @@
+\begin{figure}[!h]
+\centering
+\begin{align*}
+  &\text{eval-prog}\llbracket~(\text{program}~(\text{use-linklets}~(x_L, L)~\ldots)~p_{\text{top}}~\ldots)~\rrbracket \\
+  &\qquad =\ \text{run-prog}\llbracket~((\text{program}~(\text{use-linklets}~(x_L, L)~\ldots)~p_{\text{top}}~\ldots)~()~()~())~\rrbracket \\
+  &\hspace{5em} \text{where}\;\left(
+    \begin{array}{l}
+      \text{and( term check-free-varss$\llbracket L, \ldots \rrbracket$,} \\
+      \text{\qquad term no-exp/imp-duplicates$\llbracket L, \ldots \rrbracket$,} \\
+      \text{\qquad term no-export-rename-duplicates$\llbracket L, \ldots \rrbracket$,} \\
+      \text{\qquad term no-non-definable-variables$\llbracket L, \ldots \rrbracket$,} \\
+      \text{\qquad term no-duplicate-binding-namess$\llbracket L, \ldots \rrbracket$,} \\
+      \text{\qquad term linklet-refs-check-out$\llbracket (p_{\text{top}}\ldots),\;(x_L\ldots),$}\\
+      \text{\qquad\qquad get-defined-instance-ids$\llbracket(p_{\text{top}}\ldots),() \rrbracket \rrbracket$ )}
+    \end{array}
+  \right)
+\end{align*}
+\caption{Initial checks before the evaluation begins}
+\label{fig:restricted-lkl-eval-prog}
+\end{figure}
