@@ -38,7 +38,7 @@
 	\inputFigure{validation}{big-example}
 
 	\begin{paragraph-here}% 3
-		figure works on Pycket. For this program to work, here's what needs to work (from high level to low level). BIG PARAGRAPH. Since this program is working, you don't even need to look at the rest of the chapter to see Pycket works.
+		figure \figref{fig:pycket-works-big-example} works on Pycket. For this program to work, here's what needs to work (from high level to low level). BIG PARAGRAPH. Since this program is working, you don't even need to look at the rest of the chapter to see Pycket works.
 	\end{paragraph-here}
 
 	\begin{paragraph-here}% 4
@@ -51,11 +51,11 @@
 			Luckily, we start with already correct core values and data structures (number tower, symbols, hash tables, vectors, structs..).
 		\end{paragraph-here}
 
-		\begin{paragraph-here}% 2
-			The correction for the primitives is made sure by unit tests. Pycket has an extensive test suite.
-		\end{paragraph-here}
-
 		\inputFigure{validation}{test-suites-table}
+
+		\begin{paragraph-here}% 2
+			The correction for the primitives is made sure by unit tests. Pycket has an extensive test suite. \tableRef{table:validation-test-suites-table}
+		\end{paragraph-here}
 
 		\begin{paragraph-here}% 3
 			We considered running Racket's own tests on Pycket, however, Racket's testing mechanism is built on `raco` (e.g. `raco test -p racket-test-core`), and integrating external tooling into Pycket would be beyond the scope of our study.
@@ -77,7 +77,7 @@
 			\inputFigure{validation}{test-equal-listing}
 
 			\begin{paragraph-here}% 7
-				Figure shows one of those test cases as an example, where the linklet l2 exports a closure that has a free variable “y” inside, defined as 10 at the time of closure creation. We start by filling the target t1 with the variables that l2 exports, including the closure “g”, and use the same target t1 in instantiating the linklet l3. The linklet l3 exports the undefined variable “y”, and because that the target t1 now has the variable “y”, it uses the target’s variable. l3 sets the variable to 200 and invokes the closure. Thanks to lexical scope, the closure uses the environment that it captures at the time of its creation, which had the value 10 for the variable “y”. However that variable “y” is now modified to be 200, therefore the result is 201, instead of 11. Note that the value for “y” inside the target has been modified too, so (instance-variable-value t1 ’y) would give us 200.
+				Figure \figref{fig:test-equal-listing} shows one of those test cases as an example, where the linklet l2 exports a closure that has a free variable “y” inside, defined as 10 at the time of closure creation. We start by filling the target t1 with the variables that l2 exports, including the closure “g”, and use the same target t1 in instantiating the linklet l3. The linklet l3 exports the undefined variable “y”, and because that the target t1 now has the variable “y”, it uses the target’s variable. l3 sets the variable to 200 and invokes the closure. Thanks to lexical scope, the closure uses the environment that it captures at the time of its creation, which had the value 10 for the variable “y”. However that variable “y” is now modified to be 200, therefore the result is 201, instead of 11. Note that the value for “y” inside the target has been modified too, so (instance-variable-value t1 ’y) would give us 200.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}% 8
@@ -92,12 +92,10 @@
 				One interesting issue was that the redex-check generates random terms based on the given grammar, which in this case the grammar for LKL language (and also the Linklets grammar for random testing of the Linklets model). However, these languages include objects that doesn’t have explicit representations in Racket, such as closure. A closure in both Racket and LKL has formal parameters, body and an environment that it closes on. However, it’s not possible to syntactically produce closures in Racket, since the environment doesn’t have explicit representation. Therefore, a syntactically valid term according to the LKL grammar such as “(closure x (+ x y) ((y cell123)))” doesn’t have a corresponding term in Racket. As a result, any randomly generated term that has an explicit closure in it will raise an exception on the Racket evaluator, while successfully being run on the LKL evaluator.
 			\end{paragraph-here}
 
-			\begin{figure-here}
-				FIGURE -- e-test grammar -- Fig 11 in quals main
-			\end{figure-here}
+			\inputFigure{validation}{restricted-lkl-expression-grammar}
 
 			\begin{paragraph-here}% 11
-				To address this issue, and decrease the number of errors caused by randomly generated such cases, we restricted the grammar a bit for redex-check to generate terms that will have corresponding terms in the Racket world. Figure shows the restricted expression for the RC. Note that in this case the only difference is that we don’t allow the closures (the non-terminal “c”) to explicitly appear in terms. We have a little more complicated restricted setup for the Linklets, as we will discuss below.f
+				To address this issue, and decrease the number of errors caused by randomly generated such cases, we restricted the grammar a bit for redex-check to generate terms that will have corresponding terms in the Racket world. Figure shows the restricted expression for the RC. Note that in this case the only difference is that we don’t allow the closures (the non-terminal “c”) to explicitly appear in terms. We have a little more complicated restricted setup for the Linklets, as we will discuss below.f \figref{fig:restricted-lkl-expression}
 			\end{paragraph-here}
 
 			\begin{paragraph-here}% 12

@@ -1,0 +1,20 @@
+\begin{figure}[!h]
+    \centering
+    \begin{align*}
+      \textit{e\text{-}test}~::=~&~x \\
+      &|~n \\
+      &|~b \\
+      &|~\texttt{(void)} \\
+      &|~\texttt{(}\;\textit{e\text{-}test}\;\textit{e\text{-}test}\;\ldots\;\texttt{)} \\
+      &|~\texttt{(lambda (}x!_{\_}\ldots\texttt{) }\textit{e\text{-}test}\texttt{)} \\
+      &|~\texttt{(if }\textit{e\text{-}test}\;\textit{e\text{-}test}\;\textit{e\text{-}test}\texttt{)} \\
+      &|~\texttt{(}p2\;\textit{e\text{-}test}\;\textit{e\text{-}test}\texttt{)} \\
+      &|~\texttt{(}p1\;\textit{e\text{-}test}\texttt{)} \\
+      &|~\texttt{(set! }x\;\textit{e\text{-}test}\texttt{)} \\
+      &|~\texttt{(begin }\textit{e\text{-}test}\;\textit{e\text{-}test}\;\ldots\texttt{)} \\
+      &|~\texttt{(let-values (((}x\texttt{)}\;\textit{e\text{-}test})\;\ldots\texttt{) }\textit{e\text{-}test}\texttt{)} \\
+      &|~\texttt{(raises }\textit{e\text{-}test}\texttt{)}
+    \end{align*}
+    \caption{Restricted LKL expression non-terminal}
+    \label{fig:restricted-lkl-expression}
+\end{figure}
