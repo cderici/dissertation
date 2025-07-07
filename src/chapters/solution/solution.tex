@@ -20,7 +20,7 @@
   \end{chaptersynopsis}
 
   \paragraph{}%
-    Branch-heavy computation and memory problems appear central to the performance challenges encountered when self-hosting on a meta-tracing JIT compiler. As demonstrated extensively in \chapterRef{chapter:problem}, the predominant performance degradation arises from intricate branching patterns during macro expansion and associated runtime computations, which significantly inflate both trace sizes and GC overhead.
+    As demonstrated extensively in \chapterRef{chapter:problem}, the predominant performance degradation on Pycket self-hosting Racket arises from intricate branching patterns during macro expansion and associated runtime computations, which significantly inflate both trace sizes and GC overhead. In other words, branch-heavy computation and memory problems appear central to the performance challenges encountered when self-hosting on a meta-tracing JIT compiler.
 
   \paragraph{}%
     Addressing these core issues has the potential to transform self-hosting from a theoretical convenience into a practical and robust methodology for building language runtimes. By reducing the impact of branch-heavy computations and controlling memory usage, we can achieve consistent performance benefits from meta-tracing JIT compilers.
