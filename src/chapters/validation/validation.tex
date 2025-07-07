@@ -139,7 +139,7 @@
 			\end{paragraph-here}
 
 			\begin{paragraph-here}% 17
-				We again removed the explicit closures as values and also removed the explicit terms representing the linklet instances. Because a linklet instance is a mapping from variables to cells, and just like in the case of closure forms, a cell identifier has no corresponding term in Racket. Just as the case for Racket Core model, with an increased number of 2000 each time freshly generated random terms, we successfully demonstrated that our Linklets model agrees with the actual Racket linklet implementation (i.e. racket/linklet)).
+				We again removed the explicit closures as values and also removed the explicit terms representing the linklet instances. Because a linklet instance is a mapping from variables to cells, and just like in the case of closure forms, a cell identifier has no corresponding term in Racket. Just as the case for Racket Core model, with an increased number of 2000 each time freshly generated random terms, we successfully demonstrated that our Linklets model agrees with the actual Racket linklet implementation (i.e. racket/linklet).
 			\end{paragraph-here}
 
 			\begin{paragraph-here}% 18
@@ -148,19 +148,27 @@
 
 
 	\section[\texorpdfstring{Completeness under Self-Hosting}{Completeness}]{Completeness under Self-Hosting}
+		\begin{paragraph-here}% 1
+			Racket is a programming language programming language.
+		\end{paragraph-here}
 
-		\begin{mainpoint}
-			Pycket can evaluate any \#lang that Racket evaluates.
-		\end{mainpoint}
+		\begin{paragraph-here}% 2
+			As long as you have the expander to reduce the given language to \#\%kernel, you're golden.
+		\end{paragraph-here}
 
-		\subsection{From \#\%kernel to \#lang racket/base}
-			\begin{mainpoint}
-				Racket is a programming language programming language.
+		\begin{paragraph-here}% 3
+			From \#\%kernel to \#lang racket/base, you need primitives, data structures, etc .........
+		\end{paragraph-here}
 
-				As long as you have the expander to reduce the given language to \#\%kernel, you're golden.
-			\end{mainpoint}
+		\begin{paragraph-here}% 4
+			Being able to implement \#lang racket/base is a good springboard to implement larger languages.
+		\end{paragraph-here}
 
-		\subsection{Beyond \#lang racket/base}
-			\begin{mainpoint}
-				Being able to implement \#lang racket/base is a good springboard to implement larger languages.
-			\end{mainpoint}
+		\begin{paragraph-here}% 5
+			Beyond \#lang racket/base, you need the full power of the macro expander and the module language
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 6
+			We showed in the figure at the very beginning that Pycket can run a `\#lang racket` program, confirming our opening claim: Pycket behaves as a drop-in, functionally transparent, self-hosting Racket runtime.
+		\end{paragraph-here}
+
