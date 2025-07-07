@@ -7,7 +7,7 @@
 
         We demonstrate three things in this chapter:
 
-        1. Self-hosted Racket on Pycket works.
+        1. Self-hosted implementation of Racket on Pycket works.
 
         2. Semantics of the self-hosted Racket on Pycket are identical to the semantics of Racket on Chez Scheme (Racket's own default runtime).
 
@@ -26,34 +26,126 @@
 		\end{itemize}
     \end{chaptersynopsis}
 
+
+	\begin{paragraph-here}% 1
+		 In this chapter we demonstrate that the self-hosted Racket implementation on Pycket is correct, and it's complete wrt Racket.
+	\end{paragraph-here}
+
+	\begin{paragraph-here}% 2
+		As the first step of our overall validation, we first demonstrate with a slightly large example that Pycket is functionally indistinguishable from the Racket on Chez.
+	\end{paragraph-here}
+
 	\inputFigure{validation}{big-example}
+
+	\begin{paragraph-here}% 3
+		figure works on Pycket. For this program to work, here's what needs to work (from high level to low level). BIG PARAGRAPH. Since this program is working, you don't even need to look at the rest of the chapter to see Pycket works.
+	\end{paragraph-here}
+
+	\begin{paragraph-here}% 4
+		The equivalence in semantics of Racket on Chez and Pycket depends on the correctness of the core data sturctures and primitives that Pycket expose to the linklets, as well as the correctness of the linklet semantics themselves. From there, the completeness is achieved by Racket's way of building languages on top of each other. The next two sections detail these.
+	\end{paragraph-here}
 
 	\section[\texorpdfstring{Correctness by Construction}{Correctness}]{Correctness by Construction}
 
-		\begin{mainpoint}
-			Pycket is correct wrt Racket.
-		\end{mainpoint}
+
+		\begin{paragraph-here}% 1
+			Luckily, we start with already correct core values and data structures (number tower, symbols, hash tables, vectors, structs..).
+		\end{paragraph-here}
+
+		\begin{paragraph-here}% 2
+			The correction for the primitives is made sure by unit tests. Pycket has an extensive test suite.
+		\end{paragraph-here}
+
+		\begin{todo}[TECH TODO]
+			how many tests, how to present
+		\end{todo}
+
+		\begin{paragraph-here}% 3
+			We considered running Racket's own tests on Pycket, however, Racket's testing mechanism is built on `raco` (e.g. `raco test -p racket-test-core`), and integrating external tooling into Pycket would be beyond the scope of our study.
+		\end{paragraph-here}
 
 		\subsection{Randomized Testing for Linklet Semantics}
-			\begin{mainpoint}
-				We have 100\% coverage on the operational semantics as unit tests.
+			\begin{paragraph-here}% 4
+				Correctness in this setup also depends on the correctness of the linklet semantics being implemented correctly. In the rest of the section we'll detail how we made sure of that.
+			\end{paragraph-here}
 
-				Additionally, we symmetrically used the same set of tests with the redex model that realize the operational semantics.
-			\end{mainpoint}
+			\begin{paragraph-here}% 5
+				Recall that the operational semantics we presented for linklets at the chapter:linklet is developed in executable PLT Redex, the model is in the appendix whatever...
+			\end{paragraph-here}
 
-			\begin{todo}[Import]
-				Use section 1.4 "Testing the model" from the Quals written document for testing linklets.
-			\end{todo}
+			\begin{paragraph-here}% 6
+				To ensure correctness of linklet semantics, we manually adapted Pycket's own tests for linklets into the program form in the Redex model to have a symmetric setup (refer to chapter:linklet / or figure for the "program" form). In the end, we ran these tests on Racket itself, Pycket and on the Redex model simultaneously, which made sure everyone agree about the operational semantics, and all the test pass everywhere.
+			\end{paragraph-here}
 
-		\begin{paragraph-here}
-			We add untouched Racket code on top of original Pycket to expand functionality.
+			\begin{figure-here}
+				FIGURE -- test-equal in plt redex
+			\end{figure-here}
 
-				Correctness is preserved.
-		\end{paragraph-here}
+			\begin{paragraph-here}% 7
+				Figure shows one of those test cases as an example, where the linklet l2 exports a closure that has a free variable “y” inside, defined as 10 at the time of closure creation. We start by filling the target t1 with the variables that l2 exports, including the closure “g”, and use the same target t1 in instantiating the linklet l3. The linklet l3 exports the undefined variable “y”, and because that the target t1 now has the variable “y”, it uses the target’s variable. l3 sets the variable to 200 and invokes the closure. Thanks to lexical scope, the closure uses the environment that it captures at the time of its creation, which had the value 10 for the variable “y”. However that variable “y” is now modified to be 200, therefore the result is 201, instead of 11. Note that the value for “y” inside the target has been modified too, so (instance-variable-value t1 ’y) would give us 200.
+			\end{paragraph-here}
 
-		\begin{paragraph-here}
-			Overall Correctness of the System is ensured by the Old and New Unit and end-to-end/integration tests.
-		\end{paragraph-here}
+			\begin{paragraph-here}% 8
+				Additonally, the PLT Redex provides comprehensive functionalities for random testing, where it generates random terms based on a given grammar and tests those terms against a given predicate. It essentially tries to find a counterexample that will fail the predicate. We used the random testing for both Racket Core and Linklet models separately, where we essentially asked the question “Does Racket agree with the given model about this term?” for both.
+			\end{paragraph-here}
+
+			\begin{paragraph-here}% 9
+				In particular, we tested these two predicates, implemented as meta-functions on the languages LKL and Linklets respectively: – eval-rc=racket-core – eval-prog=racket-linklets eval-rc=racket-core is a meta-function that takes a term (in LKL language) as input and applies the racket evaluator and the eval-rc (i.e. RC evaluator) at the same time and checks if they produce the same answer (on an empty environment).
+			\end{paragraph-here}
+
+			\begin{paragraph-here}% 10
+				One interesting issue was that the redex-check generates random terms based on the given grammar, which in this case the grammar for LKL language (and also the Linklets grammar for random testing of the Linklets model). However, these languages include objects that doesn’t have explicit representations in Racket, such as closure. A closure in both Racket and LKL has formal parameters, body and an environment that it closes on. However, it’s not possible to syntactically produce closures in Racket, since the environment doesn’t have explicit representation. Therefore, a syntactically valid term according to the LKL grammar such as “(closure x (+ x y) ((y cell123)))” doesn’t have a corresponding term in Racket. As a result, any randomly generated term that has an explicit closure in it will raise an exception on the Racket evaluator, while successfully being run on the LKL evaluator.
+			\end{paragraph-here}
+
+			\begin{figure-here}
+				FIGURE -- e-test grammar -- Fig 11 in quals main
+			\end{figure-here}
+
+			\begin{paragraph-here}% 11
+				To address this issue, and decrease the number of errors caused by randomly generated such cases, we restricted the grammar a bit for redex-check to generate terms that will have corresponding terms in the Racket world. Figure shows the restricted expression for the RC. Note that in this case the only difference is that we don’t allow the closures (the non-terminal “c”) to explicitly appear in terms. We have a little more complicated restricted setup for the Linklets, as we will discuss below.f
+			\end{paragraph-here}
+
+			\begin{paragraph-here}% 12
+				With 1000 randomly generated terms (freshly generated each time we ran the tests), we successfully established that our LKL model agrees with the actual Racket implementation.
+			\end{paragraph-here}
+
+			\begin{paragraph-here}% 13
+				Testing the Linklets model was a little bit more elaborate than testing the LKL model, for two reasons: 1. Because that the terms are randomly generated, in the Linklets model we had to deal with almost every corner case there is to evaluate linklets. Imagine randomly generating Racket modules based on a full Racket grammar and running them. They would be syntactically valid, but one would expect a plethora of runtime errors from reference to undefined identifiers to arity errors in function applications, or type errors like trying to add a number with a string, etc. 2. Terms of the LKL language are syntactically valid for Racket language too, so we could easily feed the terms to both Racket and RC evaluators without making any changes. However, this is not possible for the Linklets language, since Racket doesn’t know about the program form.
+			\end{paragraph-here}
+
+			\begin{figure-here}
+				FIGURE -- eval-prog initial checks -- Fig 12 in quals main
+			\end{figure-here}
+
+			\begin{paragraph-here}% 14
+				To deal with the former case, where we have lots of semantically invalid test inputs, we had two options. First, to use mechanism like \#:prepare in redex-check, to ensure that a generated term is semantically valid, discard otherwise, without applying the predicate. Second, add checks to the Linklets evaluator to catch and produce errors for the corner cases. While the former is a perfectly good solution for the testing per se, we decided to choose the second option to get the model closer to the actual implementation. This, unfortunately left us with the majority of the test cases being rejected by both systems, as opposed to having them being interesting with respect to the instantiation semantics. However, we expect that to be solved when we further improve the testing with the first option as well. As can be seen in Figure 12 below, we have ahead of time checks for a bunch of error cases. The reason for these checks to be done ahead of time instead of the runtime is that the Racket catches these errors in the function compile-linklet, where it constructs linklet objects from s-expressions, while the Linklet model clearly doesn’t have the compile-linklet since the model is syntax-driven, i.e. the representation is the object itself.
+			\end{paragraph-here}
+
+			\begin{figure-here}
+				FIGURE -- converting program form back into Racket -- Fig 13 in quals main
+			\end{figure-here}
+
+			\begin{paragraph-here}% 15
+				To address the second issue, where we can not invoke the Racket evaluator on program forms, we implemented a basic converter to rewrite the program forms to use the Racket forms like let-values, etc. Figure 13 shows such a conversion as an example.
+
+			\end{paragraph-here}
+
+			\begin{figure-here}
+				 FIGURE -- linkl-ref-test -- Fig 14 in quals main
+			\end{figure-here}
+
+			\begin{paragraph-here}% 16
+				As discussed above for testing the LKL model, another issue with the random testing is generating terms that doesn’t have corresponding terms in the Racket language. As we have shown in Figure 11, we solved this issue by restricting the grammar to generate meaningful terms for the Racket evaluator. We also have a restricted grammar for the Linklets language, as shown in Figure 14.
+			\end{paragraph-here}
+
+			\begin{paragraph-here}% 17
+				We again removed the explicit closures as values and also removed the explicit terms representing the linklet instances. Because a linklet instance is a mapping from variables to cells, and just like in the case of closure forms, a cell identifier has no corresponding term in Racket. Just as the case for Racket Core model, with an increased number of 2000 each time freshly generated random terms, we successfully demonstrated that our Linklets model agrees with the actual Racket linklet implementation (i.e. racket/linklet)).
+			\end{paragraph-here}
+
+			\begin{paragraph-here}% 18
+				Ensuring the core values and data structures and primitive support, plus the linklet semantics, ensure that Pycket correctly evaluates whatever is expressed by the compiler (the macro expander). On top of this, we add untouched Racket code that brings functionality already tested and working on Racket's own run-time, which acts like integration tests for any run-time that imports those functionalities via linklets.
+			\end{paragraph-here}
+
 
 	\section[\texorpdfstring{Completeness under Self-Hosting}{Completeness}]{Completeness under Self-Hosting}
 
