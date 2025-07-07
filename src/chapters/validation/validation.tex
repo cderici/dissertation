@@ -47,7 +47,6 @@
 
 	\section[\texorpdfstring{Correctness by Construction}{Correctness}]{Correctness by Construction}
 
-
 		\begin{paragraph-here}% 1
 			Luckily, we start with already correct core values and data structures (number tower, symbols, hash tables, vectors, structs..).
 		\end{paragraph-here}
@@ -56,9 +55,7 @@
 			The correction for the primitives is made sure by unit tests. Pycket has an extensive test suite.
 		\end{paragraph-here}
 
-		\begin{todo}[TECH TODO]
-			how many tests, how to present
-		\end{todo}
+		\inputFigure{validation}{test-suites-table}
 
 		\begin{paragraph-here}% 3
 			We considered running Racket's own tests on Pycket, however, Racket's testing mechanism is built on `raco` (e.g. `raco test -p racket-test-core`), and integrating external tooling into Pycket would be beyond the scope of our study.
