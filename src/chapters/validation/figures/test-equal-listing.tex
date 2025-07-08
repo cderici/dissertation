@@ -16,7 +16,7 @@
                           (set! y 50))]
              [l3 (linklet () (y g)
                           (set! y 200)
-                          (g -1))])
+                          (g))])
         (let-inst t1 (linklet-instance ()))
         (let-inst l1 (instantiate l1))
         (instantiate l2 l1 #:target t1)  ; fill in the target

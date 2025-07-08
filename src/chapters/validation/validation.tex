@@ -42,38 +42,33 @@
 
 	\section[\texorpdfstring{Correctness by Construction}{Correctness}]{Correctness by Construction}
 
-		\begin{paragraph-here}% 1
-			Luckily, we start with already correct core values and data structures (number tower, symbols, hash tables, vectors, structs..).
-		\end{paragraph-here}
+		\paragraph{}% 1
+			Correctness by construction in Pycket begins with an already comprehensive and correct implementation of Racket's core values and data structures. This includes the full numeric tower, symbols, hash tables, vectors, and structs, as described in detail in \cite{pycketmain}. We build our high-level correctness argument upon this robust correctness of these fundamental elements.
 
 		\inputFigure{validation}{test-suites-table}
 
-		\begin{paragraph-here}% 2
-			The correction for the primitives is made sure by unit tests. Pycket has an extensive test suite. \tableRef{table:validation-test-suites-table}
-		\end{paragraph-here}
+		\paragraph{}% 2
+			Pycket ensures correctness of its primitive operations through an extensive suite of unit tests. \tableRef{table:validation-test-suites-table} shows the number and scope of Pycket's test suites, forming a total of 549 suites, each containing numerous individual test cases. Among all the baseline semantics, these suites comprehensively cover significant runtime components such as structs, hashes, equality, hidden classes, impersonators, regular expressions, \gls{ast} handling, and linklets.
 
-		\begin{paragraph-here}% 3
-			We considered running Racket's own tests on Pycket, however, Racket's testing mechanism is built on `raco` (e.g. `raco test -p racket-test-core`), and integrating external tooling into Pycket would be beyond the scope of our study.
-		\end{paragraph-here}
+		\paragraph{}% 3
+			We considered leveraging Racket’s own comprehensive test suites to further demonstrate Pycket's correctness. However, since Racket’s testing infrastructure heavily relies on external tooling such as \racketcode{raco} (e.g., \racketcode{raco test -p racket-test-core}), integrating it directly into Pycket's testing workflow would exceed the scope of our study. Instead, we focus on targeted, manually adapted tests that precisely verify the critical aspects of our implementation.
+
+		\paragraph{}% 4
+			A crucial component of ensuring Pycket’s correctness is validating its implementation of the linklet semantics. The correctness of linklets is particularly important because linklets constitute the primary compilation units upon which Racket's macro expander and module system are constructed. In the rest of the section, we explain the methodology employed to ensure that Pycket correctly implements these semantics, aligning precisely with the semantics defined by Racket itself.
+
+		\paragraph{}% 5
+			Recall that the operational semantics we presented for linklets in \chapterRef{chapter:linklet} were developed using PLT Redex, which allows us to create an executable model of these semantics. The complete linklet model is provided in \appendixRef{appendix:linklet-semantics-model-redex-code}. In the remainder of this section, we describe how we leveraged this executable model to validate Pycket’s implementation of linklet semantics.
+
+		\paragraph{}% 6
+			To ensure correctness of Pycket's implementation of linklet semantics, we manually adapted Pycket’s own linklet tests into the \racketcode{program} form defined in our PLT Redex model (refer to \figref{fig:linklet-program-source-language} for the definition of the program form). This adaptation enabled us to create a symmetric testing setup, allowing us to run each test across Racket itself, Pycket, and the Redex model simultaneously. Running these tests concurrently ensures that all implementations consistently agree on the expected operational semantics.
+
+		\inputFigure{validation}{test-equal-listing}
+
+		\paragraph{}% 7
+			An example test case (adapted from Pycket's suite into the Redex model) for the correctness of linklet semantics is shown in \figref{fig:test-equal-listing}. Here, the linklet \textbf{l2} exports a closure \racketcode{g}, which references a variable \racketcode{y} initially defined as 10 and subsequently mutated to 50 within the linklet (line 9). Since \racketcode{y} is exported and mutated within \textbf{l2}, the compiler treats it as a linklet variable. Similarly, in linklet \textbf{l3}, the identifier \racketcode{y} is exported without a corresponding local definition and is also mutated (line 11), thus compiled as a linklet variable as well. After compilation, we first instantiate \textbf{l2} with the target instance \racketcode{t1} (line 15), populating it with exported variables including the closure \racketcode{g} and the variable \racketcode{y}. We then instantiate \textbf{l3} using the same target instance \racketcode{t1}. Any reference to \racketcode{y} within \textbf{l3} thus accesses and modifies the shared linklet variable in the target instance. At the time \textbf{l3} is instantiated, the value of \racketcode{y} is 50, but before invoking the closure \racketcode{g}, \textbf{l3} updates \racketcode{y} to 200 (line 11). When the closure \racketcode{g} is finally invoked (line 12), it yields a result of 201, highlighting the use of the updated linklet variable \racketcode{y}, despite lexical scoping; otherwise, without linklet variables, the closure would have used the original lexical environment in which \racketcode{y} was 10, returning 11. Notably, after this invocation, the variable \racketcode{y} in the target instance \racketcode{t1} remains modified to 200, which can be confirmed by invoking \racketcode{(instance-variable-value t1 'y)}, demonstrating correct handling of linklet variables across instances.
 
 		\subsection{Randomized Testing for Linklet Semantics}
-			\begin{paragraph-here}% 4
-				Correctness in this setup also depends on the correctness of the linklet semantics being implemented correctly. In the rest of the section we'll detail how we made sure of that.
-			\end{paragraph-here}
 
-			\begin{paragraph-here}% 5
-				Recall that the operational semantics we presented for linklets at the chapter:linklet is developed in executable PLT Redex, the model is in the appendix whatever...
-			\end{paragraph-here}
-
-			\begin{paragraph-here}% 6
-				To ensure correctness of linklet semantics, we manually adapted Pycket's own tests for linklets into the program form in the Redex model to have a symmetric setup (refer to chapter:linklet / or figure for the "program" form). In the end, we ran these tests on Racket itself, Pycket and on the Redex model simultaneously, which made sure everyone agree about the operational semantics, and all the test pass everywhere.
-			\end{paragraph-here}
-
-			\inputFigure{validation}{test-equal-listing}
-
-			\begin{paragraph-here}% 7
-				Figure \figref{fig:test-equal-listing} shows one of those test cases as an example, where the linklet l2 exports a closure that has a free variable “y” inside, defined as 10 at the time of closure creation. We start by filling the target t1 with the variables that l2 exports, including the closure “g”, and use the same target t1 in instantiating the linklet l3. The linklet l3 exports the undefined variable “y”, and because that the target t1 now has the variable “y”, it uses the target’s variable. l3 sets the variable to 200 and invokes the closure. Thanks to lexical scope, the closure uses the environment that it captures at the time of its creation, which had the value 10 for the variable “y”. However that variable “y” is now modified to be 200, therefore the result is 201, instead of 11. Note that the value for “y” inside the target has been modified too, so (instance-variable-value t1 ’y) would give us 200.
-			\end{paragraph-here}
 
 			\begin{paragraph-here}% 8
 				Additonally, the PLT Redex provides comprehensive functionalities for random testing, where it generates random terms based on a given grammar and tests those terms against a given predicate. It essentially tries to find a counterexample that will fail the predicate. We used the random testing for both Racket Core and Linklet models separately, where we essentially asked the question “Does Racket agree with the given model about this term?” for both.
