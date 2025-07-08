@@ -26,24 +26,19 @@
 		\end{itemize}
     \end{chaptersynopsis}
 
+	\paragraph{}% 1
+		In this chapter, we demonstrate that Pycket's self-hosted implementation of Racket is both correct and complete with respect to the original Racket implementation. Correctness here means that the semantics provided by Pycket exactly match those provided by Racket's default runtime on Chez Scheme, and completeness means that any program expressible in Racket can be successfully evaluated by Pycket. Establishing these two properties is essential to demonstrate that Pycket can indeed serve as a fully functional drop-in replacement for Racket.
 
-	\begin{paragraph-here}% 1
-		 In this chapter we demonstrate that the self-hosted Racket implementation on Pycket is correct, and it's complete wrt Racket.
-	\end{paragraph-here}
-
-	\begin{paragraph-here}% 2
-		As the first step of our overall validation, we first demonstrate with a slightly large example that Pycket is functionally indistinguishable from the Racket on Chez.
-	\end{paragraph-here}
+	\paragraph{}% 2
+		As the first step of our validation, we use a moderately sized program, shown in \figref{fig:pycket-works-big-example}, as an example to illustrate that Pycket's runtime behavior is indistinguishable from Racket running on Chez Scheme. This program works correctly on both implementations.
 
 	\inputFigure{validation}{big-example}
 
-	\begin{paragraph-here}% 3
-		figure \figref{fig:pycket-works-big-example} works on Pycket. For this program to work, here's what needs to work (from high level to low level). BIG PARAGRAPH. Since this program is working, you don't even need to look at the rest of the chapter to see Pycket works.
-	\end{paragraph-here}
+	\paragraph{}% 3
+		For the program in \figref{fig:pycket-works-big-example} to correctly run on Pycket, multiple essential components must function together seamlessly. At the outset, Pycket must support the full loading and evaluation of a \racketcode{#lang racket} module, which alone involves significant runtime support for nearly all Racket core values and data structures. This includes handling numerical values, strings, symbols, hash tables, vectors, boxes, and particularly structs, which are fundamental to syntax objects used extensively by Racket’s macro expander. Indeed, before considering linklets, Pycket must already have robust runtime support for syntax objects—heavily reliant on Racket structs—to correctly handle macros such as \racketcode{define-syntax}, \racketcode{syntax-case}, and phase-level forms like \racketcode{for-syntax}. Moreover, because the macro expander itself utilizes linklets to manage dependencies across different compilation phases, Pycket must correctly instantiate and evaluate these linklets, ensuring accurate handling of variable binding, closures, and across-phase interactions. Additionally, to correctly evaluate advanced control-flow mechanisms such as \racketcode{shift0} and \racketcode{reset0}, Pycket's runtime must provide reliable and efficient support for delimited continuations. Further, the runtime must comprehensively support primitive operations required by the fully expanded program, including boxing/unboxing operations, structural equality checks, and errors. Since Pycket successfully executes this substantial program, it demonstrates the correctness and completeness of Pycket’s implementation of all these interdependent components.
 
-	\begin{paragraph-here}% 4
-		The equivalence in semantics of Racket on Chez and Pycket depends on the correctness of the core data sturctures and primitives that Pycket expose to the linklets, as well as the correctness of the linklet semantics themselves. From there, the completeness is achieved by Racket's way of building languages on top of each other. The next two sections detail these.
-	\end{paragraph-here}
+	\paragraph{}% 4
+		The semantic equivalence between Racket running on Chez Scheme and Pycket ultimately relies on Pycket's correct handling of the linklet semantics, as well as the correctness of its primitive operations and core data structures exposed to linklets. Given these foundational components, completeness naturally follows from Racket’s layered language architecture, in which richer language constructs and functionalities are incrementally constructed atop more primitive layers. The following two sections detail the evidence supporting both correctness and completeness.
 
 	\section[\texorpdfstring{Correctness by Construction}{Correctness}]{Correctness by Construction}
 
