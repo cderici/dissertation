@@ -69,63 +69,43 @@
 
 		\subsection{Randomized Testing for Linklet Semantics}
 
+			\paragraph{}% 8
+				In addition to manually adapted test cases, we also utilized PLT Redex's support for randomized testing to further verify the correctness of our implementation of linklet semantics. Redex enables generation of random terms according to a provided grammar, which are then checked against a correctness predicate. In our setup, we leverage randomized testing separately for two executable models: the core language model (\gls{lkl}) and the linklets model. For each randomly generated term, we asked whether the semantics defined by our model agreed with the actual implementation provided by Racket.
 
-			\begin{paragraph-here}% 8
-				Additonally, the PLT Redex provides comprehensive functionalities for random testing, where it generates random terms based on a given grammar and tests those terms against a given predicate. It essentially tries to find a counterexample that will fail the predicate. We used the random testing for both Racket Core and Linklet models separately, where we essentially asked the question “Does Racket agree with the given model about this term?” for both.
-			\end{paragraph-here}
+			\paragraph{}% 9
+				Specifically, we tested two correctness predicates, implemented as meta-functions within our Redex models: \racketcode{eval-rc=racket-core}, defined for the \gls{lkl} language (\figref{appendix:linklet-kernel-language-figure}), and \racketcode{eval-prog=racket-linklets}, defined for the linklets language (\figref{fig:linklet-grammar}). The meta-function \racketcode{eval-rc=racket-core} receives a randomly generated term in the \gls{lkl} language, then simultaneously evaluates it using both the Redex model's evaluator and the actual Racket interpreter (on which PLT Redex itself runs). The results are compared to verify that both implementations produce identical outcomes starting from an empty environment. Similarly, the \racketcode{eval-prog=racket-linklets} predicate performs an analogous check for the linklets language, ensuring semantic consistency between our linklets model and Racket’s own implementation.
 
-			\begin{paragraph-here}% 9
-				In particular, we tested these two predicates, implemented as meta-functions on the languages LKL and Linklets respectively: – eval-rc=racket-core – eval-prog=racket-linklets eval-rc=racket-core is a meta-function that takes a term (in LKL language) as input and applies the racket evaluator and the eval-rc (i.e. RC evaluator) at the same time and checks if they produce the same answer (on an empty environment).
-			\end{paragraph-here}
-
-			\begin{paragraph-here}% 10
-				One interesting issue was that the redex-check generates random terms based on the given grammar, which in this case the grammar for LKL language (and also the Linklets grammar for random testing of the Linklets model). However, these languages include objects that doesn’t have explicit representations in Racket, such as closure. A closure in both Racket and LKL has formal parameters, body and an environment that it closes on. However, it’s not possible to syntactically produce closures in Racket, since the environment doesn’t have explicit representation. Therefore, a syntactically valid term according to the LKL grammar such as “(closure x (+ x y) ((y cell123)))” doesn’t have a corresponding term in Racket. As a result, any randomly generated term that has an explicit closure in it will raise an exception on the Racket evaluator, while successfully being run on the LKL evaluator.
-			\end{paragraph-here}
+			\paragraph{}% 10
+				During randomized testing, we encountered a notable challenge due to the difference between the Redex language grammars and Racket's actual syntax. Specifically, the grammars for both the \gls{lkl} and the linklets languages allow the explicit representation of certain runtime entities—most notably closures—that do not have direct syntactic counterparts in Racket itself. Closures in both Racket and the \gls{lkl} language consist of formal parameters, a function body, and the environment captured at closure creation time. However, Racket’s surface syntax does not allow for explicit construction of closures, as environments lack a direct syntactic representation. Consequently, randomly generated terms containing explicit closures (e.g., \racketcode{(closure x (+ x y) ((y cell123)))}) would lead to runtime exceptions when evaluated by Racket’s interpreter, even though they were successfully evaluated by our Redex model.
 
 			\inputFigure{validation}{restricted-lkl-expression-grammar}
 
-			\begin{paragraph-here}% 11
-				To address this issue, and decrease the number of errors caused by randomly generated such cases, we restricted the grammar a bit for redex-check to generate terms that will have corresponding terms in the Racket world. Figure shows the restricted expression for the RC. Note that in this case the only difference is that we don’t allow the closures (the non-terminal “c”) to explicitly appear in terms. We have a little more complicated restricted setup for the Linklets, as we will discuss below.f \figref{fig:restricted-lkl-expression}
-			\end{paragraph-here}
+			\paragraph{}% 11
+				To mitigate this issue and reduce the frequency of errors caused by such randomly generated cases, we slightly restricted the grammar used by the random term generator. Specifically, we removed explicit closure terms (the non-terminal \racketcode{c}) from the \gls{lkl} grammar for randomized testing, ensuring that all randomly generated terms have direct syntactic representations in Racket. The restricted grammar for these \gls{lkl} expressions is shown in \figref{fig:restricted-lkl-expression}. Using this restricted grammar, we performed randomized testing with 1000 freshly generated terms, and successfully confirmed that our \gls{lkl} model agrees with the actual Racket implementation. As we discuss later, the grammar restriction for the linklets language required a slightly more involved adjustment.
 
-			\begin{paragraph-here}% 12
-				With 1000 randomly generated terms (freshly generated each time we ran the tests), we successfully established that our LKL model agrees with the actual Racket implementation.
-			\end{paragraph-here}
-
-			\begin{paragraph-here}% 13
-				Testing the Linklets model was a little bit more elaborate than testing the LKL model, for two reasons: 1. Because that the terms are randomly generated, in the Linklets model we had to deal with almost every corner case there is to evaluate linklets. Imagine randomly generating Racket modules based on a full Racket grammar and running them. They would be syntactically valid, but one would expect a plethora of runtime errors from reference to undefined identifiers to arity errors in function applications, or type errors like trying to add a number with a string, etc. 2. Terms of the LKL language are syntactically valid for Racket language too, so we could easily feed the terms to both Racket and RC evaluators without making any changes. However, this is not possible for the Linklets language, since Racket doesn’t know about the program form.
-			\end{paragraph-here}
+			\paragraph{}% 13
+				Testing the linklets model required a more elaborate approach compared to testing the \gls{lkl} model, for two main reasons. First, because the terms are randomly generated, the linklets model needed to robustly handle numerous runtime corner cases inherent to module-like constructs. Imagine randomly generating complete Racket modules using the full Racket grammar and evaluating them: while such modules would be syntactically valid, they would frequently yield runtime errors due to undefined identifier references, function arity mismatches, or type errors—such as attempting arithmetic between incompatible types. Second, while terms generated from the \gls{lkl} grammar are directly evaluable in both Racket and the Redex model without transformation, terms generated from the linklets grammar include forms (such as the top-level \racketcode{program} form) that are not directly recognized by Racket’s evaluator, thus necessitating additional steps to enable evaluation in Racket.
 
 			\inputFigure{validation}{initial-checks-for-test-redex}
 
-			\begin{paragraph-here}% 14
-				\figref{fig:restricted-lkl-eval-prog}
-				To deal with the former case, where we have lots of semantically invalid test inputs, we had two options. First, to use mechanism like \#:prepare in redex-check, to ensure that a generated term is semantically valid, discard otherwise, without applying the predicate. Second, add checks to the Linklets evaluator to catch and produce errors for the corner cases. While the former is a perfectly good solution for the testing per se, we decided to choose the second option to get the model closer to the actual implementation. This, unfortunately left us with the majority of the test cases being rejected by both systems, as opposed to having them being interesting with respect to the instantiation semantics. However, we expect that to be solved when we further improve the testing with the first option as well. As can be seen in Figure 12 below, we have ahead of time checks for a bunch of error cases. The reason for these checks to be done ahead of time instead of the runtime is that the Racket catches these errors in the function compile-linklet, where it constructs linklet objects from s-expressions, while the Linklet model clearly doesn’t have the compile-linklet since the model is syntax-driven, i.e. the representation is the object itself.
-			\end{paragraph-here}
+			\paragraph{}% 14
+				To handle the first challenge, where many randomly generated inputs were semantically invalid, we had two potential solutions. The first option was to employ a mechanism provided by Redex, such as the \racketcode{#:prepare} argument in \racketcode{redex-check}, which allows filtering generated terms to discard those that are semantically invalid before applying the predicate. The second option was to directly embed checks within the linklets evaluator model to explicitly identify and handle these error cases. While the first approach would have provided a streamlined testing, we chose the second approach, as it aligns our model more closely with Racket's own implementation. Specifically, we inserted preemptive checks into our linklets evaluator to detect and appropriately handle common semantic errors. The downside of this approach is that a significant portion of randomly generated test cases end up being rejected by both our model and Racket's implementation, thus reducing the proportion of interesting cases that fully exercise the instantiation semantics. However, this trade-off ensures that our model accurately mirrors the behavior of Racket's own system, which detects such semantic errors during the \racketcode{compile-linklet} phase, where linklet objects are constructed from their s-expression representations. In contrast, our Redex model does not have a separate compilation phase; instead, the representation of the object is the object itself, as evaluation directly operates on Redex meta-terms. The details of these checks are shown in \figref{fig:restricted-lkl-eval-prog}.
 
 			\inputFigure{validation}{convert-program-to-racket}
 
-			\begin{paragraph-here}% 15
-				\figref{fig:convert-program-to-racket}
-				To address the second issue, where we can not invoke the Racket evaluator on program forms, we implemented a basic converter to rewrite the program forms to use the Racket forms like let-values, etc. Figure 13 shows such a conversion as an example.
+			\paragraph{}% 15
+				To address the second issue—where randomly generated terms from the linklets grammar include forms not directly evaluable by Racket—we implemented a straightforward converter. This converter rewrites program forms from our linklets language into equivalent Racket syntax, utilizing standard constructs such as \racketcode{let} \& \racketcode{define}, as demonstrated in \figref{fig:convert-program-to-racket}. This transformation allows us to evaluate generated terms directly using Racket's evaluator, thereby enabling accurate semantic comparisons between Racket and our Redex model.
 
-			\end{paragraph-here}
+			\paragraph{}% 16
+				As noted previously for testing the \gls{lkl} model, another complication in random testing arises from generating terms that include entities without explicit representations in Racket. Just as we addressed this issue by restricting the \gls{lkl} grammar for randomized tests, we similarly restricted the grammar for the linklets language. Specifically, we removed explicit closure values and linklet instance terms from the grammar. Linklet instances, like closures, contain runtime-specific entities (variables mapped to cells), which cannot be directly expressed in Racket's syntax. In place of these instance literals, our tests instead use linklet literals combined with the \racketcode{instantiate} form, producing the desired linklet instances at runtime. The resulting restricted grammar for randomly generated linklet programs is shown in \figref{fig:restricted-linklet-program}.
 
 			\inputFigure{validation}{restricted-linklet-program-grammar}
 
-			\begin{paragraph-here}% 16
-				\figref{fig:restricted-linklet-program}
-				As discussed above for testing the LKL model, another issue with the random testing is generating terms that doesn’t have corresponding terms in the Racket language. As we have shown in Figure 11, we solved this issue by restricting the grammar to generate meaningful terms for the Racket evaluator. We also have a restricted grammar for the Linklets language, as shown in Figure 14.
-			\end{paragraph-here}
+			\paragraph{}% 17
+				Using this adjusted grammar, and increasing our coverage by running tests with 2000 freshly generated terms each time, we successfully confirmed that our linklets model aligns precisely with Racket's own linklet implementation (\racketcode{racket/linklet}). This consistency between the Redex model and Racket’s implementation confirms the correctness of Pycket’s implementation of linklet semantics.
 
-			\begin{paragraph-here}% 17
-				We again removed the explicit closures as values and also removed the explicit terms representing the linklet instances. Because a linklet instance is a mapping from variables to cells, and just like in the case of closure forms, a cell identifier has no corresponding term in Racket. Just as the case for Racket Core model, with an increased number of 2000 each time freshly generated random terms, we successfully demonstrated that our Linklets model agrees with the actual Racket linklet implementation (i.e. racket/linklet).
-			\end{paragraph-here}
-
-			\begin{paragraph-here}% 18
-				Ensuring the core values and data structures and primitive support, plus the linklet semantics, ensure that Pycket correctly evaluates whatever is expressed by the compiler (the macro expander). On top of this, we add untouched Racket code that brings functionality already tested and working on Racket's own run-time, which acts like integration tests for any run-time that imports those functionalities via linklets.
-			\end{paragraph-here}
-
+			\paragraph{}% 18
+				In summary, by combining the correctness of Pycket's foundational core values, data structures, and primitive operations with validation of its linklet semantics via targeted and randomized testing, we have ensured that Pycket accurately evaluates the linklet forms generated by Racket’s macro expander. The targeted tests—adapted to a symmetric setup—were simultaneously executed on Racket, Pycket, and our Redex model, further strengthening our confidence in Pycket's correctness by ensuring consistency across all implementations. Moreover, incorporating untouched Racket code into Pycket, code already validated on Racket’s own runtime, effectively serves as integration testing. This provides additional assurance of correctness for any runtime that imports these functionalities via linklets.
 
 	\section[\texorpdfstring{Completeness under Self-Hosting}{Completeness}]{Completeness under Self-Hosting}
 		\begin{paragraph-here}% 1
