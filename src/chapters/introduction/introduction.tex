@@ -18,37 +18,86 @@
 
     \section{Thesis}
 
-    \textit{Efficient self-hosting of full-scale functional languages on meta-tracing \gls{jit} compilers is achievable.}
+    \textit{Efficient self-hosting of a full-scale functional language on a meta-tracing \gls{jit} compiler is achievable.}
 
 
-    \section[\texorpdfstring{Motivation \& Background}{Context}]{Motivation \& Background}
+    \section[\texorpdfstring{Motivation \& Context}{Context}]{Motivation \& Context}
 
-        \begin{mainpoint}
+    \begin{paragraph-here}% 1
+        self-hosting is ............, and it indicates semantic maturity of a language.
+    \end{paragraph-here}
 
-            The thesis statement consists of these parts and concepts. Here's a breakdown of the concepts.
-            Why are we doing this? What's the motivation, and connection to broader scientific
-            % e.g. the opening statement of a lawyer in a court case... Clear, concise and to the point.
+    \begin{paragraph-here}% 2
+        but implementation of these semantics decides practicality
+    \end{paragraph-here}
 
-            \begin{todo}
-                Read the introduction section of the proposal document.
-            \end{todo}
+    \begin{paragraph-here}% 3
+        self-hosting involves challenging performance trade-offs, it would be nice if we had a canonical way to implement efficient run-times while retaining semantic maturity.
+    \end{paragraph-here}
 
-        \end{mainpoint}
+    \begin{paragraph-here}% 4
+        meta-tracing is ............, and Bolz's work showed meta-tracing is an effective language implementation technique for dynamic languages. \cite{bolzPhDThesis}
+    \end{paragraph-here}
 
-    \section[\texorpdfstring{Approach \& Dissertation Structure}{Dissertation Structure}]{Approach \& Dissertation Structure}
+    \begin{paragraph-here}% 5
+        but self-hosting brings unique challenges to meta-tracing, and support for full-scale real-world functional language is still an open question.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 6
+        hence our hypothesis. to prove, we need to show it's possible, and show it can be efficient.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 7
+        Pycket was a small research project for Racket, rudimentary interpreter \cite{bolzMetatracingMakesFast2014}
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 8
+        Pycket was shown to be fast, also shown to eliminate overhead for gradual typing. perfect candidate for our hypothesis \cite{pycketmain,pycketmain2}
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 9
+        subsequently, Racket's transition to Chez Scheme with improved portability, set the stage for us
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 10
+        so to prove our hypothesis, we turned Pycket from a simple interpreter to a full language VM
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 11
+        we discovered some performance issues fundamental to self-hosting on meta-tracing, but we showed that it can be made efficient.
+    \end{paragraph-here}
+
+    \section[\texorpdfstring{Dissertation Structure \& Contributions}{Structure \& Contributions}]{Dissertation Structure \& Contributions}
 
     \begin{mainpoint}
-        How do we elaborate, expand on the problem and go about proving the thesis?
-
-        To prove this thesis statement, we need to show that:
-        \begin{itemize}
-            \item Self-hosting is possible on a meta-tracing \gls{jit} compiler
-            \item It can be made efficient
-        \end{itemize}
-
-        Introduce the thesis structure.
+        Here's how we structured this study to prove our hypothesis.
     \end{mainpoint}
 
+    \begin{paragraph-here}% 12
+        we started with studying meta-tracing JIT compilers in \chapterRef{chapter:rpython}, and gave Pycket primer. Then we study portability in programming languages in \chapterRef{chapter:linklets}, and provided an in-depth study of the central piece that allowed Racket to improve its portability.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 13
+        In \chapterRef{chapter:pycket} we detailed our methodology, and explained how we proved the first part of our thesis statement. We validate the correctness of our system in \chapterRef{chapter:validation}, and argue that Pycket is now indeed a working full-scale Racket implementation.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 14
+        then we move on to performance considerations in \chapterRef{chapter:problem}, and provide an in-depth evaluation of performance of self-hosting on meta-tracing compilers, where we discover, analyze and expose some performance issues fundamental to self-hosting on meta-tracing JITs.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 15
+        In \chapterRef{chapter:solution}, we study some approaches on solving these performance problems and argue (with evidence) that this can be made efficient. And finally we conclude with related work and final thoughts about broader significance in \chapterRef{chapter:conclusion}.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 16
+        Here are the main technical contributions of this dissertation:
+
+        - Pycket
+
+        - linklet semantics
+
+        - discovery and analysis of problems fundamental to self-hosting on meta-tracing
+    \end{paragraph-here}
 
 % \begin{todo}
 % Paragraph still missing - decide whether to keep!
