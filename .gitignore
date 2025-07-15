@@ -13,6 +13,8 @@
 .*.lb
 *.ist
 
+.vscode
+
 ## Intermediate documents:
 *.dvi
 *.xdv

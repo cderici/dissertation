@@ -5,76 +5,97 @@
 
     \begin{chaptersynopsis}[Chapter Synopsis - \emph{Chapter Content: 0\%}]
         Conclude the dissertation.
+
+        \vspace{2em}
+
+        Sections:
+		\begin{itemize}
+            \item Contributions \& Significance
+			\item Related Work
+			\item Future Work
+		\end{itemize}
     \end{chaptersynopsis}
+
+    \paragraph{} \textit{Thesis:}
+
+    \textit{Efficient self-hosting of a full-scale functional language on a meta-tracing \gls{jit} compiler is achievable.}
+
+    \begin{paragraph-here}% 1
+        We detailed our reproducible research that proves our claim...
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 2
+        In this chapter we provide some related work and conclude by listing concrete contributions we made towards proving our thesis. Finally we close with a discussion of broader significance and future directions for this work.
+    \end{paragraph-here}
+
+    \section[\texorpdfstring{Contributions \& Significance}{Significance}]{Contributions \& Significance}
+        \begin{paragraph-here}% 3
+            This study demonstrates with evidence that it is indeed possible to have a working full-scale self-hosting functional programming language on a meta-tracing JIT compiler.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}% 4
+            We built a useful research vehicle, namely Pycket, that can be utilized to further research into language run-times, self-hosting, meta-tracing and more. % pycket
+        \end{paragraph-here}
+
+        \begin{paragraph-here}% 5
+            We provide for the first time a formalization for the operational semantics of linklets, a compilation unit that's critical in improving the communication between a compiler and a run-time, thereby improving portability of a programming language. % linklets
+        \end{paragraph-here}
+
+        \begin{paragraph-here}% 6
+            We revealed and analyzed some performance problems fundamental to self-hosting on meta-tracing \glspl{jit} and argued it is solvable, proposing solution avenues clearly worth further study.  This is a significant contribution to PL research. % problems with self-hosting
+        \end{paragraph-here}
+
+        \begin{paragraph-here}% 7
+            The research also reframes performance analysis of tracing \glspl{jit}: instead of only looking for hot loops to trace, identifying what to avoid tracing can unlock full potential.
+        \end{paragraph-here}
+
+        \begin{paragraph-here}% 8
+            The research provides a novel way to think about computational models in language run-times. Instead of sticking to one, several different kinds of models can be combined to exploit strengths in different areas in implementing reduction semantics. % hybrid model
+        \end{paragraph-here}
 
     \section{Related Work}
         \label{section:related-work}
 
-        \begin{mainpoint}
-            There is research related to higher-order dynamic VMs.
+        \begin{paragraph-here}% 9
+             There is research related to higher-order dynamic VMs.
+        \end{paragraph-here}
 
+        \begin{paragraph-here}% 10
             There is research related to tracing JIT VMs for languages.
+        \end{paragraph-here}
 
+        \begin{paragraph-here}% 11
             There is research related to optimizing VM performance in a meta-tracing context.
+        \end{paragraph-here}
 
+        \begin{paragraph-here}% 12
             There is research related to self-hosting.
+        \end{paragraph-here}
 
+        \begin{paragraph-here}% 13
             There is research related to managing abstraction levels.
 
+            Collapsing towers of interpreters? Futamura projections?
+        \end{paragraph-here}
+
+        \begin{paragraph-here}% 14
             There is research related to space concerns \& heap allocated continuations.
+        \end{paragraph-here}
 
-        \end{mainpoint}
+    \section[\texorpdfstring{Future Work}{Future Work}]{Future Work}
 
-        \begin{todo}[Import]
-            Section 4 Related Work of the proposal document is relevant for this section.
-        \end{todo}
+        \begin{paragraph-here}% 15
+            There are a lot of dynamic features of programming languages, overhead of which can be eliminated by meta-tracing, such as eliminating gradual typing performance with using Pycket \cite{pycketmain2}. If all the issues of self-hosting on meta-tracing JITs are solved and the full potential of our approach is realized, then a featureful language like Racket and all languages that can be built on Racket can be made extremely fast with minimal effort.
+        \end{paragraph-here}
 
-        Collapsing towers of interpreters
+        \begin{paragraph-here}% 16
+            Having another Racket implementation symmetric to RacketCS enables further research on language runtimes for functional programming languages across a variety of different types of computations. Strenghts and weaknesses of each can be identified and the whole research about VMs for dynamic languages can be improved.
+        \end{paragraph-here}
 
+        \begin{paragraph-here}% 17
+            This is an example of self-hosting with on a meta-tracing \gls{jit}, and it paves the way for future work on different ways of self-hosting languages.
+        \end{paragraph-here}
 
-
-    \section{Research Contributions}
-		\begin{mainpoint}
-			\begin{itemize}
-                \item This demonstrates with evidence that it is possible to have a working and complete self-hosting functional programming language on a meta-tracing JIT compiler.
-                \item We revealed and analyzed a fundamental problem with self-hosting on meta-tracing JITs and argued it is solvable, proposing solution avenues clearly worth further study.  This is a significant contribution to PL research.
-                \item We detailed a big problem in tracing JITs in general--you lose more when slow than you gain when fast, especially in branch-heavy code--and showed why solving it would be a major contribution.
-                \item We built a solid tool (Pycket), useful for further research into both language runtimes and self-hosting.
-                \item The research reframes performance analysis of tracing JITs: instead of only looking for hot loops to trace, identifying what to avoid tracing can unlock full potential.
-                \item The research expands the way we think about runtimes, rather than an isolated separate part of a language implementation, a runtime can literally be a part of the language, and that the language can have an opinion about how the runtime looks like.
-		    \end{itemize}
-		\end{mainpoint}
-
-		\begin{paragraph-here}
-			A working system where you run full Racket (is a contribution).
-		\end{paragraph-here}
-
-    \section{Significance}
-		\begin{mainpoint}
-			% Why is this research cool/exciting/important?
-			Paves the way and provides an example for future work on
-			different ways of self-hosting languages.
-
-			It's a step towards more intelligent communication between
-			the language and the runtime.
-
-			Having another Racket implementation symmetric to RacketCS
-			enables further research on language runtimes for functional
-			programming languages.
-
-			It's also beneficial for furthering meta-tracing research.
-
-            The research opens up new avenues of research\dots
-		\end{mainpoint}
-
-    \section{Future Work}
-        \begin{mainpoint}
-            There are a few future directions for this research:
-
-            \begin{itemize}
-                \item Solve all the issues with self-hosting on meta-tracing JIT, and realize the full potential of the approach.
-                \item Investigate the language-runtime communication and how it can be improved.
-                \item Survey the characteristics of different VMs (e.g. RacketCS vs Pycket) across a variety of computations.
-                \item Build on the analysis we provide for the tracing performance of branch-heavy code, and make tracing JITs cool again.
-            \end{itemize}
-        \end{mainpoint}
+        \begin{paragraph-here}% 18
+            It opens interesting avenues for meta-tracing research, where we also touch one of the most classical problems with tracing \glspl{jit}; you lose more when slow than you gain when fast in evaluating branch-heavy computations.
+        \end{paragraph-here}
