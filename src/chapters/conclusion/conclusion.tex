@@ -3,7 +3,7 @@
 
     \label{chapter:conclusion}
 
-    \begin{chaptersynopsis}[Chapter Synopsis - \emph{Chapter Content: 0\%}]
+    \begin{chaptersynopsis}[Chapter Synopsis - \emph{Chapter Content: 40\%}]
         Conclude the dissertation.
 
         \vspace{2em}
@@ -57,29 +57,162 @@
         \label{section:related-work}
 
         \begin{paragraph-here}% 9
-             There is research related to higher-order dynamic VMs.
+            Higher-order dynamic VMs
+
+             Dynamic VM implementations are becoming increasingly popular for their
+                rapid prototyping potential, as the effort required to implement a new
+                VM from scratch is often quite large. Therefore, instead of manually
+                implementing a VM in a low-level language such as C, it is often
+                argued that building on top of an existing object-oriented
+                general-purpose VMs or dynamic integration via generating a VM using a
+                "specification" of a language allows easier and more maintainable
+                implementations with competitive performance
+                \cite{bolzHowNotWrite}. One of the major actors for the former approach
+                is the \emph{GraalVM}, which is a modified version of the Java HotSpot
+                VM on the JVM (Java Virtual Machine). GraalVM uses a language
+                implementation framework called Truffle, and a method-based JIT
+                compiler called Graal to implement VMs on the JVM for dynamic
+                languages such as Javascript, Ruby and Python \cite{truffle-graal}. As
+                opposed to building on top of VM, the \emph{RPython} project
+                introduced the idea of automatically generating a VM from a language
+                specification represented as an interpreter via meta-tracing
+                \cite{rpython07}. For example, as mentioned in the introduction, PyPy
+                is an implementation of Python that is built on the RPython
+                meta-tracing framework that generated a VM including a tracing JIT for
+                Python with a better performance than the CPython itself. In addition
+                to the RPython framework, there are other meta-tracing systems as
+                well, such as the SPUR, a tracing JIT compiler for CIL bytecode
+                \cite{millerCommonLanguageInfrastructure2003}, meta-tracing languages that are implemented
+                in C\# \cite{spurJIT}.
         \end{paragraph-here}
 
         \begin{paragraph-here}% 10
-            There is research related to tracing JIT VMs for languages.
+            Tracing JIT VMs
+
+            Like PyPy, Pycket is built on the RPython meta-tracing framework as
+            well, and this study tries to identify approaches on achieving
+            efficient self-hosting on Pycket running a tracing JIT. Therefore it
+            would be relevant to mention here some notable tracing JIT VMs
+            too. Initially introduced by the Dynamo project \cite{dynamo},
+            trace-based compilation is successfully utilized by many VMs including
+            some commercial VMs such as Mozilla's TraceMonkey JavaScript VM
+            \cite{traceMonkey}, Adobe's Tamarin ActionScript VM \cite{tamarin}, as
+            well as some research VMs such as LuaJIT \cite{LuaJITLanguageToolkit}, Converge
+            \cite{converge:05}, Lambdamachine \cite{lambdamachine} and PyHaskell
+            \cite{pyhaskell}.
         \end{paragraph-here}
 
         \begin{paragraph-here}% 11
-            There is research related to optimizing VM performance in a meta-tracing context.
+            Optimizing VM performance in a meta-tracing context
+
+            As we mentioned in \chapterRef{chapter:rpython}, there are a lot of dynamic
+            optimizations performed by the RPython back-end that the language
+            interpreter should be in sync with. There are two main approaches for
+            a VM author to optimize such a system: \textbf{i)} improve the
+            interpreter performance, \textbf{ii)} modify the interpreter to
+            produce traces that are easier to optimize by JIT. Both of these
+            approaches operate on the interpreter, therefore the improvements
+            should focus on the common patterns that are specific to the language
+            being interpreted. For example, along with the general JIT
+            improvements such as value promotion and elidable functions, PyPy and
+            Converge both focus on optimizing the objects, classes and modules
+            \cite{bolz15-meta-vm}.
         \end{paragraph-here}
 
         \begin{paragraph-here}% 12
-            There is research related to self-hosting.
+            Self-hosting
+
+            Similarly, Bolz and contributors state that in general-purpose VMs,
+            the compiler and the language being implemented should be semantically
+            in sync to achieve a good performance \cite{bolzHowNotWrite,
+            runtime-feedback:11}. As we discussed in
+            \chapterRef{chapter:problem}, we study the relationship between the
+            semantics of the programs common to self-hosting and the interpreter
+            \& trace performance. Unfortunately, to the best of our knowledge, no
+            studies of self-hosting on meta-tracing has been done so far. However,
+            there are self-hosting VMs for dynamic languages, such as the Tachyon
+            VM for JavaScript, which is a bootstrapping JIT compiler that is
+            completely hand-coded in JavaScript and doesn't use any automatic
+            generation techniques \cite{self-hosted-tachyon}. Although Tachyon is
+            quite different than Pycket and bootstraps the VM itself, it uses
+            control-flow graphs in SSA form as an \gls{ir}, similar to Pycket. Moreover, it uses interesting techniques that
+            might prove useful for Pycket as well, such as conditional constant
+            propagation via abstract interpretation \cite{sccp:91}. Additionally,
+            there are low-level techniques to deal with control-flow issues on VMs
+            caused by large amount of branches, such as indirect branch prediction
+            \cite{branch-predict:03}, which might be adapted to be useful in
+            tracing as well. However, in our case implementing such techniques
+            would require modifying the underlying RPython framework, where our
+            approach is at the language (interpreter) level.
         \end{paragraph-here}
 
         \begin{paragraph-here}% 13
-            There is research related to managing abstraction levels.
+            Managing abstraction levels
 
-            Collapsing towers of interpreters? Futamura projections?
+            A big part of the problems we tackle in this thesis is caused by the
+            fact that adding self-hosting on Pycket adds another level of
+            abstraction that needs to be semantically in-sync with the run-time
+            meta-tracing VM. There has been related research studying to reduce
+            complexity in systems involving multiple levels of abstractions, such
+            as type-directed partial evaluation \cite{tdpe:99} and multi-stage
+            programming \cite{multi-stage:17}. Amin and Rompf studied how to
+            collapse a tower of interpreters interpreting each-other into a
+            compiler to remove the interpretation overhead
+            \cite{collapse:17}. They developed a multi-level lambda calculus and a
+            meta-circular evaluator, namely Pink, to demonstrate the collapse of
+            arbitrarily many levels of self-interpretation.
+
+            Another work that is relevant to our investigation is optimizing
+            hierarchically layered VMs using trace compilation, researched by
+            Yermolovich and contributors \cite{layering:09}. Similar to the
+            RPython framework, they propose to run a guest VM (Lua VM
+            \cite{LuaJITLanguageToolkit}) on top of a host VM with a trace-based JIT compiler
+            (Tamarin \cite{tamarin}). Along with optimizing the guest VM, the host
+            VM also allows the guest VM to provide hints about its interpreter
+            loop that can specify which parts of the guest VM should not be traced
+            for its own, thereby taking into account the guest VMs workload as
+            well.
+
+            Futamura projections maybe?
         \end{paragraph-here}
 
         \begin{paragraph-here}% 14
-            There is research related to space concerns \& heap allocated continuations.
+            Space concerns \& heap allocated continuations
+
+            Many studies investigate the space complexity and optimizations aiming
+            to increase performance. Some use \emph{repurposed} JIT compilers
+            (RJIT) to benefit from the optimizations that the dynamic languages
+            enable, such simplification of control-flow graphs
+            \cite{dynStatComp:12} and run-time type feedbacks \cite{stJITdyn:12}
+            in the context of adding support for dynamic languages to an existing
+            static-language VMs. Others use higher-level techniques such as
+            hidden-classes in Pycket \cite{pycketmain2}, similar to the maps
+            introduced by Self \cite{self-maps:89} and used by PyPy
+            \cite{runtime-feedback:11}.
+
+            As we discussed in the performance section, one of the big concerns we
+            identified in self-hosting is the garbage collection overhead caused
+            by the long-chains of heap allocated continuations. Allocating
+            activation records on the heap is studied extensively in the context
+            of compiling with \cite{comp-cont:92} or without
+            \cite{comp-without-cont:17} continuations \cite{whatever:19}. With
+            that said, perhaps the most relevant work to our investigation with
+            the stackful and CEK interpreters working together is by Hieb and
+            contributors \cite{cont-heap-stack:90}, where they provide an approach
+            to allocate activation records on the stack that doesn't require the
+            stack to be copied when a continuation is created, thereby
+            establishing an upper bound on the amount of copying which is
+            otherwise unbounded. They also provide techniques for stack
+            overflow/underflow recovery, which is isomorphic to continuation
+            creation and re-instantiation.
+
+            To the best of our knowledge, no comprehensive synthesis of issues and
+            opportunities of self-hosting on a meta-tracing VM has been
+            done. Therefore a head-to-head comparison of Pycket with such a system
+            is impossible. However, existing Racket implementations such as
+            Racket's previous (generic JIT-based) and current (Chez
+            \cite{icfp2019}) run-time are suitable for performance
+            comparison with Pycket implementing Racket.
         \end{paragraph-here}
 
     \section[\texorpdfstring{Future Work}{Future Work}]{Future Work}

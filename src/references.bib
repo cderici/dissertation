@@ -9,6 +9,32 @@
   isbn = {978-0-521-03311-4}
 }
 
+@article{bolz15-meta-vm,
+  title = {The Impact of Meta-Tracing on {{VM}} Design and Implementation},
+  author = {Bolz, Carl Friedrich and Tratt, Laurence},
+  year = {2015},
+  month = feb,
+  journal = {Science of Computer Programming},
+  series = {Special {{Issue}} on {{Advances}} in {{Dynamic Languages}}},
+  volume = {98},
+  pages = {408--421},
+  issn = {0167-6423},
+  doi = {10.1016/j.scico.2013.02.001},
+  urldate = {2019-11-12},
+  abstract = {Most modern languages are implemented using Virtual Machines (VMs). While the best VMs use Just-In-Time (JIT) compilers to achieve good performance, JITs are costly to implement, and few VMs therefore come with one. The RPython language allows tracing JIT VMs to be automatically created from an interpreter, changing the economics of VM implementation. In this paper, we explain, through two concrete VMs, how meta-tracing RPython VMs can be designed and optimised, and, experimentally, the performance levels one might reasonably expect from them.},
+  langid = {english},
+  keywords = {Meta-tracing,Programming languages,Virtual machines},
+  file = {C\:\\Users\\caner\\Zotero\\storage\\LRDAMC8H\\Bolz and Tratt - 2015 - The impact of meta-tracing on VM design and implem.pdf;C\:\\Users\\caner\\Zotero\\storage\\4EAFPWT3\\S0167642313000269.html}
+}
+
+@article{bolzHowNotWrite,
+  title = {How to Not Write {{Virtual Machines}} for {{Dynamic Languages}}},
+  author = {Bolz, Carl Friedrich and Rigo, Armin},
+  pages = {11},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\I36I5QGI\Bolz and Rigo - How to not write Virtual Machines for Dynamic Lang.pdf}
+}
+
 @article{bolzMetatracingMakesFast2014,
   title = {Meta-Tracing Makes a Fast {{Racket}}},
   author = {Bolz, Carl Friedrich and Pape, Tobias and Siek, Jeremy and {Tobin-Hochstadt}, Sam},
@@ -24,6 +50,22 @@
   author = {Bolz, Carl Friedrich},
   langid = {ngerman},
   file = {C:\Users\caner\Zotero\storage\57J8CJLC\Bolz - Meta-Tracing Just-in-Time Compilation for RPython.pdf}
+}
+
+@article{branch-predict:03,
+  title = {Optimizing Indirect Branch Prediction Accuracy in Virtual Machine Interpreters},
+  author = {Casey, Kevin and Ertl, M. Anton and Gregg, David},
+  year = {2007},
+  month = oct,
+  journal = {ACM Trans. Program. Lang. Syst.},
+  volume = {29},
+  number = {6},
+  pages = {37--es},
+  issn = {0164-0925},
+  doi = {10.1145/1286821.1286828},
+  urldate = {2025-07-16},
+  abstract = {Interpreters designed for efficiency execute a huge number of indirect branches and can spend more than half of the execution time in indirect branch mispredictions. Branch target buffers (BTBs) are the most widely available form of indirect branch prediction; however, their prediction accuracy for existing interpreters is only 2\%--50\%. In this article we investigate two methods for improving the prediction accuracy of BTBs for interpreters: replicating virtual machine (VM) instructions and combining sequences of VM instructions into superinstructions. We investigate static (interpreter build-time) and dynamic (interpreter runtime) variants of these techniques and compare them and several combinations of these techniques. To show their generality, we have implemented these optimizations in VMs for both Java and Forth. These techniques can eliminate nearly all of the dispatch branch mispredictions, and have other benefits, resulting in speedups by a factor of up to 4.55 over efficient threaded-code interpreters, and speedups by a factor of up to 1.34 over techniques relying on dynamic superinstructions alone.},
+  file = {C:\Users\caner\Zotero\storage\7927UYB9\Casey et al. - 2007 - Optimizing indirect branch prediction accuracy in virtual machine interpreters.pdf}
 }
 
 @inproceedings{clasp_llvm,
@@ -57,6 +99,80 @@
   isbn = {978-3-540-18353-2}
 }
 
+@article{collapse:17,
+  title = {Collapsing {{Towers}} of {{Interpreters}}},
+  author = {Amin, Nada and Rompf, Tiark},
+  year = {2017},
+  month = dec,
+  journal = {Proc. ACM Program. Lang.},
+  volume = {2},
+  number = {POPL},
+  pages = {52:1--52:33},
+  issn = {2475-1421},
+  doi = {10.1145/3158140},
+  urldate = {2019-11-29},
+  abstract = {Given a tower of interpreters, i.e., a sequence of multiple interpreters interpreting one another as input programs, we aim to collapse this tower into a compiler that removes all interpretive overhead and runs in a single pass. In the real world, a use case might be Python code executed by an x86 runtime, on a CPU emulated in a JavaScript VM, running on an ARM CPU. Collapsing such a tower can not only exponentially improve runtime performance, but also enable the use of base-language tools for interpreted programs, e.g., for analysis and verification. In this paper, we lay the foundations in an idealized but realistic setting.   We present a multi-level lambda calculus that features staging constructs and stage polymorphism: based on runtime parameters, an evaluator either executes source code (thereby acting as an interpreter) or generates code (thereby acting as a compiler). We identify stage polymorphism, a programming model from the domain of high-performance program generators, as the key mechanism to make such interpreters compose in a collapsible way.   We present Pink, a meta-circular Lisp-like evaluator on top of this calculus, and demonstrate that we can collapse arbitrarily many levels of self-interpretation, including levels with semantic modifications. We discuss several examples: compiling regular expressions through an interpreter to base code, building program transformers from modi ed interpreters, and others. We develop these ideas further to include reflection and reification, culminating in Purple, a reflective language inspired by Brown, Blond, and Black, which realizes a conceptually infinite tower, where every aspect of the semantics can change dynamically. Addressing an open challenge, we show how user programs can be compiled and recompiled under user-modified semantics.},
+  keywords = {compiler,interpreter,Lisp,reflection,Scala,staging},
+  file = {C:\Users\caner\Zotero\storage\ZDQXC6SI\Amin and Rompf - 2017 - Collapsing Towers of Interpreters.pdf}
+}
+
+@book{comp-cont:92,
+  title = {Compiling with Continuations},
+  author = {Appel, Andrew W.},
+  year = {1992},
+  publisher = {Cambridge University Press},
+  address = {USA},
+  isbn = {978-0-521-41695-5}
+}
+
+@inproceedings{comp-without-cont:17,
+  title = {Compiling {{Without Continuations}}},
+  booktitle = {Proceedings of the 38th {{ACM SIGPLAN Conference}} on {{Programming Language Design}} and {{Implementation}}},
+  author = {Maurer, Luke and Downen, Paul and Ariola, Zena M. and Peyton Jones, Simon},
+  year = {2017},
+  series = {{{PLDI}} 2017},
+  pages = {482--494},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/3062341.3062380},
+  urldate = {2019-11-29},
+  abstract = {Many fields of study in compilers give rise to the concept of a join point---a place where different execution paths come together. Join points are often treated as functions or continuations, but we believe it is time to study them in their own right. We show that adding join points to a direct-style functional intermediate language is a simple but powerful change that allows new optimizations to be performed, including a significant improvement to list fusion. Finally, we report on recent work on adding join points to the intermediate language of the Glasgow Haskell Compiler.},
+  isbn = {978-1-4503-4988-8},
+  keywords = {ANF,CPS,GHC,Haskell,intermediate languages,list fusion},
+  file = {C:\Users\caner\Zotero\storage\UM27HJWZ\Maurer et al. - 2017 - Compiling Without Continuations.pdf}
+}
+
+@inproceedings{cont-heap-stack:90,
+  title = {Representing {{Control}} in the {{Presence}} of {{First-class Continuations}}},
+  booktitle = {Proceedings of the {{ACM SIGPLAN}} 1990 {{Conference}} on {{Programming Language Design}} and {{Implementation}}},
+  author = {Hieb, R. and Dybvig, R. Kent and Bruggeman, Carl},
+  year = {1990},
+  series = {{{PLDI}} '90},
+  pages = {66--77},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/93542.93554},
+  urldate = {2019-11-29},
+  abstract = {Languages such as Scheme and Smalltalk that provide continuations as first-class data objects present a challenge to efficient implementation. Allocating activation records in a heap has proven unsatisfactory because of increased frame linkage costs, increased garbage collection overhead, and decreased locality of reference. However, simply allocating activation records on a stack and copying them when a continuation is created results in unbounded copying overhead. This paper describes a new approach based on stack allocation that does not require the stack to be copied when a continuation is created and that allows us to place a small upper bound on the amount copied when a continuation is reinstated. This new approach is faster than the naive stack allocation approach, and it does not suffer from the problems associated with unbounded copying. For continuation-intensive programs, our approach is at worst a constant factor slower than the heap allocation approach, and for typical programs, it is significantly faster. An important additional benefit is that recovery from stack overflow is handled gracefully and efficiently.},
+  isbn = {978-0-89791-364-5},
+  file = {C:\Users\caner\Zotero\storage\EKD5S5T3\Hieb et al. - 1990 - Representing Control in the Presence of First-clas.pdf}
+}
+
+@inproceedings{converge:05,
+  title = {Compile-Time {{Meta-programming}} in a {{Dynamically Typed OO Language}}},
+  booktitle = {Proceedings of the 2005 {{Symposium}} on {{Dynamic Languages}}},
+  author = {Tratt, Laurence},
+  year = {2005},
+  series = {{{DLS}} '05},
+  pages = {49--63},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/1146841.1146846},
+  urldate = {2019-11-28},
+  abstract = {Compile-time meta-programming allows programs to be constructed by the user at compile-time. Although LISP derived languages have long had such facilities, few modern languages are capable of compile-time meta-programming, and of those that do many of the most powerful are statically typed functional languages. In this paper I present the dynamically typed object orientated language Converge which allows compile-time meta-programming in the spirit of Template Haskell. Converge demonstrates that integrating powerful, safe compile-time meta-programming features into a dynamic language requires few restrictions to the flexible development style facilitated by the paradigm. In this paper I detail Converge's compile-time meta-programming facilities, much of which is adapted from Template Haskell, contain several features new to the paradigm. Finally I explain how such a facility might be integrated into similar languages.},
+  file = {C:\Users\caner\Zotero\storage\A6ZCCMXB\Tratt - 2005 - Compile-time Meta-programming in a Dynamically Typ.pdf}
+}
+
 @inproceedings{danvy:93,
   title = {Separating Stages in the Continuation-Passing Style Transformation},
   booktitle = {Proceedings of the 20th {{ACM SIGPLAN-SIGACT}} Symposium on {{Principles}} of Programming Languages},
@@ -80,6 +196,24 @@
   pages = {12},
   abstract = {We describe the design and implementation of Dynamo, a software dynamic optimization system that is capable of transparently improving the performance of a native instruction stream as it executes on the processor. The input native instruction stream to Dynamo can be dynamically generated (by a JIT for example), or it can come from the execution of a statically compiled native binary. This paper evaluates the Dynamo system in the latter, more challenging situation, in order to emphasize the limits, rather than the potential, of the system. Our experiments demonstrate that even statically optimized native binaries can be accelerated Dynamo, and often by a significant degree. For example, the average performance of --O optimized SpecInt95 benchmark binaries created by the HP product C compiler is improved to a level comparable to their --O4 optimized version running without Dynamo. Dynamo achieves this by focusing its efforts on optimization opportunities that tend to manifest only at runtime, and hence opportunities that might be difficult for a static compiler to exploit. Dynamo's operation is transparent in the sense that it does not depend on any user annotations or binary instrumentation, and does not require multiple runs, or any special compiler, operating system or hardware support. The Dynamo prototype presented here is a realistic implementation running on an HP PA-8000 workstation under the HPUX 10.20 operating system.},
   langid = {english}
+}
+
+@inproceedings{dynStatComp:12,
+  title = {Adding {{Dynamically-typed Language Support}} to a {{Statically-typed Language Compiler}}: {{Performance Evaluation}}, {{Analysis}}, and {{Tradeoffs}}},
+  shorttitle = {Adding {{Dynamically-typed Language Support}} to a {{Statically-typed Language Compiler}}},
+  booktitle = {Proceedings of the 8th {{ACM SIGPLAN}}/{{SIGOPS Conference}} on {{Virtual Execution Environments}}},
+  author = {Ishizaki, Kazuaki and Ogasawara, Takeshi and Castanos, Jose and Nagpurkar, Priya and Edelsohn, David and Nakatani, Toshio},
+  year = {2012},
+  series = {{{VEE}} '12},
+  pages = {169--180},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/2151024.2151047},
+  urldate = {2019-11-29},
+  abstract = {Applications written in dynamically typed scripting languages are increasingly popular for Web software development. Even on the server side, programmers are using dynamically typed scripting languages such as Ruby and Python to build complex applications quickly. As the number and complexity of dynamically typed scripting language applications grows, optimizing their performance is becoming important. Some of the best performing compilers and optimizers for dynamically typed scripting languages are developed entirely from scratch and target a specific language. This approach is not scalable, given the variety of dynamically typed scripting languages, and the effort involved in developing and maintaining separate infrastructures for each. In this paper, we evaluate the feasibility of adapting and extending an existing production-quality method-based Just-In-Time (JIT) compiler for a language with dynamic types. Our goal is to identify the challenges and shortcomings with the current infrastructure, and to propose and evaluate runtime techniques and optimizations that can be incorporated into a common optimization infrastructure for static and dynamic languages. We discuss three extensions to the compiler to support dynamically typed languages: (1) simplification of control flow graphs, (2) mapping of memory locations to stack-allocated variables, and (3) reduction of runtime overhead using language semantics. We also propose four new optimizations for Python in (2) and (3). These extensions are effective in reduction of compiler working memory and improvement of runtime performance. We present a detailed performance evaluation of our approach for Python, finding an overall improvement of 1.69x on average (up to 2.74x) over our JIT compiler without any optimization for dynamically typed languages and Python.},
+  isbn = {978-1-4503-1176-2},
+  keywords = {dynamically typed language,just-in-time compiler,python},
+  file = {C:\Users\caner\Zotero\storage\MRG8T5J8\Ishizaki et al. - 2012 - Adding Dynamically-typed Language Support to a Sta.pdf}
 }
 
 @inproceedings{enginesOriginal,
@@ -326,6 +460,31 @@
   file = {C:\Users\caner\Zotero\storage\48RY7S5V\Aycock - 2003 - A Brief History of Just-in-time.pdf}
 }
 
+@article{lambdamachine,
+  title = {Trace-Based {{Just-in-time Compilation}} for {{Lazy Functional Programming Languages}}},
+  author = {Schilling, Thomas},
+  pages = {213},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\U76SZ52S\Schilling - Trace-based Just-in-time Compilation for Lazy Func.pdf}
+}
+
+@inproceedings{layering:09,
+  title = {Optimization of {{Dynamic Languages Using Hierarchical Layering}} of {{Virtual Machines}}},
+  booktitle = {Proceedings of the 5th {{Symposium}} on {{Dynamic Languages}}},
+  author = {Yermolovich, Alexander and Wimmer, Christian and Franz, Michael},
+  year = {2009},
+  series = {{{DLS}} '09},
+  pages = {79--88},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/1640134.1640147},
+  urldate = {2019-11-29},
+  abstract = {Creating an interpreter is a simple and fast way to implement a dynamic programming language. With this ease also come major drawbacks. Interpreters are significantly slower than compiled machine code because they have a high dispatch overhead and cannot perform optimizations. To overcome these limitations, interpreters are commonly combined with just-in-time compilers to improve the overall performance. However, this means that a just-in-time compiler has to be implemented for each language. We explore the approach of taking an interpreter of a dynamic language and running it on top of an optimizing trace-based virtual machine, i.e., we run a guest VM on top of a host VM. The host VM uses trace recording to observe the guest VM executing the application program. Each recorded trace represents a sequence of guest VM bytecodes corresponding to a given execution path through the application program. The host VM optimizes and compiles these traces to machine code, thus eliminating the need for a custom just-in-time compiler for the guest VM. The guest VM only needs to provide basic information about its interpreter loop to the host VM.},
+  isbn = {978-1-60558-769-1},
+  keywords = {actionscript,dynamic languages,hierarchical virtual machines,lua,trace compilation},
+  file = {C:\Users\caner\Zotero\storage\FSVM3V8T\Yermolovich et al. - 2009 - Optimization of Dynamic Languages Using Hierarchic.pdf}
+}
+
 @inproceedings{llvm_verification,
   title = {Leveraging {{Compiler Intermediate Representation}} for {{Multi-}} and {{Cross-Language Verification}}},
   booktitle = {Verification, {{Model Checking}}, and {{Abstract Interpretation}}: 21st {{International Conference}}, {{VMCAI}} 2020, {{New Orleans}}, {{LA}}, {{USA}}, {{January}} 16--21, 2020, {{Proceedings}}},
@@ -358,6 +517,10 @@
   file = {C:\Users\caner\Zotero\storage\QSMR5HNR\Ardö et al. - 2012 - Loop-aware Optimizations in PyPy's Tracing JIT.pdf}
 }
 
+@misc{LuaJITLanguageToolkit,
+  title = {{{LuaJIT Language Toolkit}}}
+}
+
 @inproceedings{malloc-removal:11,
   title = {Allocation {{Removal}} by {{Partial Evaluation}} in a {{Tracing JIT}}},
   booktitle = {Proceedings of the 20th {{ACM SIGPLAN Workshop}} on {{Partial Evaluation}} and {{Program Manipulation}}},
@@ -375,11 +538,39 @@
   file = {C:\Users\caner\Zotero\storage\7GRXDUIE\Bolz et al. - 2011 - Allocation Removal by Partial Evaluation in a Trac.pdf}
 }
 
+@book{millerCommonLanguageInfrastructure2003,
+  title = {The {{Common Language Infrastructure Annotated Standard}}},
+  author = {Miller, Jim S. and Ragsdale, Susann},
+  year = {2003},
+  month = sep,
+  publisher = {Addison-Wesley Longman Publishing Co., Inc.},
+  address = {USA},
+  abstract = {From the Publisher The Common Language Infrastructure Annotated Standard is the definitive guide to understanding the annotated specification for the Common Language Infrastructure (CLI) standard. With annotations and code samples from both the ECMA standards committee and the Microsoft Common Language Runtime (CLR) team, this book goes beyond the online documentation to clarify and amplify the original standard and describe its implementation. The core of this book is the international CLI standard. The text describes the CLI and its parts and provides all the information needed to implement a Virtual Execution System (VES) or design a compiler that runs on top of a VES and generates portable code. Author Jim Miller draws upon his experience as editor of the CLI standard and lead of the Microsoft CLR team to guide readers through the CLI blueprint and to a complete understanding of the CLR. Features of this book include: A heavily annotated architectural overview of the standard A description of the semantics of metadata A complete specification of the Portable Executable (PE) file format Coverage of file format and metadata layout An overview of the CLI libraries A detailed description of the Common Intermediate Language (CIL) instruction set Sample programs and other annexes to the standard An enhanced online index that allows readers to quickly and easily search the entire text for specific topics The Common Language Infrastructure Annotated Standard is the single source programmers, language and tool designers, and library and VES developers need to renderfully comprehensible.},
+  isbn = {978-0-321-15493-4}
+}
+
 @misc{mozblog,
   title = {You Lose More When Slow than You Gain When Fast -- {{Nicholas Nethercote}}},
   urldate = {2025-06-12},
   howpublished = {https://blog.mozilla.org/nnethercote/2011/05/31/you-lose-more-when-slow-than-you-gain-when-fast/},
   file = {C:\Users\caner\Zotero\storage\RG2D8I54\you-lose-more-when-slow-than-you-gain-when-fast.html}
+}
+
+@inproceedings{multi-stage:17,
+  title = {Refining Semantics for Multi-Stage Programming},
+  booktitle = {Proceedings of the 16th {{ACM SIGPLAN International Conference}} on {{Generative Programming}}: {{Concepts}} and {{Experiences}}},
+  author = {Ge, Rui and Garcia, Ronald},
+  year = {2017},
+  month = oct,
+  series = {{{GPCE}} 2017},
+  pages = {2--14},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  doi = {10.1145/3136040.3136047},
+  urldate = {2025-07-16},
+  abstract = {The multi-stage programming paradigm supports runtime code generation and execution. Though powerful, its potential is impeded by the lack of static analysis support. Van Horn and Might proposed a general-purpose approach to systematically develop static analyses by transforming an environmental abstract machine, which evolves a control string, an environment and a continuation as a program evaluates. To the best of our knowledge, no such semantics exists for a multi-stage language like MetaML.  We develop and prove correct an environmental abstract machine semantics for MetaML by gradually refining the reference substitutional structural operational semantics. Highlights of our approach include leveraging explicit substitutions to bridge the gap between substitutional and environmental semantics, and devising meta-environments to model the complexities of variable bindings in multi-stage environmental semantics.},
+  isbn = {978-1-4503-5524-7},
+  file = {C:\Users\caner\Zotero\storage\6T3SY8T2\Ge and Garcia - 2017 - Refining semantics for multi-stage programming.pdf}
 }
 
 @inproceedings{practical-partial,
@@ -432,6 +623,15 @@
   urldate = {2019-11-10},
   langid = {english},
   file = {C:\Users\caner\Zotero\storage\DSSSEG9Z\Bauman et al. - 2017 - Sound gradual typing only mostly dead.pdf}
+}
+
+@inproceedings{pyhaskell,
+  title = {Trace-Based Just-Intime Compiler for {{Haskell}} with {{RPython}}},
+  author = {Thomassen, Wiik},
+  year = {2013},
+  abstract = {Can Haskell benefit from tracing JIT optimization techniques, and is the RPython translation toolchain suitable for purely functional, lazy languages such as Haskell? RPython has been used to implement VMs for many different programming languages, but not for any purely functional or lazy languages. Haskell has achieved impressive speed with ahead-of-time optimizations. Attempts at trace-based JIT optimizations of Haskell have so far not achieved greater speed than static compilation. PyHaskell, a prototype Haskell VM with a meta-tracing JIT compiler written in RPython, shows that the RPython toolchain is suitable for Haskell. While the meta-tracer greatly speeds up PyHaskell, it does not yet beat GHC.},
+  keywords = {Ahead-of-time compilation,Compiler,INtime RTOS / INtime for Windows,Just-in-time-concept,Lazy evaluation,Mathematical optimization,OpenVMS,Programming language,Programming Languages,Prototype,PyPy,Static library,The Glorious Glasgow Haskell Compilation System,Toolchain,Tracer,Tracing just-in-time compilation},
+  file = {C:\Users\caner\Zotero\storage\V3VMBSPM\Thomassen - 2013 - Trace-based just-intime compiler for Haskell with .pdf}
 }
 
 @inproceedings{pypy-main,
@@ -549,6 +749,23 @@
   file = {C:\Users\caner\Zotero\storage\ESEZHPD5\Bruni and Verwaest - 2009 - PyGirl Generating Whole-System VMs from high-leve.pdf}
 }
 
+@inproceedings{runtime-feedback:11,
+  title = {Runtime {{Feedback}} in a {{Meta-tracing JIT}} for {{Efficient Dynamic Languages}}},
+  booktitle = {Proceedings of the 6th {{Workshop}} on {{Implementation}}, {{Compilation}}, {{Optimization}} of {{Object-Oriented Languages}}, {{Programs}} and {{Systems}}},
+  author = {Bolz, Carl Friedrich and Cuni, Antonio and Fija{\textbackslash}lkowski, Maciej and Leuschel, Michael and Pedroni, Samuele and Rigo, Armin},
+  year = {2011},
+  series = {{{ICOOOLPS}} '11},
+  pages = {9:1--9:8},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  doi = {10.1145/2069172.2069181},
+  urldate = {2019-03-22},
+  abstract = {Meta-tracing JIT compilers can be applied to a variety of different languages without explicitly encoding language semantics into the compiler. So far, they lacked a way to give the language implementor control over runtime feedback. This restricted their performance. In this paper we describe the mechanisms in PyPy's meta-tracing JIT that can be used to control runtime feedback in language-specific ways. These mechanisms are flexible enough to express classical VM techniques such as maps and runtime type feedback.},
+  isbn = {978-1-4503-0894-6},
+  keywords = {code generation,interpreter,meta-programming,runtime feedback,tracing JIT},
+  file = {C:\Users\caner\Zotero\storage\WQ2DSCQT\Bolz et al. - 2011 - Runtime Feedback in a Meta-tracing JIT for Efficie.pdf}
+}
+
 @article{samth:11,
   title = {Languages as Libraries},
   author = {{Tobin-Hochstadt}, Sam and {St-Amour}, Vincent and Culpepper, Ryan and Flatt, Matthew and Felleisen, Matthias},
@@ -556,6 +773,23 @@
   abstract = {Programming language design benefits from constructs for extending the syntax and semantics of a host language. While C's stringbased macros empower programmers to introduce notational shorthands, the parser-level macros of Lisp encourage experimentation with domain-specific languages. The Scheme programming language improves on Lisp with macros that respect lexical scope.},
   langid = {english},
   file = {C:\Users\caner\Zotero\storage\Y47HQ2G4\Tobin-Hochstadt et al. - Languages as libraries.pdf}
+}
+
+@article{sccp:91,
+  title = {Constant {{Propagation}} with {{Conditional Branches}}},
+  author = {Wegman, Mark N. and Zadeck, F. Kenneth},
+  year = {1991},
+  month = apr,
+  journal = {ACM Trans. Program. Lang. Syst.},
+  volume = {13},
+  number = {2},
+  pages = {181--210},
+  issn = {0164-0925},
+  doi = {10.1145/103135.103136},
+  urldate = {2019-11-28},
+  abstract = {Constant propagation is a well-known global flow analysis problem. The goal of constant propagation is to discover values that are constant on all possible executions of a program and to propagate these constant values as far foward through the program as possible. Expressions whose operands are all constants can be evaluated at compile time and the results propagated further. Using the algorithms presented in this paper can produce smaller and faster compiled programs. The same algorithms can be used for other kinds of analyses (e.g., type of determination). We present four algorithms in this paper, all conservitive in the sense that all constants may not be found, but each constant found is constant over all possible executions of the program. These algorithms are among the simplest, fastest, and most powerful global constant propagation algorithms known. We also present a new algorithm that performs a form of interprocedural data flow analysis in which aliasing information is gathered in conjunction with constant progagation. Several variants of this algorithm are considered.},
+  keywords = {abstract interpretation,code optimization,constant propagation,control flow graph,interprocedural analysis,procedure integration,static single assignment form,type determination},
+  file = {C:\Users\caner\Zotero\storage\T3TVZ5UD\Wegman and Zadeck - 1991 - Constant Propagation with Conditional Branches.pdf}
 }
 
 @inproceedings{schneiderEfficientHandlingGuards2012,
@@ -609,6 +843,22 @@
   file = {C:\Users\caner\Zotero\storage\CPZBTXFR\Chevalier-Boisvert et al. - 2011 - Bootstrapping a self-hosted research virtual machine for JavaScript an experience report.pdf}
 }
 
+@article{self-maps:89,
+  title = {An Efficient Implementation of {{SELF}} a Dynamically-Typed Object-Oriented Language Based on Prototypes},
+  author = {Chambers, C. and Ungar, D. and Lee, E.},
+  year = {1989},
+  month = sep,
+  journal = {SIGPLAN Not.},
+  volume = {24},
+  number = {10},
+  pages = {49--70},
+  issn = {0362-1340},
+  doi = {10.1145/74878.74884},
+  urldate = {2025-07-16},
+  abstract = {We have developed and implemented techniques that double the performance of dynamically-typed object-oriented languages. Our SELF implementation runs twice as fast as the fastest Smalltalk implementation, despite SELF's lack of classes and explicit variables.To compensate for the absence of classes, our system uses implementation-level maps to transparently group objects cloned from the same prototype, providing data type information and eliminating the apparent space overhead for prototype-based systems. To compensate for dynamic typing, user-defined control structures, and the lack of explicit variables, our system dynamically compiles multiple versions of a source method, each customized according to its receiver's map. Within each version the type of the receiver is fixed, and thus the compiler can statically bind and inline all messages sent to self. Message splitting and type prediction extract and preserve even more static type information, allowing the compiler to inline many other messages. Inlining dramatically improves performance and eliminates the need to hard-wire low-level methods such as +,==, and ifTrue:.Despite inlining and other optimizations, our system still supports interactive programming environments. The system traverses internal dependency lists to invalidate all compiled methods affected by a programming change. The debugger reconstructs inlined stack frames from compiler-generated debugging information, making inlining invisible to the SELF programmer.},
+  file = {C:\Users\caner\Zotero\storage\NNQDP37F\Chambers et al. - 1989 - An efficient implementation of SELF a dynamically-typed object-oriented language based on prototypes.pdf}
+}
+
 @book{sicpbook,
   title = {Structure and {{Interpretation}} of {{Computer Programs}}},
   author = {Abelson, Harold and Sussman, Gerald Jay},
@@ -622,6 +872,15 @@
   keywords = {thema EDItEUR::U Computing and Information Technology::UY Computer science},
   annotation = {Accepted: 2019-01-17 23:55},
   file = {C:\Users\caner\Zotero\storage\AVYTX98K\Abelson and Sussman - 1996 - Structure and Interpretation of Computer Programs.pdf}
+}
+
+@article{spurJIT,
+  title = {{{SPUR}}: A Trace-Based {{JIT}} Compiler for {{CIL}}},
+  author = {Bebenita, Michael and Brandner, Florian and Fahndrich, Manuel and Logozzo, Francesco and Schulte, Wolfram and Tillmann, Nikolai and Venter, Herman},
+  pages = {18},
+  abstract = {Tracing just-in-time compilers (TJITs) determine frequently executed traces (hot paths and loops) in running programs and focus their optimization effort by emitting optimized machine code specialized to these traces. Prior work has established this strategy to be especially beneficial for dynamic languages such as JavaScript, where the TJIT interfaces with the interpreter and produces machine code from the JavaScript trace.},
+  langid = {english},
+  file = {C:\Users\caner\Zotero\storage\73UNH3Y4\Bebenita et al. - SPUR a trace-based JIT compiler for CIL.pdf}
 }
 
 @inproceedings{squeak_smalltalk_vm,
@@ -642,6 +901,22 @@
   file = {C:\Users\caner\Zotero\storage\EL25R8Z5\Ingalls et al. - 1997 - Back to the future the story of Squeak, a practical Smalltalk written in itself.pdf}
 }
 
+@article{stJITdyn:12,
+  title = {On the Benefits and Pitfalls of Extending a Statically Typed Language {{JIT}} Compiler for Dynamic Scripting Languages},
+  author = {Castanos, Jose and Edelsohn, David and Ishizaki, Kazuaki and Nagpurkar, Priya and Nakatani, Toshio and Ogasawara, Takeshi and Wu, Peng},
+  year = {2012},
+  month = oct,
+  journal = {SIGPLAN Not.},
+  volume = {47},
+  number = {10},
+  pages = {195--212},
+  issn = {0362-1340},
+  doi = {10.1145/2398857.2384631},
+  urldate = {2025-07-16},
+  abstract = {Whenever the need to compile a new dynamically typed language arises, an appealing option is to repurpose an existing statically typed language Just-In-Time (JIT) compiler (repurposed JIT compiler). Existing repurposed JIT compilers (RJIT compilers), however, have not yet delivered the hoped-for performance boosts. The performance of JVM languages, for instance, often lags behind standard interpreter implementations. Even more customized solutions that extend the internals of a JIT compiler for the target language compete poorly with those designed specifically for dynamically typed languages. Our own Fiorano JIT compiler is an example of this problem. As a state-of-the-art, RJIT compiler for Python, the Fiorano JIT compiler outperforms two other RJIT compilers (Unladen Swallow and Jython), but still shows a noticeable performance gap compared to PyPy, today's best performing Python JIT compiler. In this paper, we discuss techniques that have proved effective in the Fiorano JIT compiler as well as limitations of our current implementation. More importantly, this work offers the first in-depth look at benefits and limitations of the repurposed JIT compiler approach. We believe the most common pitfall of existing RJIT compilers is not focusing sufficiently on specialization, an abundant optimization opportunity unique to dynamically typed languages. Unfortunately, the lack of specialization cannot be overcome by applying traditional optimizations.},
+  file = {C:\Users\caner\Zotero\storage\KB4QLV55\Castanos et al. - 2012 - On the benefits and pitfalls of extending a statically typed language JIT compiler for dynamic scrip.pdf}
+}
+
 @article{survey:05,
   title = {A {{Survey}} of {{Adaptive Optimization}} in {{Virtual Machines}}},
   author = {Arnold, M. and Fink, S. J. and Grove, D. and Hind, M. and Sweeney, P. F.},
@@ -656,6 +931,38 @@
   abstract = {Virtual machines face significant performance challenges beyond those confronted by traditional static optimizers. First, portable program representations and dynamic language features, such as dynamic class loading, force the deferral of most optimizations until runtime, inducing runtime optimization overhead. Second, modular program representations preclude many forms of whole-program interprocedural optimization. Third, virtual machines incur additional costs for runtime services such as security guarantees and automatic memory management. To address these challenges, vendors have invested considerable resources into adaptive optimization systems in production virtual machines. Today, mainstream virtual machine implementations include substantial infrastructure for online monitoring and profiling, runtime compilation, and feedback-directed optimization. As a result, adaptive optimization has begun to mature as a widespread production-level technology. This paper surveys the evolution and current state of adaptive optimization technology in virtual machines.},
   keywords = {Adaptive optimization,adaptive optimization systems,Adaptive systems,automatic memory management,Condition monitoring,Costs,dynamic optimization,feedback directed optimization,feedback-directed optimization (FDO),Memory management,modular program representations,online monitoring,online profiling,optimisation,optimising compilers,optimization,Optimized production technology,production level technology,Production systems,Runtime,runtime compilation,Security,software performance evaluation,static optimizers,Virtual machine monitors,virtual machines,Virtual machining},
   file = {C\:\\Users\\caner\\Zotero\\storage\\DVWJXGSE\\Arnold et al. - 2005 - A Survey of Adaptive Optimization in Virtual Machi.pdf;C\:\\Users\\caner\\Zotero\\storage\\I5PPYRYM\\1386662.html}
+}
+
+@inproceedings{tamarin,
+  title = {Tracing for Web 3.0: Trace Compilation for the next Generation Web Applications},
+  shorttitle = {Tracing for Web 3.0},
+  booktitle = {Proceedings of the 2009 {{ACM SIGPLAN}}/{{SIGOPS}} International Conference on {{Virtual}} Execution Environments},
+  author = {Chang, Mason and Smith, Edwin and Reitmaier, Rick and Bebenita, Michael and Gal, Andreas and Wimmer, Christian and Eich, Brendan and Franz, Michael},
+  year = {2009},
+  month = mar,
+  series = {{{VEE}} '09},
+  pages = {71--80},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  doi = {10.1145/1508293.1508304},
+  urldate = {2025-07-16},
+  abstract = {Today's web applications are pushing the limits of modern web browsers. The emergence of the browser as the platform of choice for rich client-side applications has shifted the use of in-browser JavaScript from small scripting programs to large computationally intensive application logic. For many web applications, JavaScript performance has become one of the bottlenecks preventing the development of even more interactive client side applications. While traditional just-in-time compilation is successful for statically typed virtual machine based languages like Java, compiling JavaScript turns out to be a challenging task. Many JavaScript programs and scripts are short-lived, and users expect a responsive browser during page loading. This leaves little time for compilation of JavaScript to generate machine code.We present a trace-based just-in-time compiler for JavaScript that uses run-time profiling to identify frequently executed code paths, which are compiled to executable machine code. Our approach increases execution performance by up to 116\% by decomposing complex JavaScript instructions into a simple Forth-based representation, and then recording the actually executed code path through this low-level IR. Giving developers more computational horsepower enables a new generation of innovative web applications.},
+  isbn = {978-1-60558-375-4},
+  file = {C:\Users\caner\Zotero\storage\PLWFJCPU\Chang et al. - 2009 - Tracing for web 3.0 trace compilation for the next generation web applications.pdf}
+}
+
+@inproceedings{tdpe:99,
+  title = {A {{Semantic Account}} of {{Type-Directed Partial Evaluation}}},
+  booktitle = {Proceedings of the {{International Conference PPDP}}'99 on {{Principles}} and {{Practice}} of {{Declarative Programming}}},
+  author = {Filinski, Andrzej},
+  year = {1999},
+  month = sep,
+  series = {{{PPDP}} '99},
+  pages = {378--395},
+  publisher = {Springer-Verlag},
+  address = {Berlin, Heidelberg},
+  urldate = {2025-07-16},
+  isbn = {978-3-540-66540-3}
 }
 
 @inproceedings{trace-vs-PE,
@@ -728,4 +1035,22 @@
   author = {Vandercammen, Maarten},
   langid = {english},
   file = {C:\Users\caner\Zotero\storage\9Q858YLX\Vandercammen - The Essence of Meta-Tracing JIT Compilers.pdf}
+}
+
+@article{whatever:19,
+  title = {Compiling with {{Continuations}}, or {{Without}}? {{Whatever}}.},
+  shorttitle = {Compiling with {{Continuations}}, or {{Without}}?},
+  author = {Cong, Youyou and Osvald, Leo and Essertel, Gr{\'e}gory M. and Rompf, Tiark},
+  year = {2019},
+  month = jul,
+  journal = {Proc. ACM Program. Lang.},
+  volume = {3},
+  number = {ICFP},
+  pages = {79:1--79:28},
+  issn = {2475-1421},
+  doi = {10.1145/3341643},
+  urldate = {2019-11-29},
+  abstract = {What makes a good compiler IR? In the context of functional languages, there has been an extensive debate on the advantages and disadvantages of continuation-passing-style (CPS). The consensus seems to be that some form of explicit continuations is necessary to model jumps in a functional style, but that they should have a 2nd-class status, separate from regular functions, to ensure efficient code generation. Building on this observation, a recent study from PLDI 2017 proposed a direct-style IR with explicit join points, which essentially represent local continuations, i.e., functions that do not return or escape. While this IR can work well in practice, as evidenced by the implementation of join points in the Glasgow Haskell Compiler (GHC), there still seems to be room for improvement, especially with regard to the way continuations are handled in the course of optimization.  In this paper, we contribute to the CPS debate by developing a novel IR with the following features. First, we integrate a control operator that resembles Felleisen's C, eliminating certain redundant rewrites observed in the previous study. Second, we treat the non-returning and non-escaping aspects of continuations separately, allowing efficient compilation of well-behaved functions defined by the user. Third, we define a selective CPS translation of our IR, which erases control operators while preserving the meaning and typing of programs. These features enable optimizations in both direct style and full CPS, as well as in any intermediate style with selectively exposed continuations. Thus, we change the spectrum of available options from ``CPS yes or no'' to ``as much or as little CPS as you want, when you want it''.},
+  keywords = {compiler intermediate languages,control operators,CPS translation},
+  file = {C:\Users\caner\Zotero\storage\67PLU4YQ\Cong et al. - 2019 - Compiling with Continuations, or Without Whatever.pdf}
 }
