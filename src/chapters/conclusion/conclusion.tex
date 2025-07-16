@@ -1,5 +1,5 @@
-\chapter[\texorpdfstring{CONCLUSION \& FINAL THOUGHTS}
-                          {8. Conclusion}]{CONCLUSION \& FINAL THOUGHTS}
+\chapter[\texorpdfstring{CONCLUSION \& SIGNIFICANCE}
+                          {8. Conclusion}]{CONCLUSION \& SIGNIFICANCE}
 
     \label{chapter:conclusion}
 
@@ -10,7 +10,6 @@
 
         Sections:
 		\begin{itemize}
-            \item Contributions \& Significance
 			\item Related Work
 			\item Future Work
 		\end{itemize}
@@ -21,43 +20,34 @@
     \textit{Efficient self-hosting of a full-scale functional language on a meta-tracing \gls{jit} compiler is achievable.}
 
     \begin{paragraph-here}% 1
-        We detailed our reproducible research that proves our claim...
+        In this study we demonstrate with evidence, via a reproducible research, that it is indeed possible to realize an efficient implementation of a working full-scale self-hosting functional programming language on a meta-tracing \gls{jit} compiler. We support this claim in several ways we describe below.
     \end{paragraph-here}
 
     \begin{paragraph-here}% 2
-        In this chapter we provide some related work and conclude by listing concrete contributions we made towards proving our thesis. Finally we close with a discussion of broader significance and future directions for this work.
+        We built a useful research vehicle, namely Pycket, that can be utilized to further research into language run-times, self-hosting, meta-tracing and more, as we discuss in the subsequent sections. Pycket was initially a rudimentary interpreter for Racket's \racketcode{\#\%kernel} language, we turned it into a full run-time for Racket. All that's detailed in \chapterRef{chapter:pycket}. We validated its correctness and completeness in \chapterRef{chapter:validation}. % pycket
     \end{paragraph-here}
 
-    \section[\texorpdfstring{Contributions \& Significance}{Significance}]{Contributions \& Significance}
-        \begin{paragraph-here}% 3
-            This study demonstrates with evidence that it is indeed possible to have a working full-scale self-hosting functional programming language on a meta-tracing JIT compiler.
-        \end{paragraph-here}
+    \begin{paragraph-here}% 3
+        We provide for the first time a formalization for the operational semantics of linklets, a compilation unit that's critical in improving the communication between a compiler and a run-time, thereby the portability of a programming language. All that's formally defined and detailed in \chapterRef{chapter:linklets}, and the full PLT Redex model for the semantics is provided in \appendixRef{appendix:linklet-semantics-model-redex-code}. % linklets
+    \end{paragraph-here}
 
-        \begin{paragraph-here}% 4
-            We built a useful research vehicle, namely Pycket, that can be utilized to further research into language run-times, self-hosting, meta-tracing and more. % pycket
-        \end{paragraph-here}
+    \begin{paragraph-here}% 4
+        Although a proof of efficiency is not established, we identified and analyzed in detailed performance problems of this approach in \chapterRef{chapter:problem} and showed that they're fundamental to self-hosting on meta-tracing \gls{jit} compilers. Furthermore, we argued in \chapterRef{chapter:solution} that these issues are solvable (yet requires another PhD-level study), and presented some approaches to overcome these issues with evidence that shows that these approaches are worthy of further investigation.  % problems with self-hosting
+    \end{paragraph-here}
 
-        \begin{paragraph-here}% 5
-            We provide for the first time a formalization for the operational semantics of linklets, a compilation unit that's critical in improving the communication between a compiler and a run-time, thereby improving portability of a programming language. % linklets
-        \end{paragraph-here}
+    \begin{paragraph-here}% 5
+        We also contribute to performance analysis of tracing \glspl{jit} in proposing a more fine-grained control on tracing loops involving deep branching. In particular, one of the solutions we propose in \chapterRef{chapter:solution} argues that by steering the tracer away from branch-heavy computations, the overall performance of tracing interpreter-style data-dependent code can be improved.
+    \end{paragraph-here}
 
-        \begin{paragraph-here}% 6
-            We revealed and analyzed some performance problems fundamental to self-hosting on meta-tracing \glspl{jit} and argued it is solvable, proposing solution avenues clearly worth further study.  This is a significant contribution to PL research. % problems with self-hosting
-        \end{paragraph-here}
-
-        \begin{paragraph-here}% 7
-            The research also reframes performance analysis of tracing \glspl{jit}: instead of only looking for hot loops to trace, identifying what to avoid tracing can unlock full potential.
-        \end{paragraph-here}
-
-        \begin{paragraph-here}% 8
-            The research provides a novel way to think about computational models in language run-times. Instead of sticking to one, several different kinds of models can be combined to exploit strengths in different areas in implementing reduction semantics. % hybrid model
-        \end{paragraph-here}
+    \begin{paragraph-here}% 6
+        Moreover, we provide a novel way to think about computational models in language run-times. We argue in \chapterRef{chapter:solution}, that instead of sticking to one model of evaluation, several different kinds of reducers can be combined to exploit strengths in different areas to improve language \gls{vm} performance. % hybrid model
+    \end{paragraph-here}
 
     \section{Related Work}
         \label{section:related-work}
 
-        \begin{paragraph-here}% 9
-            Higher-order dynamic VMs
+        \begin{paragraph-here}% 7
+            start with \paragraph{Higher-order dynamic VMs}% 7
 
              Dynamic VM implementations are becoming increasingly popular for their
                 rapid prototyping potential, as the effort required to implement a new
@@ -86,8 +76,8 @@
                 in C\# \cite{spurJIT}.
         \end{paragraph-here}
 
-        \begin{paragraph-here}% 10
-            Tracing JIT VMs
+        \begin{paragraph-here}% 8
+            start with \paragraph{Tracing JIT VMs}
 
             Like PyPy, Pycket is built on the RPython meta-tracing framework as
             well, and this study tries to identify approaches on achieving
@@ -102,8 +92,8 @@
             \cite{pyhaskell}.
         \end{paragraph-here}
 
-        \begin{paragraph-here}% 11
-            Optimizing VM performance in a meta-tracing context
+        \begin{paragraph-here}% 9
+            start with \paragraph{Optimizing VM performance in a meta-tracing context}
 
             As we mentioned in \chapterRef{chapter:rpython}, there are a lot of dynamic
             optimizations performed by the RPython back-end that the language
@@ -119,8 +109,8 @@
             \cite{bolz15-meta-vm}.
         \end{paragraph-here}
 
-        \begin{paragraph-here}% 12
-            Self-hosting
+        \begin{paragraph-here}% 10
+            start with \paragraph{Self-hosting}
 
             Similarly, Bolz and contributors state that in general-purpose VMs,
             the compiler and the language being implemented should be semantically
@@ -146,8 +136,8 @@
             approach is at the language (interpreter) level.
         \end{paragraph-here}
 
-        \begin{paragraph-here}% 13
-            Managing abstraction levels
+        \begin{paragraph-here}% 11
+            start with \paragraph{Managing abstraction levels}
 
             A big part of the problems we tackle in this thesis is caused by the
             fact that adding self-hosting on Pycket adds another level of
@@ -176,8 +166,8 @@
             Futamura projections maybe?
         \end{paragraph-here}
 
-        \begin{paragraph-here}% 14
-            Space concerns \& heap allocated continuations
+        \begin{paragraph-here}% 12
+            start with \paragraph{Space concerns \& heap allocated continuations}
 
             Many studies investigate the space complexity and optimizations aiming
             to increase performance. Some use \emph{repurposed} JIT compilers
@@ -217,18 +207,18 @@
 
     \section[\texorpdfstring{Future Work}{Future Work}]{Future Work}
 
-        \begin{paragraph-here}% 15
+        \begin{paragraph-here}% 13
             There are a lot of dynamic features of programming languages, overhead of which can be eliminated by meta-tracing, such as eliminating gradual typing performance with using Pycket \cite{pycketmain2}. If all the issues of self-hosting on meta-tracing JITs are solved and the full potential of our approach is realized, then a featureful language like Racket and all languages that can be built on Racket can be made extremely fast with minimal effort.
         \end{paragraph-here}
 
-        \begin{paragraph-here}% 16
+        \begin{paragraph-here}% 14
             Having another Racket implementation symmetric to RacketCS enables further research on language runtimes for functional programming languages across a variety of different types of computations. Strenghts and weaknesses of each can be identified and the whole research about VMs for dynamic languages can be improved.
         \end{paragraph-here}
 
-        \begin{paragraph-here}% 17
+        \begin{paragraph-here}% 15
             This is an example of self-hosting with on a meta-tracing \gls{jit}, and it paves the way for future work on different ways of self-hosting languages.
         \end{paragraph-here}
 
-        \begin{paragraph-here}% 18
+        \begin{paragraph-here}% 16
             It opens interesting avenues for meta-tracing research, where we also touch one of the most classical problems with tracing \glspl{jit}; you lose more when slow than you gain when fast in evaluating branch-heavy computations.
         \end{paragraph-here}
