@@ -2,11 +2,24 @@
                           {1. Introduction}]{INTRODUCTION}
     \label{chapter:introduction}
 
-    \begin{chaptersynopsis}[Chapter Synopsis - \emph{Content Complete}]
+    \begin{chaptersynopsis}[Chapter Synopsis]
+        \footnotesize
 
        Thesis:
 
         \textit{Efficient self-hosting of full-scale functional languages on meta-tracing \gls{jit} compilers is achievable.}
+
+        \vspace{2em}
+
+        Contributions:
+
+        1. Pycket, the first self-hosting implementation of a full-scale functional programming language on a meta-tracing \gls{jit} compiler, serving as a complete run-time for Racket.
+
+        2. The first formalization for the operational semantics of linklet semantics
+
+        3. Rudimentary operational semantics for a hybrid computational model (\racketcode{CEK} \& Stackful) that utilizes both the native stack and the heap for optimized memory use.
+
+        4. Identification and analysis of performance issues fundamental to self-hosting on meta-tracing \gls{jit} compilers for future studies.
 
         \vspace{2em}
 
@@ -66,8 +79,8 @@
             The primary technical contributions of this dissertation are:
             \begin{itemize}
                 \item Pycket, the first self-hosting implementation of a full-scale functional programming language on a meta-tracing \gls{jit} compiler, serving as a complete run-time for Racket. % pycket
-                \item The first formalization of linklet semantics, providing an operational semantics to clearly reason about their behavior. % linklets
-                \item Rudimentary operational semantics for a hybrid computational model (\racketcode{CEK} \& Stackful) that utilizes both stack and the heap in an intelligent way for optimized memory use. % hybrid model
+                \item The first formalization for the operational semantics of linklet semantics, to clearly reason about their behavior. % linklets
+                \item Rudimentary operational semantics for a hybrid computational model (\racketcode{CEK} \& Stackful) that utilizes both the native stack and the heap in an intelligent way for optimized memory use. % hybrid model
                 \item Identification and thorough analysis of performance issues fundamental to self-hosting on meta-tracing \gls{jit} compilers. % issues with self-hosting
             \end{itemize}
 
