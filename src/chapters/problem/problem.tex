@@ -336,25 +336,86 @@
 		\end{mainpoint}
 
 		\begin{paragraph-here}
-			user program is effected by everything before including expansion.
+			Another major issue that we identified as one of the essential problems
+			in self-hosting Racket on meta-traced CEK is the \gls{gc} pressure caused by
+			the long chains of continuation allocations on the heap. As we
+			described in \chapterRef{chapter:pycket}, given a Racket module, Pycket now
+			first runs the expander to fully expand and load the language before expanding and running
+			the module. Since the expansion of a given Racket module is included in
+			Pycket's run-time now, the JIT suffers from numerous heap
+			allocations for the continuation chains often caused by the control
+			indirections such as within the macro-system. This, in turn, creates a
+			pressure for the garbage collection, as the \gls{gc} is triggered by
+			allocations. To understand the issue better, we start by briefly
+			describing the \gls{gc} utilized by the RPython framework.
 		\end{paragraph-here}
 
 		\begin{paragraph-here}
-			RPython GC minimark assumes short-lived small objects.
+			As described in \chapterRef{chapter:rpython}, the flow graphs and the C
+			code that are generated during the translation in the RPython
+			framework assume automatic memory management. Therefore the produced
+			program is linked with a \gls{gc} that is implemented within the framework
+			(in RPython), by inspecting all the graphs and turning all
+			\texttt{malloc} operations into calls to the GC. RPython's garbage
+			collector, namely the \emph{minimark GC} is a three-generations
+			semispace copying generational collector. Each semispace has a nursery
+			where the young\footnote{The age of an object is the number of
+			collections they survived.}  objects are inserted first,
+			i.e. allocations fill the nursery. And when the nursery is full then
+			it is collected and the objects that are still alive are moved into
+			the non-nursery part of the current semispace. This decreases the
+			times that a full collection is needed. The approach is based on the
+			idea that the lifetime of the objects that are created are short, and
+			the amount of live objects that are used by the program fits in the
+			nursery (set to be the size of CPU Level 2 cache). \cite{pypy06,
+			bolzPhDThesis, gc:16, LuaJITLanguageToolkit}
 		\end{paragraph-here}
-
-		\begin{show-experiment}
-				Demonstrate the issues concretely, nursery overflows/promotions, long-lived old objects, GC pause time eaten by majors, real-world cost
-				Maybe also deeper insights, like "`W\_StructDescriptor` accounts for 68\% of promoted bytes".
-		\end{show-experiment}
 
 		\begin{paragraph-here}
-			But Racket's objects are gigantic and long-lived.	structs, parameters
+			Now that the Racket's expander is used to expand a given module within
+			the Pycket's run-time, the life in the heap is much different than
+			what a generational GC would like to see. The allocated objects are
+			rather big and live very long. Even the expander itself is allocated
+			as a linklet instance containing more than 2000 functions, and live
+			during the whole run-time. Another example is the long continuation
+			chains caused by the large depth of the real-world Racket programs
+			such as the macro-system or the module-system. In the \emph{minimark
+			GC} the old and/or big objects are moved out of the semispace
+			("external"), where they will not be moved anymore and collected in a
+			mark-and-sweep fashion to avoid costly moves. However, since our setup
+			creates many objects (often large) that live long, not only we don't
+			benefit from the nursery approach enough but also the mark-and-sweep
+			process creates a pressure on the run-time performance, as it is a
+			serial blocking collector.
 		\end{paragraph-here}
 
+		\begin{table}[!h]
+			\centering
+			\small
+			\begin{tabular}{lcccc}
+			\toprule
+			& Collections & Bytes copied (KiB) & Old‑gen growth (MiB) & GC wall‑time (ms)\\
+			\midrule
+			Original Pycket              & 15   & 1367.1 & 19.2  & 40.6\\
+			Pycket with Self-hosting     & 500  &   546.4 & 148.0 & 890.6\\
+			\bottomrule
+			\end{tabular}
+			\caption{Memory‑management footprint of self‑hosted Pycket vs original Pycket. Nursery size: 32M}
+			\label{table:memory-footprints}
+		\end{table}
+
 		\begin{paragraph-here}
-			Various paragraphs discussing experiments.
+			\tableRef{table:memory-footprints} shows values All values are averages over a 1000 runs.
+			Switching to a self-hosting build significantly impacts the memory-management behavior of Pycket, particularly affecting RPython's Minimark garbage collector. Compared to the non-self-hosted baseline (the original Pycket), the self-hosted version increases minor garbage collections dramatically from 15 to 500. Although each minor collection in self-hosting Pycket copies fewer bytes (546 KiB vs. 1367 KiB), the cumulative effect is substantial, causing an approximately seven-fold increase in old-generation growth (148.0 MiB vs. 19.2 MiB). Consequently, GC wall-time escalates significantly, from 0.04 seconds in the original Pycket to 0.89 seconds in the self-hosting Pycket, confirming that the large, pointer-rich Racket structures introduced by self-hosting significantly challenge Minimark's design assumptions.
 		\end{paragraph-here}
+
+		\inputFigure{problem}{nursery-size-vs-gc-time-figure}
+
+		\begin{paragraph-here}
+			Figure~\ref{figure:nursery-size-vs-gc-time} illustrates the direct impact of nursery size on the garbage collection overhead introduced by self-hosting. Initially, small nursery sizes (2--8\,MiB) trigger frequent minor collections, accumulating significant GC overhead (1.7--1.0\,s). Increasing the nursery size to match or slightly exceed the CPU cache size (32--64\,MiB) effectively reduces GC overhead to approximately 0.5\,s, providing a clear performance sweet-spot. Beyond this range, further increases in nursery size yield diminishing returns and can eventually lead to unrealistic memory usage, as evidenced by the sharp reduction in GC time at impractically large sizes ($\ge$ 2\,GiB). These results reinforce our earlier observation that self-hosting generates numerous long-lived, pointer-rich Racket structures, challenging Minimark's generational assumptions, and demonstrate that tuning nursery size to hardware characteristics can mitigate—but not fully eliminate—the associated memory management overhead.
+		\end{paragraph-here}
+
+
 
 	\section[\texorpdfstring{Overall Performance of Pycket Self-hosting Racket}{Overall Performance}]{Overall Performance of Pycket Self-hosting Racket}
 	\label{section:cross-benchmarks}
