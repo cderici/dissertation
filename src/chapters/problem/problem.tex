@@ -366,7 +366,7 @@
 		\paragraph{}% 5
 			The impact of nursery size on garbage-collection overhead in Pycket is demonstrated in \figref{figure:nursery-size-vs-gc-time}, highlighting clear trade-offs in tuning this parameter. At smaller nursery sizes (2--8\,MiB), frequent minor collections lead to substantial total GC overhead, reaching up to 1.7 seconds. Increasing the nursery size to align with typical CPU cache sizes (32--64\,MiB) significantly reduces this overhead, with GC times stabilizing around 0.5 seconds, thus identifying an optimal performance region. However, further enlarging the nursery provides diminishing returns, only slightly reducing the overhead while increasing memory demands. These results confirm that while nursery-size tuning can mitigate the pressure induced by large and persistent objects, it cannot completely address the underlying challenges posed by Racket's expansion workloads in Pycket.
 
-	\section[\texorpdfstring{Overall Performance of Pycket Self-hosting Racket}{Overall Performance}]{Overall Performance of Pycket Self-hosting Racket}
+	\section[\texorpdfstring{Back-end Performance of Pycket}{Back-end Performance}]{Back-end Performance of Pycket}
 	\label{section:cross-benchmarks}
 
 		\begin{mainpoint}
@@ -385,11 +385,10 @@
 			Both OP/NP using the same expander generates same kernel code.
 		\end{paragraph-here}
 
-		\begin{show-experiment}
-			CrossBenchmark experiments.
-		\end{show-experiment}
+		\inputFigure{problem}{run6-npww-opww-rel-R-chart}
 
 		\begin{paragraph-here}
+			\figref{fig:pycket-npww-opww-relR} shows ....
 			There are rare cases where self-hosting Pycket is faster.
 		\end{paragraph-here}
 
