@@ -17,33 +17,7 @@
 
 \begin{abstract}
 
-Self-hosting a full-scale, higher-order functional language on a meta-tracing
-just-in-time (JIT) compiler promises portable, high-performance
-implementations, yet prior work remains confined to toy subsets. This
-dissertation shows, for the first time, that an \emph{unmodified} Racket
-ecosystem can run atop Pycket, a meta-tracing JIT, while preserving
-semantic fidelity and practical usability.
-
-The key insight is to let the language itself steer its own runtime.
-Using \emph{linklets}—formally specified compilation units encapsulating code,
-mutable state, and import/export contracts—we grow a minimal Pycket kernel
-into a complete Racket runtime. Untouched Racket functionality are incrementally
-imported as linklets, and validated by operational-semantics test
-suites, Redex equivalence checks, and a comprehensive coverage.
-
-Performance evaluation reveals two fundamental obstacles: interpreter-shaped
-control flow yields overspecialized, non-reusable traces, and compile-time
-expansion lacks the tight loops that meta-tracing rewards. Although overall
-slowdown is modest, branch-heavy programs inflate warm-up costs, deepen
-continuation chains, and increase garbage-collection pressure.
-
-To address these issues we prototype hot-branch detection, and introduce a hybrid CEK + stackful
-evaluation model that trims memory footprint. Together, these techniques
-promise to narrow the performance gap and chart a research path for making
-meta-tracing JITs hospitable to self-hosting languages. Beyond the concrete
-system, the work reframes the runtime as a language-defined artifact
-and offers a versatile platform for future studies on language–runtime
-co-design and tracing-compiler optimization.
+Self-hosting represents a significant milestone in the evolution of a programming language, indicating its semantic maturity and offering practical advantages in portability and flexibility. While self-hosting is traditionally achieved through meta-circular interpreters or custom compilers, the viability of using meta-tracing \gls{jit} compilers for this purpose in full-scale functional languages remains underexplored. This dissertation investigates this open question by developing an operational self-hosting full Racket implementation on Pycket, a meta-tracing \gls{jit} compiler generated on the RPython framework. We integrate Racket's runtime subsystems into Pycket using linklets—formally specified compilation units that enable self-hosting. To support and clarify this integration, we present formal operational semantics for linklets, validated via both Racket \& Pycket reference implementations and a PLT Redex model. Our evaluation identifies specific performance challenges fundamental to self-hosting on meta-tracing, such as overspecialized traces and increased \gls{gc} overhead. We propose and explore targeted approaches to address these challenges, including methods to guide the tracer away from inefficient trace generation and a hybrid evaluation model combining CEK and stack-based interpreters to reduce memory overhead. Beyond demonstrating the feasibility of efficient self-hosting on meta-tracing \gls{jit} compilers, our findings offer insights into language-runtime co-design, suggesting a general strategy for implementing high-level language features without compromising run-time performance, thereby opening new avenues for further research into efficient language implementation techniques.
 
 \end{abstract}
 
