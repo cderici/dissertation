@@ -6,13 +6,13 @@
     bar shift=0pt,
     width=15cm,
     height=8cm,
-    ylabel={Relative Runtime (to Racket)},
-    xlabel={Scheme Benchmarks},
-    symbolic x coords={string,sumloop,sumfp,fft,mbrot,ctak,pnpoly,sum,fibfp,pi,triangl,array1,simplex,puzzle,primes,diviter,fib,nqueens,takl,cpstak,gcold,ack,gcbench,graphs,divrec,mazefun,sboyer,tak,perm9,nboyer,earley,paraffins},
+    ylabel={Relative Runtime (to Racket 8.18)},
+    xlabel={Larceny Cross-platform Benchmarks},
+    symbolic x coords={string,sumloop,sumfp,fft,mbrot,ctak,pnpoly,sum,fibfp,pi,triangl,array1,simplex,puzzle,primes,diviter,fib,nqueens,takl,cpstak,gcold,ack,gcbench,graphs,divrec,mazefun,sboyer,tak,perm9,nboyer,earley,paraffins,,g. mean},
     xtick=data,
     xticklabel style={rotate=55,anchor=east,font=\scriptsize},
     ymin=0,
-    enlarge x limits=0.08,
+    enlarge x limits=0.04,
     ymajorgrids=true,
     grid style=dashed,
     legend style={
@@ -71,6 +71,7 @@
     (nboyer,4.141) +- (0,0.00855)
     (earley,4.521) +- (0,0.0115)
     (paraffins,5.505) +- (0,0.0109)
+    (g. mean,0.9472) +- (0,0)
     };
   % Old Pycket With Warmup
   \addplot[
@@ -116,6 +117,7 @@
     (nboyer,3.520) +- (0,0.00506)
     (earley,3.515) +- (0,0.00865)
     (paraffins,3.761) +- (0,0.00816)
+    (g. mean,0.9005) +- (0,0)
     };
   \legend{Pycket Self-Hosting Racket, Original Pycket}
   \end{axis}
