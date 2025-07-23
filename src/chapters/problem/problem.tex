@@ -223,15 +223,13 @@
 		\subsection{Front-end}
 
 			\begin{paragraph-here}% 11
-				Now we take a look at the run times for the expansion of the same benchmarks. For this, we used the same setup that's described in the \secref{benchmark-setup}. And turned the benchmarks into benchmarks of expansion.
+				Now we take a look at the run times for the expansion of the same benchmarks. For this, we used the same setup that's described in the \secref{benchmark-setup}. We took each benchmark that's used for measuring the back-end performance, and turned it into a benchmark that measures the expansion performance of that program.
 			\end{paragraph-here}
 
-			\begin{figure-here}
-				FIGURE -- ack vs ack-expand side by side Racket code.
-			\end{figure-here}
+			\inputFigure{problem}{ack-vs-ack-expand}
 
 			\begin{paragraph-here}% 12
-				\figref{ack-vs-ack-expand} shows the transformation. Each benchmark explicitly calls `expand` repeatedly and the time is measured in-system. Although these benchmarks might not be the ideal benchmarks for benchmarking program expansion performance per se, we still wanted to use the same suite just to give a consistent and complete analysis of front-end and back-end performance of the same system with least amount of variables in experiments.
+				\figref{fig:ack-vs-ack-expand} shows the transformation on an example benchmark (ack). Each benchmark explicitly calls `expand` repeatedly and the time is measured in-system. Note that loading \racketcode{#lang racket/base} is still not included in the measurement, just \racketcode{expand}. Although these benchmarks might not be the ideal benchmarks for benchmarking program expansion performance per se, we still wanted to use the same suite just to give a consistent and complete analysis of front-end and back-end performance of the same system with the least amount of variables in experiments.
 			\end{paragraph-here}
 
 			\inputFigure{problem}{run7-np-vs-R-expansion-chart}
@@ -247,12 +245,6 @@
 			\begin{paragraph-here}% 15
 				In the next sections, we delve into the issues behind these results, detailing what the problems are and why are they fundamental to self-hosting, with some specific, targeted experiments and measurements.
 			\end{paragraph-here}
-
-
-		\begin{paragraph-here}
-			\figref{fig:pycket-npww-opww-relR} shows ....
-			There are rare cases where self-hosting Pycket is faster.
-		\end{paragraph-here}
 
 		% \begin{show-experiment}
 		% 	Warmup breakdowns

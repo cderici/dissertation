@@ -1,0 +1,73 @@
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}[font=\scriptsize]
+
+    % left listing (A)
+    \node[anchor=north west] (A) at (0,0) {%
+      \begin{minipage}{0.45\linewidth}
+\begin{lstlisting}[language=racket,
+                   basicstyle=\ttfamily\scriptsize,
+                   numbers=none,
+                   frame=none]
+#lang racket/base
+
+(require "conf.rkt")
+
+(define (ack m n)
+  (cond ((= m 0) (+ n 1))
+        ((= n 0) (ack (- m 1) 1))
+        (else (ack (- m 1) (ack m (- n 1))))))
+
+(define (main)
+  (for ([i (in-range outer)])
+    (time (for ([j (in-range ack-iters)])
+            (ack 3 9)))))
+
+(main)
+\end{lstlisting}
+      \end{minipage}};
+
+    % sub‑caption A
+    \node (captionA) at ([yshift=-1.8cm]A.south) {(A) Back-end benchmark};
+
+    % right listing (B)
+    \node[anchor=north west] (B) at ($(A.north east)+(2.0cm,0)$) {%
+      \begin{minipage}{0.45\linewidth}
+\begin{lstlisting}[language=racket,
+                   basicstyle=\ttfamily\scriptsize,
+                   numbers=none,
+                   frame=none]
+#lang racket/base
+
+(require racket/syntax "conf.rkt")
+
+(define stx
+  #'(module ack racket/base
+      (define outer 100)
+      (define (ack m n)
+        (cond ((= m 0) (+ n 1))
+              ((= n 0) (ack (- m 1) 1))
+              (else (ack (- m 1) (ack m (- n 1))))))))
+
+(define (main)
+  (for ([i (in-range expand-outer)])
+    (time (for ([j (in-range expand-inner)])
+            (expand stx)))))
+
+(main)
+\end{lstlisting}
+      \end{minipage}};
+
+    % sub‑caption B (aligned with A)
+    \node at ([xshift=0cm]B.south |- captionA) {(B) Front-end benchmark};
+
+    % centre divider
+    \draw[very thick,gray!50]
+          ($(A.north east)+(1cm,0.2cm)$) -- ++(0,-6.2cm);
+
+  \end{tikzpicture}
+
+  \vspace{1.4em}
+  \caption{Example benchmark used in measuring (A) Back‑end and (B) Front‑end performance.}
+  \label{fig:ack-vs-ack-expand}
+\end{figure}
