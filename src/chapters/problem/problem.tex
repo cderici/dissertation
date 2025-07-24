@@ -3,7 +3,7 @@
 
 	\label{chapter:problem}
 
-	\begin{chaptersynopsis}[Chapter Synopsis - \emph{Chapter Content: 70\%}]
+	\begin{chaptersynopsis}[Chapter Synopsis]
 		\footnotesize
 		Self-hosting on a meta-tracing JIT compiler introduces several performance issues.
 
@@ -11,19 +11,19 @@
 		\begin{itemize}
 			\item \ref{section:pycket-performance-characteristics} Pycket's Performance Characteristics
 
-				Pycket is generally fast, but self-hosting exposes performance issues.
+				Pycket is generally fast, but self-hosting exacerbates issues in tracing interpreter-style code.
 			\item \ref{section:module-and-language-loading} Module and Language Loading
 
-				Self-hosting introduces a "boot and language expansion" overhead, which Pycket didn't have before.
-			\item \ref{section:cross-benchmarks} Cost of Self-hosting on Back-end \& Front-end
+				Self-hosting adds a "boot and language expansion" overhead, which Pycket didn't have before.
+			\item \ref{section:cross-benchmarks} Cost of Self-hosting
 
-				Pycket's back-end performance for fully-expanded code is nearly the same after adding self-hosting (i.e. by including expansion time to the run-time). However, the front-end got a big hit, the evaluation of the expander on the meta-tracing JIT needs work for self-hosting to be fully practical.
+				While self-hosting introduces minimal overhead for back-end performance, it degrades front-end performance; subsequent sections investigate the underlying reasons.
 			\item \ref{section:nature-of-the-beast} The Nature of the Beast: Tracing Data-Dependent Computation
 
-				Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces. Computations that are critical to self-hosting—such as program expansion—seem poorly suited to meta-tracing because they contain no hot loops for the tracer to capture.
-			\item \ref{section:memory} Memory Issues with Self-Hosting
+				Data-dependent, interpreter-style computations essential to self-hosting inherently produce overspecialized and inefficient traces under meta-tracing.
+			\item \ref{section:memory} Memory Pressure under Self-hosting
 
-				Long continuation chains, and big and old heap objects cause GC pressure.
+				Late binding, long continuation chains due to numerous control-flow indirections, and frequent allocation of large, long-lived heap objects significantly increase \gls{gc} pressure in self-hosting on meta-tracing.
 		\end{itemize}
 	\end{chaptersynopsis}
 
@@ -71,10 +71,7 @@
 		Earlier versions of Pycket mitigated some of this mismatch by allowing the JIT to allocate just enough additional data to reconcile the states. Escape analysis and malloc-removal often virtualize those allocations \cite{malloc-removal:11,loop-aware:12}. A small heuristic therefore permits the JIT to materialize objects that would otherwise stay virtual, trading a bit of space for a jump into the peeled iteration; thus yielding roughly a 4 \% speed-up for gradually typed programs with no measurable overhead \cite{pycketmain2}.
 
 	\paragraph{}%
-		Any functionality that Pycket now imports as Racket code\footnote{via bootstrapping linklets} would, in a handwritten RPython interpreter, exploit meta-interpreter hints-such as \verb|@jit.unroll_safe|-to guide the JIT back-end. Because the imported modules arrive as opaque ASTs, Pycket cannot inject such hints, so the tracer sees long interpreter-style dispatch loops without guidance. Moreover, the runtime feedback that Pycket and all the interpreters on RPython utilize quite extensively (that we talked about in \chapterRef{chapter:rpython}) doesn't work. For example, we can't \emph{promote} values that are within the macro expander, or can't mark methods/functions as \emph{elidable}.
-
-	\paragraph{}%
-		Any functionality that Pycket now imports as Racket code\footnote{via bootstrapping linklets} would, in a handwritten RPython interpreter, utilize meta-interpreter hints—such as \verb|@jit.unroll_safe|—to guide the JIT backend. Because imported modules arrive as opaque ASTs, Pycket cannot insert these hints, causing the tracer to encounter extensive interpreter-style dispatch loops without guidance. Additionally, the runtime feedback extensively used by Pycket and other interpreters built on RPython (as discussed in \chapterRef{chapter:rpython}) is ineffective in this context. For instance, it is impossible to \emph{promote} values within the macro expander or mark methods and functions as \emph{elidable} without manually annotating the Racket code.
+		Any functionality that Pycket now imports as Racket code\footnote{via bootstrapping linklets} would, in a handwritten RPython interpreter, utilize meta-interpreter hints—such as \verb|@jit.unroll_safe|—to guide the JIT back-end. Because the imported modules arrive as opaque ASTs, Pycket cannot insert these hints, causing the tracer to encounter extensive interpreter-style dispatch loops without guidance. Additionally, the runtime feedback extensively used by Pycket and other interpreters built on RPython (as discussed in \chapterRef{chapter:rpython}) is ineffective in this context. For instance, it is impossible to \emph{promote} values within the macro expander or mark methods and functions as \emph{elidable} without manually annotating the Racket code.
 
 	\paragraph{}%
 		Introducing the linklet layer lets Pycket execute large Racket programs—including the 2642-function expander—entirely inside the JIT. Bootstrapping the \emph{racket/base} language alone instantiates close to a hundred modules before user code starts. Although micro-benchmarks seem mostly unaffected for fully-expanded programs (the back-end is unchanged), these large workloads exacerbate all the aforementioned issues in program expansion. In short, the very extensibility that makes self-hosting attractive also deprives the meta-tracer of inside information, limiting trace quality and prolonging warm-up.
@@ -170,7 +167,7 @@
 		\paragraph{}%
 			Regardless of the source of each module, every macro expansion of user code ultimately depends on the performance of evaluating the underlying expander. Pycket's ability to inline into, and sometimes across, expander helpers opens new optimization opportunities, but it also means that the performance deficiencies in the evaluation of the expander itself now directly affect application performance. The next sections discuss those interactions in detail.
 
-	\section[\texorpdfstring{Cost of Self-hosting on Back-end \& Front-end}{Cost of Self-hosting}]{Cost of Self-hosting on Back-end \& Front-end}
+	\section[\texorpdfstring{Cost of Self-Hosting}{Cost of Self-Hosting}]{Cost of Self-Hosting}
 	\label{section:cross-benchmarks}
 
 		\paragraph{}% 1
@@ -391,11 +388,11 @@
 			\paragraph{}%
 				Addressing this challenge requires further research and careful consideration. At the heart of this challenge is the fundamental violation of the second assumption underlying tracing \glspl{jit}, as previously discussed in \chapterRef{chapter:rpython}. The second assumption—that multiple iterations of the same loop are likely to traverse similar code paths—is directly contradicted by the highly data-dependent, branch-heavy nature of interpreter-style computations. This inherent violation explains why such computations, although critical for self-hosting, remain particularly ill-suited to meta-tracing and tracing \glspl{jit} in general.
 
-	\section[\texorpdfstring{Memory Issues with Self-Hosting}{Memory Issues}]{Memory Issues with Self-Hosting}
+	\section[\texorpdfstring{Memory Pressure under Self-hosting}{Memory Pressure}]{Memory Pressure under Self-hosting}
 	\label{section:memory}
 
 		\paragraph{}% 1
-			Another significant problem we identified in self-hosting functional languages on meta-tracing \glspl{jit}, such as Pycket, is increased pressure on \gls{gc}. In the original Pycket design, module expansion was delegated to Racket's standalone executable, leaving Pycket's heap usage predominantly limited to user program evaluation. However, the self-hosting design now requires Pycket to execute large-scale expansions internally—particularly for modules employing extensive macros or sophisticated language features. As described in \chapterRef{chapter:pycket}, this change substantially increases heap allocations, notably in the form of deeply nested continuation objects and large, persistent structures, such as linklet instances containing extensive sets of functions. Consequently, Pycket's heap exhibits characteristics significantly different from typical interpreter workloads, placing considerable stress on the \gls{gc}, which relies heavily on allocation behavior assumptions for its efficiency.
+			Another significant problem we identified in self-hosting functional languages on meta-tracing \glspl{jit}, such as Pycket, is increased pressure on the memory, and garbage collection. In the original Pycket design, module expansion was delegated to Racket's standalone executable, leaving Pycket's heap usage predominantly limited to user program evaluation. However, the self-hosting design now requires Pycket to execute large-scale expansions internally—particularly for modules employing extensive macros or sophisticated language features. As described in \chapterRef{chapter:pycket}, this change substantially increases heap allocations, notably in the form of deeply nested continuation objects and large, persistent structures, such as linklet instances containing extensive sets of functions. Consequently, Pycket's heap exhibits characteristics significantly different from typical interpreter workloads, placing considerable stress on the \gls{gc}, which relies heavily on allocation behavior assumptions for its efficiency.
 
 		\paragraph{}% 2
 			To better understand the impact of these heap allocation patterns, we briefly review the garbage collector employed by the RPython framework—namely, the minimark \gls{gc}. As discussed in \chapterRef{chapter:rpython}, RPython translates interpreter-level memory operations (e.g., \texttt{malloc}) into managed allocations using its built-in garbage collector. The minimark \gls{gc} is a generational, semispace-copying collector optimized for short-lived objects by employing a nursery sized roughly to match the CPU's Level 2 cache. Objects are initially allocated in the nursery; upon nursery saturation, surviving objects are copied into an older generation to reduce full collections. The underlying assumption is that most objects die young, a property which typically holds for workloads encountered by tracing interpreters, as young, short-lived temporaries dominate their allocations. However, in the context of self-hosting expansion, Pycket generates numerous large, long-lived objects—such as continuation chains and complex linklet instances—which consistently survive minor collections and must be managed in older generations, triggering expensive full collections and undermining the generational assumptions of minimark \gls{gc}. \cite{pypy06, bolzPhDThesis, gc:16, LuaJITLanguageToolkit}
