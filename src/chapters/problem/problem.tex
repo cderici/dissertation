@@ -173,32 +173,26 @@
 	\section[\texorpdfstring{Cost of Self-hosting on Back-end \& Front-end}{Cost of Self-hosting}]{Cost of Self-hosting on Back-end \& Front-end}
 	\label{section:cross-benchmarks}
 
-		\begin{paragraph-here}% 1
-			 Everything we've done with the bootstrap linklets are done at the front-end of Pycket, the only change in the CEK back-end is the addition of the linklet evaluation semantics. Therefore we don't expect too much differrence in the back-end performance with the original Pycket back-end performance.
-		\end{paragraph-here}
+		\paragraph{}% 1
+			Everything related to the integration of bootstrapping linklets into Pycket's runtime is handled at the front-end. The only modification in Pycket's CEK back-end is the addition of linklet evaluation semantics, and numerous primitives. As a result, we do not anticipate significant differences in back-end performance between the original and the current Pycket implementations, since the CEK machine core remains essentially unchanged.
 
-		\begin{paragraph-here}% 2
-			Note that increasing performance of the original Pycket is not one of the goals of this research. The Racket expander and all the imported functionality carries the same characteristics that make implementing dynamic languages difficult, such as late-binding, dispatching, and boxing due to dynamic typing. The self-hosting Pycket is competing in performance neither with the original Pycket nor Racket.
-		\end{paragraph-here}
+		\paragraph{}% 2
+			Improving the performance of the original Pycket is not one of the goals of this particular study. The Racket expander and all imported functionalities share the same characteristics that typically make dynamic languages challenging to implement efficiently, such as late binding, frequent dispatching, and the boxing and unboxing overhead from dynamic typing. Consequently, Pycket with self-hosting is not positioned as a competitor in performance against the original Pycket or even against the Racket runtime.
 
-		\begin{paragraph-here}% 3
-			Since the fully expanded Racket programs in both the original Pycket and the new Pycket with self-hosting are identical, there’s no reason Pycket with self-hosting should be faster than the original Pycket. We hypothesize that self-hosting Racket didn't hinder the JIT's back-end ability to discover the critical loops in the fully expanded user programs. In this section, we test this hypothesis and analyze the cost of self-hosting (i.e. including the expansion time in the overall run-time) on back-end and front-end separately in isolation.
-		\end{paragraph-here}
+		\paragraph{}% 3
+			Since fully-expanded Racket programs are identical in both the original and the current Pycket implementations, we have no reason to expect the self-hosting Pycket to outperform the original. However, we hypothesize that introducing self-hosting via Racket does not negatively affect the JIT's back-end capability to discover critical loops in the fully expanded user programs. In this section, we empirically test this hypothesis, isolating the evaluation of the back-end and front-end performances, and analyzing the distinct costs incurred by self-hosting, specifically the overhead associated with including expansion time in the overall runtime.
 
 		\subsection{Experiment Setup}
 		\label{benchmark-setup}
 
-			\begin{paragraph-here}% 4
-				To test our hypothesis, we conducted experiments on a 10-node Kubernetes cluster, where each worker node running Ubuntu 24.04 LTS on x86-64-v2-aes CPU at 2.1 GHz with 32 MB cache and 16 GB of RAM. The cluster was virtualized on Proxmox v8.2.2. All benchmarks are run on separate worker each on different separate VMs. Each worker is set to run only a single pod at a time via podAntiAffinity rule, and each pod is set to run only a single benchmark, report the numbers and die.
-			\end{paragraph-here}
+			\paragraph{}% 4
+				To test our hypothesis, we conducted experiments on a 10-node Kubernetes cluster, with each worker node running Ubuntu 24.04 LTS on an x86-64-v2-aes CPU at 2.1 GHz, 32 MB cache, and 16 GB of RAM. The cluster was virtualized using Proxmox v8.2.2. Every benchmark ran isolated on a separate worker node in an independent virtual machine. Kubernetes' \texttt{podAntiAffinity} rules ensured each worker executed a single pod at a time, and each pod executed exactly one benchmark, reported the measured runtime, and terminated without interference.
 
-			\begin{paragraph-here}% 5
-				All benchmarks ran with Racket 8.18.0.1 with Pycket as of revision 00be1e3. Every benchmark was run 500 times uninterrupted at highest priority in a new process in the worker node. The execution time was measured in-system and, hence, does not include start-up; however, warm-up was not separated, so all times include JIT compilation. We show the arithmetic mean of all runs along with bootstrapped confidence intervals for a 95\% confidence level \cite{davisonBootstrapMethodsTheir2013}.
-			\end{paragraph-here}
+			\paragraph{}% 5
+				All benchmarks were executed using Racket version 8.18.0.1 with Pycket at revision 00be1e3. We ran each benchmark uninterrupted for 100 iterations at the highest priority within an isolated process on the worker nodes. Execution time measurements were taken from within the benchmark program itself, excluding startup overhead. However, we did not separate warm-up phases, thus reported times incorporate JIT compilation. For reporting, we present the arithmetic mean of all runs along with bootstrapped confidence intervals at the 95\% confidence level~\cite{davisonBootstrapMethods2013}.
 
-			\begin{paragraph-here}% 6
-				For each benchmark, all the Kubernetes job configurations and bash scripts are automatically generated. The generation scripts, along with all the analysis and plotting scripts can be found at https://github.com/cderici/pycket-performance/ [MAKE HYPERREF].
-			\end{paragraph-here}
+			\paragraph{}% 6
+				All Kubernetes job specifications and benchmark scripts were auto-generated for reproducibility. Scripts for generating jobs, analyzing results, and plotting data are available online at \url{https://github.com/cderici/pycket-performance/}.
 
 		\subsection{Back-end}
 
