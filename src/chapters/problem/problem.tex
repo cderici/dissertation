@@ -198,47 +198,35 @@
 
 			\inputFigure{problem}{run6-npww-opww-rel-R-chart}
 
-			\begin{paragraph-here}% 7
-				The results of original Pycket vs Pycket with the new front-end on Larceny Cross-platform Scheme Benchmark suite are summarized in \figref{fig:pycket-npww-opww-relR}. We chose this suite because these benchmarks are already prepared and used in earlier Pycket studies, where run times are adjusted to lower jitter with fast-running benchmarks, all I/O is moved out of the timed loop, etc. The only change we made to the benchmarks for this study is to have all the benchmarks to be in \racketcode{#lang racket/base}, even though some of them could be in smaller languages.
-			\end{paragraph-here}
+			\paragraph{}% 7
+				The results comparing the original Pycket to the self-hosting Pycket using the Larceny Cross-platform Scheme Benchmark suite are summarized in \figref{fig:pycket-npww-opww-rel-R-chart}. We selected this benchmark suite because it was prepared and extensively used in earlier Pycket studies, with run time iterations adjusted to reduce jitter and all I/O operations moved outside the timed loop. The only modification introduced for this study was converting all benchmarks to use \racketcode{#lang racket/base}, despite some benchmarks originally capable of using smaller languages, ensuring consistency across the benchmarks.
 
-			\begin{paragraph-here}% 8
-				Note that, because we don't have the start-up in these times, these times do not include the expansion of these benchmarks, thereby isolating the measurement of only the back-end performance for the fully-expanded programs (expansion time is not included). However, the traces that are captured during the evaluation of the expander and all the modules for the \racketcode{#lang racket/base} are still captured and available during the timed section of the benchmark, since it's the same process.
-			\end{paragraph-here}
+			\paragraph{}% 8
+				Note that because startup overhead is excluded from these measurements, the reported times do not include benchmark expansion, thus specifically isolating the measurement to back-end performance. However, the traces generated during the expansion of modules for \racketcode{#lang racket/base} remain present in the \gls{jit} and are available during benchmark execution, although these traces from the expansion phase are not expected to be directly beneficial to the performance of the benchmarks themselves.
 
-			\begin{paragraph-here}% 9
-				We can see in the results, especially looking at the geometric mean, that the performance of both Pyckets are quite similar, validating our hypothesis, that even though the evaluation of the program expansion is included in the computation (but not the measured time), the back-end performance remains mostly unaffected. In some of the benchmarks, in particular in `earley`, `perm9` and `nboyer` we observe a slow-down in Pycket with self-hosting that we don't see for other benchmarks, and that's due to increase in GC pressure. `perm9` is a memory system benchmark, `earley` is a parser that implements a grammar, and `nboyer` is a logic programming benchmark. All of them involve large indirections and allocate and de-allocate a lot of objects in the heap within each benchmark, therefore, the memory issues that come with self-hosting are all exaggerated. We'll demonstrate these issues in detail in \secref{section:memory}.
-			\end{paragraph-here}
+			\paragraph{}% 9
+				As demonstrated by the results—particularly when examining the geometric mean—both Pycket variants achieve very similar back-end performance, confirming our hypothesis that adding self-hosting does not significantly hinder the \gls{jit}'s ability to detect critical loops. However, in a few specific benchmarks, namely \texttt{earley}, \texttt{perm9}, and \texttt{nboyer}, Pycket with self-hosting shows a noticeable slowdown not observed in other benchmarks. We attribute this difference primarily to increased \gls{gc} pressure: \texttt{perm9} is specifically designed to benchmark a system's memory performance, \texttt{earley} involves complex grammar parsing, and \texttt{nboyer} is a logic programming benchmark—all of which frequently allocate and deallocate numerous heap objects during execution. Consequently, the memory-related challenges inherent to self-hosting become more prominent in these benchmarks. These memory issues are analyzed in detail in \sectionRef{section:memory}.
 
-			\begin{paragraph-here}% 10
-				Our hypothesis is also confirmed by looking closely at the captured traces in the JIT, we observe that the most used traces for each benchmark are almost identical between the original Pycket and the Pycket with self-hosting, despite that Pycket with self-hosting also includes some large traces captured during the expansion phase. Because our hypothesis that "self-hosting didn't effect the back-end" is validated with these experiments, Pycket's performance analyses in the earlier studies all remain valid \cite{pycketmain, pycketmain2}.
-			\end{paragraph-here}
+			\paragraph{}% 10
+				A closer inspection of the traces captured by the JIT further supports our hypothesis. For each benchmark, the most frequently used traces remain nearly identical between the original Pycket and the self-hosting variant, despite the latter including additional large traces generated during the expansion phase. Since our experimental results confirm that the introduction of self-hosting does not significantly affect Pycket's back-end performance, the performance analyses from earlier studies on Pycket remain fully valid~\cite{pycketmain,pycketmain2}.
 
 		\subsection{Front-end}
 
-			\begin{paragraph-here}% 11
-				Now we take a look at the run times for the expansion of the same benchmarks. For this, we used the same setup that's described in the \secref{benchmark-setup}. We took each benchmark that's used for measuring the back-end performance, and turned it into a benchmark that measures the expansion performance of that program.
-			\end{paragraph-here}
+			\paragraph{}% 11
+				We now turn our attention to measuring the performance of the program expansion phase. During this phase, Pycket runs the macro expander provided by the expander linklet, transforming a given Racket program into a fully expanded \racketcode{#\%kernel} program. Unlike in Pycket's original design, which utilized the standalone Racket binary to expand user programs externally, Pycket with self-hosting executes the \racketcode{expand} function directly within its own runtime. For these measurements, we utilize the same experimental setup described previously in \sectionRef{benchmark-setup}. Each benchmark previously used to evaluate back-end performance is transformed into a corresponding benchmark explicitly designed to evaluate the expansion performance of that same program.
 
 			\inputFigure{problem}{ack-vs-ack-expand}
 
-			\begin{paragraph-here}% 12
-				\figref{fig:ack-vs-ack-expand} shows the transformation on an example benchmark (ack). Each benchmark explicitly calls `expand` repeatedly and the time is measured in-system. Note that loading \racketcode{#lang racket/base} is still not included in the measurement, just \racketcode{expand}. Although these benchmarks might not be the ideal benchmarks for benchmarking program expansion performance per se, we still wanted to use the same suite just to give a consistent and complete analysis of front-end and back-end performance of the same system with the least amount of variables in experiments.
-			\end{paragraph-here}
+			\paragraph{}% 12
+				\figref{fig:ack-vs-ack-expand} demonstrates the nature of this transformation using the \texttt{ack} benchmark as an example. The back-end version of the benchmark repeatedly executes the fully-expanded program to measure runtime performance. In contrast, the transformed front-end version explicitly calls the \racketcode{expand} function repeatedly on the same unexpanded syntax object, measuring the runtime performance of the expansion phase alone. Note that the time spent loading \racketcode{#lang racket/base} remains excluded; only the runtime of the explicit calls to \racketcode{expand} is measured. While these benchmarks may not perfectly represent typical expansion workloads, using the same set of programs for both back-end and front-end performance evaluations allows us to provide a consistent and comprehensive comparison of the overall costs associated with self-hosting in Pycket.
 
 			\inputFigure{problem}{run7-np-vs-R-expansion-chart}
 
-			\begin{paragraph-here}% 13
-				\figref{fig:crossbenchmark-expansion-times-vs-R} shows the expansion phase performance comparison between Pycket with self-hosting and Racket on Chez. Using Racket here is the same as using the original Pycket because the original Pycket uses the Racket's own binary to expand a given program anyways.
-			\end{paragraph-here}
+			\paragraph{}% 13
+				\figref{fig:crossbenchmark-expansion-times-vs-R} shows the performance comparison of the expansion phase between Pycket with self-hosting and Racket on Chez Scheme. Since the original Pycket delegates the expansion step to Racket's standalone executable, directly measuring Racket's expansion performance is equivalent to measuring the expansion performance of the original Pycket. The results indicate that the front-end performance of Pycket with self-hosting is approximately two orders of magnitude slower than that of Racket (and consequently the original Pycket) across all benchmarks. This significant difference aligns with earlier studies, which found that meta-tracing JIT compilers generally perform poorly on interpreter-style programs that have complex, data-dependent control flow~\cite{pycketmain,bolzPhDThesis}. Since Racket's expander inherently involves such interpreter-like computation, Pycket's meta-tracer faces considerable challenges in generating efficient, reusable traces.
 
-			\begin{paragraph-here}% 14
-				The results show about two orders of magnitude difference in performance between Pycket and Racket across the board. This is not surprising, as earlier studies stated that meta-tracing is bad in performance for programs with data-dependent control flow in the style of an interpreter \cite{pycketmain, bolzThesis}.
-			\end{paragraph-here}
-
-			\begin{paragraph-here}% 15
-				In the next sections, we delve into the issues behind these results, detailing what the problems are and why are they fundamental to self-hosting, with some specific, targeted experiments and measurements.
-			\end{paragraph-here}
+			\paragraph{}% 15
+				In the subsequent sections, we examine these issues more closely, providing targeted experiments and analyses to clearly identify the underlying problems. Specifically, \sectionRef{section:nature-of-the-beast} provides an in-depth investigation of why data-dependent, interpreter-style computations present fundamental challenges for meta-tracing \gls{jit} compilers. Additionally, \sectionRef{section:memory} closely examines the memory-related issues, focusing particularly on the increased \gls{gc} pressure that arises from self-hosting, and quantifies its impact on overall system performance.
 
 		% \begin{show-experiment}
 		% 	Warmup breakdowns
