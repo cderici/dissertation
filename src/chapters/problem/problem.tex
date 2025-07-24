@@ -168,7 +168,7 @@
 		\end{table}
 
 		\paragraph{}%
-			Regardless of the source of each module, every macro expansion of user code ultimately depends on the performance of evaluating the underlying expander. Pycket's ability to inline into, and sometimes across, expander helpers opens new optimization opportunities, but it also means that the performance deficiencies in the evaluation of the expander itself now directly affect application start-up. The next sections discuss those interactions in detail.
+			Regardless of the source of each module, every macro expansion of user code ultimately depends on the performance of evaluating the underlying expander. Pycket's ability to inline into, and sometimes across, expander helpers opens new optimization opportunities, but it also means that the performance deficiencies in the evaluation of the expander itself now directly affect application performance. The next sections discuss those interactions in detail.
 
 	\section[\texorpdfstring{Cost of Self-hosting on Back-end \& Front-end}{Cost of Self-hosting}]{Cost of Self-hosting on Back-end \& Front-end}
 	\label{section:cross-benchmarks}
@@ -213,7 +213,7 @@
 			\end{paragraph-here}
 
 			\begin{paragraph-here}% 9
-				We can see in the results, especially looking at the geometric mean, that the performance of both Pyckets are quite similar, validating our hypothesis, that even though the evaluation of the program expansion is included in the computation (but not the measured time), the back-end performance remains mostly unaffected. In some of the benchmarks (such as `paraffins`, `earley`, `nboyer`, and `perm9`) we see a slow-down because EXPLANATION.
+				We can see in the results, especially looking at the geometric mean, that the performance of both Pyckets are quite similar, validating our hypothesis, that even though the evaluation of the program expansion is included in the computation (but not the measured time), the back-end performance remains mostly unaffected. In some of the benchmarks, in particular in `earley`, `perm9` and `nboyer` we observe a slow-down in Pycket with self-hosting that we don't see for other benchmarks, and that's due to increase in GC pressure. `perm9` is a memory system benchmark, `earley` is a parser that implements a grammar, and `nboyer` is a logic programming benchmark. All of them involve large indirections and allocate and de-allocate a lot of objects in the heap within each benchmark, therefore, the memory issues that come with self-hosting are all exaggerated. We'll demonstrate these issues in detail in \secref{section:memory}.
 			\end{paragraph-here}
 
 			\begin{paragraph-here}% 10
