@@ -18,12 +18,9 @@
         ((= n 0) (ack (- m 1) 1))
         (else (ack (- m 1) (ack m (- n 1))))))
 
-(define (main)
-  (for ([i (in-range outer)])
-    (time (for ([j (in-range ack-iters)])
-            (ack 3 9)))))
-
-(main)
+(for ([i (in-range outer)])
+  (time (for ([j (in-range ack-iters)])
+          (ack 3 9))))
 \end{lstlisting}
       \end{minipage}};
 
@@ -49,12 +46,9 @@
               ((= n 0) (ack (- m 1) 1))
               (else (ack (- m 1) (ack m (- n 1))))))))
 
-(define (main)
-  (for ([i (in-range expand-outer)])
-    (time (for ([j (in-range expand-inner)])
-            (expand stx)))))
-
-(main)
+(for ([i (in-range expand-outer)])
+  (time (for ([j (in-range expand-inner)])
+          (expand stx))))
 \end{lstlisting}
       \end{minipage}};
 
