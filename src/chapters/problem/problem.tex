@@ -196,7 +196,7 @@
 			\inputFigure{problem}{run6-npww-opww-rel-R-chart}
 
 			\paragraph{}% 7
-				The results comparing the original Pycket to the self-hosting Pycket using the Larceny Cross-platform Scheme Benchmark suite are summarized in \figref{fig:pycket-npww-opww-rel-R-chart}. We selected this benchmark suite because it was prepared and extensively used in earlier Pycket studies, with run time iterations adjusted to reduce jitter and all I/O operations moved outside the timed loop. The only modification introduced for this study was converting all benchmarks to use \racketcode{#lang racket/base}, despite some benchmarks originally capable of using smaller languages, ensuring consistency across the benchmarks.
+				The results comparing the original Pycket to the self-hosting Pycket using the Larceny Cross-platform Scheme Benchmark suite are summarized in \figref{fig:pycket-npww-opww-relR}. We selected this benchmark suite because it was prepared and extensively used in earlier Pycket studies, with run time iterations adjusted to reduce jitter and all I/O operations moved outside the timed loop. The only modification introduced for this study was converting all benchmarks to use \racketcode{#lang racket/base}, despite some benchmarks originally capable of using smaller languages, ensuring consistency across the benchmarks.
 
 			\paragraph{}% 8
 				Note that because startup overhead is excluded from these measurements, the reported times do not include benchmark expansion, thus specifically isolating the measurement to back-end performance. However, the traces generated during the expansion of modules for \racketcode{#lang racket/base} remain present in the \gls{jit} and are available during benchmark execution, although these traces from the expansion phase are not expected to be directly beneficial to the performance of the benchmarks themselves.
@@ -266,24 +266,22 @@
 				\figref{fig:branchy-introduce-code} introduces \emph{Branchy}\footnote{Full code and alternative definitions of Branchy is available at https://github.com/cderici/pycket-performance/blob/master/branchy/private/branchy.rkt.}, a synthetic benchmark intentionally designed to exhibit interpreter-style, branch-heavy, and data-dependent behavior. It is synthesized by simplifying Racket's \racketcode{fasl->s-exp} function from the \gls{fasl} library, which deserializes a given byte stream into an s-expression. Each iteration processes an element from an input list through nested conditional branches resembling a decision tree. Certain inputs produce consistently deep paths through this branching structure, while others immediately exit via shallow paths. For instance, an input list such as \racketcode{'(0 0 0 ...)} repeatedly traverses the longer path sequence \emph{18-8-3-1}, via \racketcode{Exit B}, whereas \racketcode{'(20 20 20 ...)} consistently follows the shorter path labeled \emph{18}, repeatedly taking \racketcode{Exit A}.
 
 			\paragraph{}%
-				Note that describing static source code itself as "branch-heavy" can be misleading. The critical notion here is the data-dependent nature of branch decisions during runtime. A program could possess deeply nested conditional structures yet exhibit minimal runtime branching if the input consistently chooses shallow branches. Therefore, the "branchiness" of a computation is an empirical property, characterized by the frequency and complexity of branching decisions made during an actual evaluation over an input.
+				Note that describing static source code itself as "branch-heavy" can be misleading. The critical notion here is the data-dependent nature of branch decisions during runtime. A program could possess deeply nested conditional structures yet exhibit minimal runtime branching if the input consistently chooses shallow branches. Therefore, the "branchiness" of a computation is an empirical property, characterized by the frequency and complexity of branching decisions made during an actual evaluation over a particular input.
 
 			\paragraph{}%
 				This data-dependency explicitly manifests through guards placed by a tracing \gls{jit}. As discussed in \chapterRef{chapter:rpython}, guards serve as exit points in a trace, verifying assumptions made during tracing. Thus, each conditional encountered in the user program generates a corresponding guard in the trace to enforce assumptions about input data at trace time. An increased number of control-flow decisions therefore results in more guards within the trace. Additionally, guards carry runtime information that allows the \gls{jit} to exit to the interpreter upon guard failure. Consequently, numerous guard operations can significantly increase memory consumption \cite{schneiderEfficientHandlingGuards2012}.
 
-			\begin{figure}[h] % let LaTeX decide where it fits best
-				\centering
-				\includegraphics[width=0.6\linewidth]{\inputFigPath{problem}{branchy-long-path-trace-guards.png}}
-				\caption{RPython trace for Branchy running all-zero input taking a long 18-8-3-1 path. [PLACEHOLDER IMAGE]}
-				\label{fig:branchy-long-path-trace}
-			\end{figure}
+			\inputFigure{problem}{branchy-long-path-trace}
+
+			\vspace{-1em}
 
 			\paragraph{}%
-				\figref{fig:branchy-long-path-trace} presents an excerpt from a trace of Branchy executed with an all-zero input, repeatedly following the deep path sequence \emph{18-8-3-1}. Note how all the guards in trace correspond to an if condition in the Branchy code. Each decision along this path generates a guard that must hold true at runtime; failure of any guard causes the trace to exit prematurely and fallback to the interpreter or trigger another trace. The resulting trace, while optimized and compiled, is excessively specialized, limiting its utility exclusively to identical inputs.
+				\figref{fig:branchy-long-path-trace} presents the optimized inner loop of a trace recorded while running Branchy with an all-zero input, repeatedly taking the deep path sequence \emph{18-8-3-1}, as shown earlier in \figref{fig:branchy-introduce-code}. Note that each guard operation within the trace corresponds directly to a conditional (\texttt{if}) in Branchy's code. These guards ensure that runtime execution closely matches the assumptions made during tracing; if any guard fails, the trace prematurely exits, causing execution to either revert to interpretation or initiate another trace. Although this trace is optimized and compiled, it is overly specialized, limiting its applicability exclusively to identical or very similar inputs.
 
 			\paragraph{}%
 				Thus, the internal structure of the input data significantly influences tracing outcomes. Repetitive input patterns, such as \racketcode{'(3 3 3 3 ...)}, allow trace reuse within the pattern, thereby amortizing the overhead of tracing and compiling. However, highly repetitive inputs like these are uncommon in realistic workloads. Conversely, more varied or random inputs, such as \racketcode{'(1 3 5 1 3 5 ...)}, significantly reduce trace reuse, because of the same specialization. This phenomenon of internal "loops" within the input data will be revisited in more detail in \sectionRef{section:there-is-no-loop} when we discuss the nature of loops the tracer attempts to capture.
 
+			% TECH TODO 2
 			\begin{figure}[h] % let LaTeX decide where it fits best
 				\centering
 				\includegraphics[width=0.8\linewidth]{\inputFigPath{problem}{branchy-trace-graphs.png}}

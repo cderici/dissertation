@@ -1,0 +1,33 @@
+\begin{figure}[!htbp]
+  \centering
+  \begin{minipage}{0.5\textwidth}
+    \begin{lstlisting}[style=rptrace-style]
+# Inner loop with 18 ops
+label(p19, p24, p8, p21, p1, p22, p30)                54
+i31 = getfield_gc_i(p24)     ; FixnumCons._car        55
+guard_not_invalidated()                               56
+
+i33 = int_gt(i31, 18)                                 57
+guard_false(i33)                                      58
+
+i35 = int_gt(i31, 8)                                  59
+guard_false(i35)                                      60
+
+i37 = int_lt(i31, 3)                                  61
+guard_true(i37)                                       62
+
+i39 = int_lt(i31, 1)                                  63
+guard_true(i39)                                       64
+
+p40 = getfield_gc_r(p24)     ; FixnumCons._cdr        65
+guard_nonnull_class(p40)                              66
+p42 = new_with_vtable()                               67
+setfield_gc(p42, p8)                                  68
+setfield_gc(p42, p21)                                 69
+setfield_gc(p42, p1)                                  70
+setfield_gc(p42, ConstPtr(ptr43))                     71
+jump(p19, p40, p8, p30, p42, p22, p30)                72\end{lstlisting}
+  \end{minipage}
+  \caption{RPython trace inner loop for Branchy running all‑zero input taking a long 18‑8‑3‑1 path.}
+  \label{fig:branchy-long-path-trace}
+\end{figure}
