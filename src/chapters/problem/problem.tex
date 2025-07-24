@@ -281,16 +281,8 @@
 			\paragraph{}%
 				Thus, the internal structure of the input data significantly influences tracing outcomes. Repetitive input patterns, such as \racketcode{'(3 3 3 3 ...)}, allow trace reuse within the pattern, thereby amortizing the overhead of tracing and compiling. However, highly repetitive inputs like these are uncommon in realistic workloads. Conversely, more varied or random inputs, such as \racketcode{'(1 3 5 1 3 5 ...)}, significantly reduce trace reuse, because of the same specialization. This phenomenon of internal "loops" within the input data will be revisited in more detail in \sectionRef{section:there-is-no-loop} when we discuss the nature of loops the tracer attempts to capture.
 
-			% TECH TODO 2
-			\begin{figure}[h] % let LaTeX decide where it fits best
-				\centering
-				\includegraphics[width=0.8\linewidth]{\inputFigPath{problem}{branchy-trace-graphs.png}}
-				\caption{Tracing branch-heavy computation with arbitrary branches results in a combinatorial explosion of recorded loops and bridges. [PLACEHOLDER IMAGE]}
-				\label{fig:branchy-trace-graphs}
-			\end{figure}
-
 			\paragraph{}%
-				\figref{fig:branchy-trace-graphs} and \tableRef{table:branchy-backend-summaries} illustrate this effect quantitatively. For inputs with highly repetitive branching decisions (e.g., all 20s), the meta-tracer records only two loops and three bridges, requiring a negligible fraction of runtime spent on trace compilation. However, even these traces remain highly specialized to the particular repetitive path taken, significantly limiting their reusability in more general cases where input variation occurs. In contrast, random inputs, more representative of realistic macro expander behavior, induce a combinatorial explosion: 39 loops, 248 bridges, and substantially more traced operations, resulting in significant overhead in trace compilation and optimization.
+				\tableRef{table:branchy-backend-summaries} illustrate this effect quantitatively. For inputs with highly repetitive branching decisions (e.g., all 20s), the meta-tracer records only two loops and three bridges, requiring a negligible fraction of runtime spent on trace compilation. However, even these traces remain highly specialized to the particular repetitive path taken, significantly limiting their reusability in more general cases where input variation occurs. In contrast, random inputs, more representative of realistic macro expander behavior, induce a combinatorial explosion: 39 loops, 248 bridges, and substantially more traced operations, resulting in significant overhead in trace compilation and optimization.
 
 			\begin{table}[!h]
 			\centering
@@ -326,7 +318,7 @@
 				This observation naturally raises the question of what constitutes an ideal tracing strategy for interpreter-style, branch-heavy computations. Should a tracing JIT generate one highly specialized trace per unique branching pattern, incurring substantial memory and compilation overhead but achieving maximum runtime efficiency for those exact inputs? Or is it preferable to construct broader, less specialized traces containing multiple branches, potentially reducing memory footprint but introducing runtime overhead from unnecessary paths? Consider a repeated branching pattern such as \emph{18-8-3-5-4-18-8-3-5-4-...}; capturing the entire pattern into one trace may yield high specialization, whereas identifying a shorter common prefix (e.g., \emph{18-8-3-5}) might increase trace reuse at the cost of less specialization. However, for our specific scenario regarding self-hosting, neither tracing strategy sufficiently justifies the resources expended by meta-tracing during runtime. As we will elaborate in the next section, this inefficiency arises because program expansion occurs at compile-time, where the control flow lacks meaningful loops to capture—each computation path is effectively static and resembles the linear decision-making of a regular-expression matcher.
 
 			\paragraph{}%
-				This fundamental tension explains the limited adoption of tracing JITs in practice in the last decade [CITE HERE]. Highly specialized traces yield considerable speed-ups only for workloads closely matching traced paths, while deviating workloads incur substantial tracing overhead without corresponding benefits. Consequently, the average-case performance may significantly degrade, exemplified by the observation that a tracing JIT that is ten times faster on half of a benchmark suite but ten times slower on the other half is, overall, more than five times slower in practice~\cite{mozblog}.
+				This fundamental tension contributes to the limited adoption of tracing JITs in the industry over the last decade. Highly specialized traces yield considerable speed-ups only for workloads closely matching traced paths, while deviating workloads incur substantial tracing overhead without corresponding benefits. Consequently, the average-case performance may significantly degrade, exemplified by the observation that a tracing JIT that is ten times faster on half of a benchmark suite but ten times slower on the other half is, overall, more than five times slower in practice~\cite{mozblog}.
 
 		\subsection{Performance of Program Expansion}
 			\label{section:there-is-no-loop}
