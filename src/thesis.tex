@@ -23,6 +23,7 @@
 \usepackage{xurl}% break up urls in the document
 \usepackage[font=small]{caption} % caption font size
 \usepackage{array}
+
 % For abbreviations
 \usepackage[nopostdot,style=super,acronym,toc,nonumberlist,nogroupskip]{glossaries}
 \makeglossaries
@@ -270,7 +271,8 @@
 %format title font size and position (this also applys to list of figures and list of tables)
 % \titleformat{\chapter}[display]{\normalfont\bfseries\filcenter}{\MakeUppercase\chaptertitlename\ \thechapter}{0pt}{\MakeUppercase{#1}}
 % \titleformat{\chapter}[display]{\normalfont\bfseries\large\filcenter}{\MakeUppercase\chaptertitlename\ \thechapter}{30pt}{\MakeUppercase{#1}}
-\titleformat{\chapter}[block]{\normalfont\chapsc\large\raggedright}{\MakeUppercase{\thechapter}}{1em}{\MakeUppercase{#1}}
+% WARN: this line might be redundant, see chapfmt in common/config.tex
+\titleformat{\chapter}[block]{\normalfont\chapsc\large\raggedright}{\MakeUppercase{\thechapter}.}{1em}{\MakeUppercase{#1}}
 
 
 %spacing between titles

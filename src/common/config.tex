@@ -228,3 +228,21 @@
   moredelim=**[is][\itshape\color{OliveGreen}]{<<;<<}{>>;>>},
 }
 
+\usepackage{etoolbox}
+
+% Need a way to put "APPENDIX" at the beginning of the title in appendix chapters.
+% normal chapter title style
+\newcommand{\chapfmt}{%
+  \titleformat{\chapter}[block]
+    {\normalfont\chapsc\large\raggedright}
+    {\MakeUppercase{\thechapter.}}{1em}{\MakeUppercase{##1}}}
+
+% chapter title style for appendix chapters (“APPENDIX A.”, …)
+\newcommand{\appchapfmt}{%
+  \titleformat{\chapter}[block]
+    {\normalfont\chapsc\large\raggedright}
+    {\MakeUppercase{\appendixname\space\thechapter.}}{1em}{\MakeUppercase{##1}}}
+
+% switch styles automatically
+\AtBeginEnvironment{appendices}{\appchapfmt}
+\AtEndEnvironment{appendices}{\chapfmt}
