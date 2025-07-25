@@ -1,0 +1,25 @@
+\begin{figure}[!htbp]
+    \centering
+    \begin{align*}
+        e &::=\; x \;|\; v \;|\; (e\; e\;\ldots) \;|\; (\textbf{if}\; e\; e\; e) \;|\; (p1\; e) \;|\; (p2\; e\; e) \\
+          &\;\hspace*{1.3em}|\; (\textbf{set!}\; x\; e) \;|\; (\textbf{begin}\; e\; e\;\ldots) \;|\; (\textbf{lambda}\; (x_{\_}\;\ldots)\; e) \\
+          &\;\hspace*{1.3em}|\; (\textbf{let-values}\; (((x_{\_})\; e)\;\ldots)\; e) \;|\; (\textbf{raises}\; e)\\
+        v &::=\; n \;|\; b \;|\; c \;|\; (\textbf{void})\\
+        c &::=\; (\textbf{closure}\; x\;\ldots\; e\; \Sigma)\\
+        n &::=\; \textit{number}\\
+        b &::=\; \textbf{true} \;|\; \textbf{false}\\
+        x &::=\; \textit{variable-not-otherwise-mentioned}\\
+        p1 &::=\; \textbf{add1}\\
+        p2 &::=\; + \;|\; * \;|\; <\\
+        o &::=\; p1 \;|\; p2\\
+        E &::=\; [] \;|\; (v\;\ldots\; E\; e\;\ldots) \;|\; (o\; v\;\ldots\; E\; e\;\ldots) \;|\; (\textbf{if}\; E\; e\; e)\\
+          &\;\hspace*{1.3em}|\; (\textbf{begin}\; v\;\ldots\; E\; e\;\ldots) \;|\; (\textbf{set!}\; x\; E) \\
+          &\;\hspace*{1.3em}|\; (\textbf{let-values}\; (((x)\; v)\;\ldots\; ((x)\; E)\; ((x)\; e)\;\ldots)\; e)\\
+        \Sigma &::=\; ((x\; \textit{any})\;\ldots)\\
+        \sigma &::=\; ((x\; \textit{any})\;\ldots)
+    \end{align*}
+
+    \vspace{-1em}
+
+    \caption{Linklet Kernel Language Grammar}
+\end{figure}
