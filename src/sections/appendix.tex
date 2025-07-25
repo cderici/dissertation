@@ -6,18 +6,26 @@
 
 %Begin individual appendices, separated as chapters
 
-\chapter[\texorpdfstring{Linklet Kernel Language (LKL) Semantics}{Appendix A}]{Linklet Kernel Language (LCL) Semantics}
+\chapter[\texorpdfstring{Linklet Kernel Language (LKL) Specification}{Appendix A}]{Linklet Kernel Language (LKL) Specification}
 \label{appendix:linklet-kernel-language}
 
-    \inputAppendixFigure{linklet-kernel-language-grammar}
+    \inputAppendixFigure{linklet-kernel-language-grammar.tex}
 
-    \begin{figure-here}
-        RC standard reduction relation (quals main Fig.5)
-    \end{figure-here}
+    \begin{figure}[h]
+    \centering
+    \fbox{
+        \includegraphics[scale=0.8]{sections/figures/rc-red-relation.eps}
+    }
+    \caption{Linklet Kernel Language standard reduction relation}
+    \label{fig:rc-red-relation}
+    \end{figure}
 
-    \begin{figure-here}
-        RC evaluator (quals main Fig.6)
-    \end{figure-here}
+    \begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{sections/figures/rc-run-rc.eps}
+    \caption{Linklet Kernel Language evaluator}
+    \label{fig:rc-run-rc}
+    \end{figure}
 
 
 \chapter[\texorpdfstring{Formal Reduction Steps for Top-level Example Program}{Appendix B}]{Formal Reduction Steps for Top-level Example Program}
