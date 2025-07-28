@@ -93,17 +93,12 @@
 
     \subsection{Formalism for CEK \+ Stackful}
 
-      \inputSub{solution}{cek-stackful-grammar}
+      \inputFigure{solution}{cek-stackful-grammar}
 
       \paragraph{}%
         To facilitate deeper understanding and more precise experimental control, we developed a formal model integrating both the CEK and stackful interpreters. This formalism evaluates a simplified subset of Racket, closely resembling the Racket Core language described previously in \secref{section:linklet-semantics}, but excluding the linklet variable forms. Additionally, this model introduces specialized \racketcode{convert} forms explicitly designed for managing interpreter transitions directly from the source code. \figref{fig:st-cek-grammar} illustrates this simplified language, and \figref{fig:cek-convert-stack} depicts the fundamental interaction model, allowing for deliberate interpreter switching through these special forms.
 
-      \begin{figure}[!h]
-        \centering
-        \includegraphics[scale=0.3]{\inputFigPath{solution}{cek-stackful-switch}}
-        \caption{Stackful \& CEK Switch}
-        \label{fig:cek-convert-stack}
-      \end{figure}
+      \inputFigure{solution}{cek-stackful-switch}
 
       \paragraph{}%
         The underlying objective of this approach is to reduce heap memory pressure induced by large, long-lived continuations. Developed as an executable formalism using PLT Redex, this model enables rigorous experimentation with the semantics of interpreter transitions. \figref{fig:cek-reduction-relation-redacted} and \figref{fig:interpret-stack-redacted} provide simplified versions of the CEK and Stackful reduction semantics, respectively. Complete semantics are available in \appendixRef{appendix:cek-stackful-redex}.
