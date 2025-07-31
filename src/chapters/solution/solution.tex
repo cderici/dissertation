@@ -22,7 +22,7 @@
   \end{chaptersynopsis}
 
   \paragraph{}%
-    As demonstrated extensively in \chapterRef{chapter:problem}, the predominant performance degradation on Pycket self-hosting Racket arises from intricate branching patterns during macro expansion and associated runtime computations, which significantly inflate both trace sizes and GC overhead. In other words, branch-heavy computation and memory problems appear central to the performance challenges encountered when self-hosting on a meta-tracing JIT compiler.
+    We demonstrated extensively in \chapterRef{chapter:problem}, that the predominant performance degradation on Pycket self-hosting Racket arises from intricate branching patterns during macro expansion and associated runtime computations. This degradation significantly inflates both trace sizes and the GC overhead. In other words, branch-heavy computation and memory problems appear central to the performance challenges encountered when self-hosting on a meta-tracing JIT compiler.
 
   \paragraph{}%
     Addressing these core issues has the potential to transform self-hosting from a theoretical convenience into a practical and robust methodology for building language runtimes. By reducing the impact of branch-heavy computations and controlling memory usage, we can achieve consistent performance benefits from meta-tracing JIT compilers.
@@ -45,9 +45,6 @@
 
 	\section[\texorpdfstring{Guiding Tracer Away from Branch-Heavy Computation}{Hot Branches}]{Guiding Tracer Away from Branch-Heavy Computation}
     \label{section:hot-branches}
-		\begin{mainpoint}
-			Trying to detect branch-heavy computations and help the tracer forgo them seems like a promising idea.
-		\end{mainpoint}
 
     \paragraph{}%
       A critical observation from \chapterRef{chapter:problem} is that the majority of performance overhead in self-hosting on meta-tracing JIT compilers stems from generating large, intricate, and often non-reusable traces during macro expansion phases. These expansive traces significantly degrade runtime performance due to the frequency and complexity of branching operations inherent in macro expanders.
@@ -74,61 +71,22 @@
 	\section[\texorpdfstring{Mitigating Memory Pressure in Branch-Heavy Computation}{CEK + Stackful Model}]{Mitigating Memory Pressure in Branch-Heavy Computation}
     \label{section:stackful}
 
-		\begin{mainpoint}
-			A hybrid model of computation (e.g., a stackful model alongside CEK) could mitigate memory issues.
-		\end{mainpoint}
-
     \paragraph{}%
       A prominent contributor to the performance overhead in self-hosting via meta-tracing JIT compilers is the considerable memory pressure arising from frequent heap allocations, especially continuations and environments. Recall that the explicit continuations allocated on the heap are fundamental to the CEK machine's ability to implement complex control operations, including proper tail-calls, which inherently leads to frequent continuation allocations in Pycket. [TODO: Here's a brief summary from \chapterRef{chapter:problem}]
 
     \paragraph{}%
-      To address memory issues without altering the underlying runtime system or garbage collector, we propose incorporating a stackful interpreter alongside the existing CEK machine in Pycket. This hybrid approach leverages the stack to handle certain computation phases, thereby significantly reducing the number of continuation allocations on the heap. The stackful interpreter is realized as a simple recursive interpreter compiled by the RPython framework into a recursive C program utilizing the native stack.
+      To address memory issues without altering the underlying runtime system or garbage collector, we propose incorporating a stackful interpreter alongside the existing CEK machine in Pycket. This hybrid approach leverages the stack to handle certain computation phases, thereby significantly reducing the number of continuation allocations on the heap. The stackful interpreter is realized as a simple recursive interpreter compiled by the RPython framework into a recursive C program utilizing the native stack. For example, when interpreting a \racketcode{let}-form, instead of creating a \racketcode{LetCont} to evaluate its body after the right-hand-side like we do in the CEK machine, in the stackful interpreter we recursively evaluate the right-hand-side and then interpret the body, using the native stack for the natural continuation.
 
     \paragraph{}%
-      Despite its simplicity, the use of a stackful interpreter introduces notable challenges related to stack management, particularly concerning stack overflows due to arbitrarily deep recursion levels. Furthermore, entirely replacing the CEK interpreter with a stack-based alternative would forgo the performance and convenience benefits offered by explicit continuations in the CEK machine, particularly in managing complex control operations and proper tail-calls.
+      Despite its simplicity, the use of a stackful interpreter introduces notable challenges related to stack management, particularly concerning stack overflows due to arbitrarily deep recursion. Furthermore, entirely replacing the CEK interpreter with a stack-based alternative would forgo the performance benefits offered by explicit continuations in the CEK machine, particularly in managing complex control operations and proper tail-calls.
 
     \paragraph{}%
       Consequently, we advocate for an approach where the two interpreters operate in tandem, strategically switching between them to optimize overall performance. The primary goal of this dual-interpreter strategy is to judiciously balance heap and stack usage—leveraging rapid stack allocations and improved locality while retaining the sophisticated control and optimization capabilities provided by the heap-based CEK interpreter.
 
-
-    \subsection{Formalism for CEK \+ Stackful}
-
-      \inputFigure{solution}{cek-stackful-grammar}
-
-      \paragraph{}%
-        To facilitate deeper understanding and more precise experimental control, we developed a formal model integrating both the CEK and stackful interpreters. This formalism evaluates a simplified subset of Racket, closely resembling the Racket Core language described previously in \secref{section:linklet-semantics}, but excluding the linklet variable forms. Additionally, this model introduces specialized \racketcode{convert} forms explicitly designed for managing interpreter transitions directly from the source code. \figref{fig:st-cek-grammar} illustrates this simplified language, and \figref{fig:cek-convert-stack} depicts the fundamental interaction model, allowing for deliberate interpreter switching through these special forms.
-
-      \inputFigure{solution}{cek-stackful-switch}
-
-      \paragraph{}%
-        The underlying objective of this approach is to reduce heap memory pressure induced by large, long-lived continuations. Developed as an executable formalism using PLT Redex, this model enables rigorous experimentation with the semantics of interpreter transitions. \figref{fig:cek-reduction-relation-redacted} and \figref{fig:interpret-stack-redacted} provide simplified versions of the CEK and Stackful reduction semantics, respectively. Complete semantics are available in \appendixRef{appendix:cek-stackful-redex}.
-
-      \begin{figure}[!h]
-        \centering
-        \includegraphics[scale=0.4]{\inputFigPath{solution}{cek-reduction-relation}}
-        \caption{CEK Reduction Relation [PLACEHOLDER]}
-        \label{fig:cek-reduction-relation-redacted}
-      \end{figure}
-
-      \begin{figure}[!h]
-        \centering
-        \includegraphics[scale=0.4]{\inputFigPath{solution}{interpret-stack-redacted}}
-        \caption{Stackful Model (Redacted) [PLACEHOLDER]}
-        \label{fig:interpret-stack-redacted}
-      \end{figure}
-
-      \begin{todo}[Technical TODO]
-        Figure out how to use this model to show the general heap memory usage drops, as opposed to CEK alone.
-      \end{todo}
-
-      % \inputSub{solution}{cek-stackful-formalism}
-
-      % \inputSub{solution}{cek-stackful-lemmas}
-
     \subsection{CEK \+ Stackful Prototype on Pycket}
 
       \paragraph{}%
-        Building upon the insights gained from the formalism, we implemented a practical prototype of the hybrid interpreter approach on Pycket. This prototype aligns closely with the conceptual framework illustrated in \figref{fig:cek-convert-stack}, though it primarily initiates computations using the CEK interpreter. This design choice accommodates Pycket's need to load and instantiate the bootstrapping linklets at startup, subsequently beginning computations via the \racketcode{read}, \racketcode{expand}, and evaluation processes.
+        We implemented a practical prototype of the hybrid interpreter approach on Pycket. This prototype aligns closely with the conceptual framework illustrated in \figref{fig:cek-convert-stack}, though it primarily initiates computations using the CEK interpreter. This design choice accommodates Pycket's need to load and instantiate the bootstrapping linklets at startup, subsequently beginning computations via the \racketcode{read}, \racketcode{expand}, and evaluation processes.
 
       \paragraph{}%
         In the implemented prototype, the CEK interpreter transfers control to the stackful interpreter upon encountering computational constructs such as \racketcode{let} or \racketcode{begin}. The switching mechanism itself is straightforward, via direct invocation of the stackful interpreter. The stackful interpreter is augmented with a trampoline mechanism to efficiently manage tail-call optimizations. Furthermore, it automatically hands control back to the CEK interpreter under three key conditions: (i) completion of computation and return, (ii) execution involving CPS-transformed primitives (e.g. \racketcode{call/cc}), or (iii) detection of potential stack overflow situations. The return to CEK is handled by unwinding the stack and installing necessary continuations via a \verb|ConvertStack| exception mechanism, effectively allowing seamless continuation of the computation in CEK mode.
@@ -175,6 +133,42 @@
       \begin{todo}[Technical TODO]
         Figure out how to show that the amount of copying activation records from the stack into the continuations in the heap should be bounded.
       \end{todo}
+
+    \subsection{Formalism for CEK \+ Stackful}
+
+      \inputFigure{solution}{cek-stackful-grammar}
+s
+      \paragraph{}%
+        To facilitate deeper understanding and more precise experimental control, we developed a formal model integrating both the CEK and stackful interpreters. This formalism evaluates a simplified subset of Racket, closely resembling the Racket Core language described previously in \secref{section:linklet-semantics}, but excluding the linklet variable forms. Additionally, this model introduces specialized \racketcode{convert} forms explicitly designed for managing interpreter transitions directly from the source code. \figref{fig:st-cek-grammar} illustrates this simplified language, and \figref{fig:cek-convert-stack} depicts the fundamental interaction model, allowing for deliberate interpreter switching through these special forms.
+
+      \inputFigure{solution}{cek-stackful-switch}
+
+      \paragraph{}%
+        The underlying objective of this approach is to reduce heap memory pressure induced by large, long-lived continuations. Developed as an executable formalism using PLT Redex, this model enables rigorous experimentation with the semantics of interpreter transitions. \figref{fig:cek-reduction-relation-redacted} and \figref{fig:interpret-stack-redacted} provide simplified versions of the CEK and Stackful reduction semantics, respectively. Complete semantics are available in \appendixRef{appendix:cek-stackful-redex}.
+
+      \begin{figure}[!h]
+        \centering
+        \includegraphics[scale=0.4]{\inputFigPath{solution}{cek-reduction-relation}}
+        \caption{CEK Reduction Relation [PLACEHOLDER]}
+        \label{fig:cek-reduction-relation-redacted}
+      \end{figure}
+
+      \inputFigure{solution}{cek-reduction-relation-redacted}
+
+      \begin{figure}[!h]
+        \centering
+        \includegraphics[scale=0.4]{\inputFigPath{solution}{interpret-stack-redacted}}
+        \caption{Stackful Model (Redacted) [PLACEHOLDER]}
+        \label{fig:interpret-stack-redacted}
+      \end{figure}
+
+      \begin{todo}[Technical TODO]
+        Figure out how to use this model to show the general heap memory usage drops, as opposed to CEK alone.
+      \end{todo}
+
+      % \inputSub{solution}{cek-stackful-formalism}
+
+      % \inputSub{solution}{cek-stackful-lemmas}
 
       \paragraph{}%
         Taking a step towards addressing the fundamental challenges in self-hosting on meta-tracing frameworks—namely, intelligent meta-tracing of programs with complex control flows and effective management of heap memory pressure—we demonstrate viable strategies for achieving efficient self-hosting of Racket on Pycket. We believe the approaches explored herein hold broad applicability, potentially serving as foundational methods for self-hosting on meta-tracing frameworks more generally.
