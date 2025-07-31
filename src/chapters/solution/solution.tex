@@ -46,27 +46,75 @@
 	\section[\texorpdfstring{Guiding Tracer Away from Branch-Heavy Computation}{Hot Branches}]{Guiding Tracer Away from Branch-Heavy Computation}
     \label{section:hot-branches}
 
-    \paragraph{}%
+    \begin{paragraph-here}% 1
       A critical observation from \chapterRef{chapter:problem} is that the majority of performance overhead in self-hosting on meta-tracing JIT compilers stems from generating large, intricate, and often non-reusable traces during macro expansion phases. These expansive traces significantly degrade runtime performance due to the frequency and complexity of branching operations inherent in macro expanders.
+    \end{paragraph-here}
 
-    \paragraph{}%
+
+    \begin{paragraph-here}% 2
       Importantly, as indicated in the performance analyses conducted in \chapterRef{chapter:problem}, once the expansion phase is completed, the runtime performance of self-hosted Pycket becomes comparable to the original Pycket implementation (without self-hosting). This highlights that the macro expansion phase, characterized by its branching complexity, is a key bottleneck to achieving overall runtime efficiency.
+    \end{paragraph-here}
 
-    \paragraph{}%
+    \begin{paragraph-here}% 3
       Thus, guiding the tracer away from computations that yield large, non-reusable traces represents a targeted strategy to mitigate this bottleneck. Specifically, if the JIT compiler can effectively avoid or limit tracing the macro expansion's heavily branched computations, the most costly part of the self-hosting runtime can be significantly accelerated. This strategy is not intended to eliminate branching itself but rather aims to selectively bypass or simplify the generation of traces that cause the most severe performance penalties.
-
-
-    \begin{paragraph-here}
-      Explain the technical details of how we do it. Trace splitting, sticking, and splicing using a separate driver.
     \end{paragraph-here}
 
-    \begin{show-experiment}
-      Apply this to branchy and show that it works.
-    \end{show-experiment}
-
-    \begin{paragraph-here}
-      Talk about the experiment, further breakdown if needed.
+    \begin{paragraph-here}% 4
+      We experimented with the following approaches to guide the tracer away from branch-heavy computation and here we explain these approaches and show their efficacy. Unfortunately none of them are quite effective, and as we stated before, this only by itself requires extensive research (like another PhD study) to solve.
     \end{paragraph-here}
+
+    \begin{paragraph-here}% 5
+      Recall from \chapterRef{chapter:rpython}, that a language interpreter written in RPython utilizes JitDriver reflection provided by the RPython framework to define its own program counter (pc) and use hints such as jit\_merge\_point and can\_enter\_jit to indicate a loop header and the spot where the interpreter might perform a backwards jump, respectively. Every time the `can\_enter\_jit` is called on the JIT driver, a counter associated with the green variables is increased. An example can be seen in Figure 2 in Section 3.1. Pycket’s two-state tracking defines the program counter (green variables) as a pair of a lambda and an application (call-site) to determine the trace header. Each lambda ast node in Pycket has an enable\_jitting() and disable\_jitting() methods that indirectly controls the behavior of calling `can\_enter\_jit` at the CEK loop.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 6
+      Unfortunately there's no dynamic "this path is not worth tracing, abort now" option that'll abondon a trace mid-tracing. Therefore dynamically detecting nested if levels and try to get out of tracing the lambda that we're currently tracing is not an option.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 7
+      \paragraph{Statically disabling jit for branch-heavy lambdas} Statically detecting the depth of nested if statements is an option. Recall from [[chapter - rpython]] that Pycket performs a few whole code analyses such as a-normalization and assign-convert, which rebuilds the ast from inside out. During this process, we mark the `lambda` that has deep nested conditionals as \emph{jit blocked} (essentially blocks its `should\_enter` field and jit never calls `can\_enter\_jit` for that function). This, however, contradicts with our earlier observation in \chapterRef{chapter:problem} that branchiness is not a static property, but a property of a computation that depends on the input. In other words, we can have a loop dominated with heavy branches but also has a shallow branch that an input takes exclusively, then this approach hurts more than it helps because we disable jitting for the entire function.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 8
+      \paragraph{Using meta-hints to guide the tracer} Meta-hints is a generalization of the RPython interpreter hints that extends further the communication between the language being implemented and the tracing-JIT run-time. We introduce two Racket forms: \racketcode{define/jit-merge-point} and \racketcode{meta-can-enter-jit} to be used in the user code. \racketcode{define/jit-merge-point} constructs a `lambda` that's *jit-block*ed by default (i.e. its `should\_enter` is always False), so normally it's not gonna be jitted by default. Whenever we hit a \racketcode{meta-can-enter-jit} in the Racket code, we flip the switch and call `can\_enter\_jit` on the JIT driver. Therefore by using \racketcode{meta-can-enter-jit} in the Racket code only at the shallow branches inside the loop, we ensure that the counter that's associated with the loop inside the `lambda` is considered hot only when shallow branches are taken repeatedly.
+    \end{paragraph-here}
+
+    \begin{figure-here}
+      branchy annotated with meta-hints
+    \end{figure-here}
+
+    \begin{paragraph-here}% 9
+      \figref{} shows the Branchy from \figref{branchy} that's annotated with meta-hints. Only the shallow loop calls are marked with \racketcode{meta-can-enter-jit}. Thus, when running on the input list, the deep branches do not contribute to the hotness of the loop, only the shallow branches do. Obviously this not a general solution. It is a heuristic that states basically "if branchiness is a concern, a trace will be more useful if the language level computation is shallow in terms of nested if levels", and an input can certainly take deep branches along with the shallow branches as well, so as soon as the tracing starts (the shallow branches are taken enough times) the tracer won't differentiate between shallow or deep branches, it'll record everything.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 10
+      One downside of this approach is the annotation of the user code, which is not very realistic for programs of the size similar to the Racket's macro expander. Considering the complex indirections in the imported sub-systems facilitating self-hosting, annotation of meta-hints becomes difficult, and also we lose the ability to use the exported functionalities as is, which is not idea.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 11
+      \paragraph{Add nested if depth to green variables} Recall that in Pycket's two state representation we have the lambda ast and come\_from information to detect loops. In this approach, we add a third variable to the green variables that represents a "depth" score for nested conditionals. For instance in Branchy, Exit B would have a depth score of 5, and Exit A would have a depth score of 1. The idea is that every time we cross those spots, if the depth score is more than a certain number, we add that number to the depth. So for example, if we have a threshold of 3, next time we take the Exit B, the depth variable would become 10 (because 5 > 3), but at Exit A the depth stays the same (because 1 < 3). This way, the green variables that `can\_enter\_jit` method increases the counter for will be different at each time we loop at a deep branch, therefore they won't contribute to the hotness of the loop.
+    \end{paragraph-here}
+
+    \begin{figure-here}
+      chart to show run times running branchy on different inputs with no optimizattions, meta-hints, and extended green variables.
+    \end{figure-here}
+
+    \begin{paragraph-here}% 12
+      \figref{} shows the overall run times for running Branchy with all 0 input (takes the deep branch path), all 20 (takes the shallow deep branch), and randomized input, with meta-hints and extended green variables. All run times are averages over 1000 runs with the same setup explained in \sectionRef{benchmarkSetups}, and random inputs are kept the same across different settings.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 13
+      Both meta-hints approach and the green variable with depth info approach are able to eliminate long trace that we see in \figref{longbranchytracefigure} for the deep path. This is not necessarily an inprovement on the run-time, however, because that path is kept being interpreted and that's inherently slow. Therefore, we do eliminate time for recording, compiling and optimizing, but if these deep branchy paths that are not JITted are taken frequently then it's gonna get much worse. At the same time, we see that both approaches trace the loop that goes through the shallow path, thus perform similarly to the unoptimized version. With the random input we do see a slowdown incurred by recording deep branches alongside the shallow branches, confirming our concern from earlier that once the shallow paths trigger a recording, then all the deep paths that branchy goes through afterwards also flood into the trace.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 14
+      While these approaches don't provide a clear win for a general scenario because of their targeted nature, evidence shows that they do warrant further investigation. In particular, meta-hints approach can be further generalized by dynamically altering the green variables on the JIT driver at the user code level. Similar to our second approach with the depth info, by adding additional components to the green variables to extend the definition of the program counter, the interpreter can dynamically modify the profiling performed by the tracer. This exaggerates the annotation needs to be done in the user code, and further specializes the behavior of the profiling to the user code, however, with a more fine grained control we postulate that a more finessed approach can be achieved. Furthermore, the interpreter can also utilize more than one JIT driver. A driver that focuses on branch-heavy nature alongside the driver with the original green variables can be employed to have a more fine grained control at the interpreter level.
+    \end{paragraph-here}
+
+    \begin{paragraph-here}% 15
+      Fundamentally, as we discussed in \chapterRef{chapter:problem}, the issue is to find the best trace for computations like these on a branch-heavy computations. Traces that contain all the conditional decisions become highly specialized, therefore not very useful unless same paths are taken by the interpreter (via same input patterns)--which is unrealistic. On the other hand, frequent paths that are not traced because of techniques like we introduced here saves tracing time, but progressively hinder the runtime performance as they're being interpreted instead of JITted. Nevertheless, evidence suggests that alleviating issues that are specific to the mechanisms used in self-hosting with targeted approaches like these can indeed open the path to efficient self-hosting on meta-tracing JIT compilers.
+    \end{paragraph-here}
+
 
 	\section[\texorpdfstring{Mitigating Memory Pressure in Branch-Heavy Computation}{CEK + Stackful Model}]{Mitigating Memory Pressure in Branch-Heavy Computation}
     \label{section:stackful}
