@@ -48,12 +48,12 @@ callout/.style={draw,circle,red!80!black,thick,
 
 % Branch-number circles
 \coordinate (ColX) at (0.25,0.01);
-\node[callout] (n18) at ($(ColX)+(0,0.29)$) {18};
-\node[callout] (n8)  at ($(ColX)+(0.03,0.36)$) {8};
-\node[callout] (n3)  at ($(ColX)+(0.06,0.425)$) {3};
-\node[callout] (n1)  at ($(ColX)+(0.09,0.46)$) {1};
-\node[callout] (n5)  at ($(ColX)+(0.09,0.62)$) {5};
-\node[callout] (n4)  at ($(ColX)+(0.12,0.652)$) {4};
+\node[callout, minimum size=10pt] (n18) at ($(ColX)+(0,0.29)$) {\scriptsize 18};
+\node[callout, minimum size=10pt] (n8)  at ($(ColX)+(0.03,0.36)$) {\scriptsize 8};
+\node[callout, minimum size=10pt] (n3)  at ($(ColX)+(0.06,0.425)$) {\scriptsize 3};
+\node[callout, minimum size=10pt] (n1)  at ($(ColX)+(0.09,0.46)$) {\scriptsize 1};
+\node[callout, minimum size=10pt] (n5)  at ($(ColX)+(0.09,0.62)$) {\scriptsize 5};
+\node[callout, minimum size=10pt] (n4)  at ($(ColX)+(0.12,0.652)$) {\scriptsize 4};
 
 % Exit above lines + arrows
 \begin{scope}[exit/.style={green!60!black,very thick,->}]
