@@ -11,16 +11,16 @@ callout/.style={draw,circle,red!80!black,thick,
                 basicstyle=\ttfamily\footnotesize,
                 numbers=left, xleftmargin=2em]
 #lang racket/base
-(define (branchy-function lst)
+(define/jit-merge-point (branchy-function lst)
     (letrec ([loop
             (lambda (lst)
             (if (null? lst)
                 -1
                 (let-values ([(input) (car lst)])
                     (if (> input 18)
-                        (+ 18 (loop (cdr lst)))
+                        (meta-can-enter-jit (+ 18 (loop (cdr lst))))
                         (if (> input 8)
-                            (+  8 (loop (cdr lst)))
+                            (meta-can-enter-jit (+  8 (loop (cdr lst))))
                             (if (< input 3)
                                 (if (< input 1)
                                     (+ 1 (loop (cdr lst)))
@@ -58,7 +58,7 @@ callout/.style={draw,circle,red!80!black,thick,
 % Exit above lines + arrows
 \begin{scope}[exit/.style={green!60!black,very thick,->}]
 % Exit A  (+ 18 ...) line 9
-\draw[exit] (0.58,0.335) -- node[midway,above=2pt]{Exit A} ++(0.25,0);
+\draw[exit] (0.82,0.335) -- node[midway,above=2pt]{Exit A} ++(0.15,0);
 % Exit B  (+ 1 ...) line 15
 \draw[exit] (0.71,0.50) -- node[midway,above=2pt]{Exit B} ++(0.25,0);
 % Exit C  (+ 3 ...) line 21
@@ -68,5 +68,5 @@ callout/.style={draw,circle,red!80!black,thick,
 %----------------------------------------------------
 \end{tikzpicture}
 \caption{Branchy: a branch-heavy program designed to exhibit data-dependent behavior.}
-\label{fig:branchy-introduce-code}
+\label{fig:branchy-with-meta-hints}
 \end{figure}

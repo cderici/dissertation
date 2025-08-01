@@ -14,7 +14,7 @@
 		\begin{itemize}
 			\item \ref{section:hot-branches} Guiding Tracer Away from Branch-Heavy Computation
 
-				Presenting a method to detect branch-heavy computations and help the tracer forgo them seems like a promising idea.
+				Present approaches for detecting branch-heavy computations and helping tracer avoid them.
 			\item \ref{section:stackful} Mitigating Memory Pressure in Branch-Heavy Computation
 
 				A hybrid model of computation (e.g., a stackful model alongside CEK) seems to mitigate memory issues in some cases.
@@ -50,7 +50,6 @@
       A critical observation from \chapterRef{chapter:problem} is that the majority of performance overhead in self-hosting on meta-tracing JIT compilers stems from generating large, intricate, and often non-reusable traces during macro expansion phases. These expansive traces significantly degrade runtime performance due to the frequency and complexity of branching operations inherent in macro expanders.
     \end{paragraph-here}
 
-
     \begin{paragraph-here}% 2
       Importantly, as indicated in the performance analyses conducted in \chapterRef{chapter:problem}, once the expansion phase is completed, the runtime performance of self-hosted Pycket becomes comparable to the original Pycket implementation (without self-hosting). This highlights that the macro expansion phase, characterized by its branching complexity, is a key bottleneck to achieving overall runtime efficiency.
     \end{paragraph-here}
@@ -79,12 +78,10 @@
       \paragraph{Using meta-hints to guide the tracer} Meta-hints is a generalization of the RPython interpreter hints that extends further the communication between the language being implemented and the tracing-JIT run-time. We introduce two Racket forms: \racketcode{define/jit-merge-point} and \racketcode{meta-can-enter-jit} to be used in the user code. \racketcode{define/jit-merge-point} constructs a `lambda` that's *jit-block*ed by default (i.e. its `should\_enter` is always False), so normally it's not gonna be jitted by default. Whenever we hit a \racketcode{meta-can-enter-jit} in the Racket code, we flip the switch and call `can\_enter\_jit` on the JIT driver. Therefore by using \racketcode{meta-can-enter-jit} in the Racket code only at the shallow branches inside the loop, we ensure that the counter that's associated with the loop inside the `lambda` is considered hot only when shallow branches are taken repeatedly.
     \end{paragraph-here}
 
-    \begin{figure-here}
-      branchy annotated with meta-hints
-    \end{figure-here}
+    \inputFigure{solution}{branchy-with-meta-hints}
 
     \begin{paragraph-here}% 9
-      \figref{} shows the Branchy from \figref{branchy} that's annotated with meta-hints. Only the shallow loop calls are marked with \racketcode{meta-can-enter-jit}. Thus, when running on the input list, the deep branches do not contribute to the hotness of the loop, only the shallow branches do. Obviously this not a general solution. It is a heuristic that states basically "if branchiness is a concern, a trace will be more useful if the language level computation is shallow in terms of nested if levels", and an input can certainly take deep branches along with the shallow branches as well, so as soon as the tracing starts (the shallow branches are taken enough times) the tracer won't differentiate between shallow or deep branches, it'll record everything.
+      \figref{fig:branchy-with-meta-hints} shows the Branchy from \figref{fig:branchy-introduce-code} that's annotated with meta-hints. Only the shallow loop calls are marked with \racketcode{meta-can-enter-jit}. Thus, when running on the input list, the deep branches do not contribute to the hotness of the loop, only the shallow branches do. Obviously this not a general solution. It is a heuristic that states basically "if branchiness is a concern, a trace will be more useful if the language level computation is shallow in terms of nested if levels", and an input can certainly take deep branches along with the shallow branches as well, so as soon as the tracing starts (the shallow branches are taken enough times) the tracer won't differentiate between shallow or deep branches, it'll record everything.
     \end{paragraph-here}
 
     \begin{paragraph-here}% 10
