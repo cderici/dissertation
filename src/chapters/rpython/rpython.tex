@@ -61,6 +61,7 @@
     % \end{paragraph-here}
 
     \section[\texorpdfstring{Tracing vs Meta-tracing in JIT Compilation}{Tracing vs Meta-tracing}]{Tracing vs Meta-tracing in JIT Compilation}
+    \label{section:tracing-meta-tracing}
 
         \paragraph{}%
             When a tracing \gls{jit} compiler is applied to a language interpreter, it typically ends up tracing the loops of the interpreter itself—rather than the loops in the user program that the interpreter is executing. To understand why this is a problem, we need to distinguish three roles: the language interpreter (the implementation of the language semantics), the tracing interpreter (or meta-tracer), and the user program (the input being evaluated by the language interpreter). The meta-tracer effectively executes the language interpreter step-by-step, carrying out its operations and observing their effects. Without additional guidance, it has no visibility into the boundaries or semantics of the user-level code being interpreted, and so it naturally captures hot paths in the language interpreter logic rather than in the user program.
