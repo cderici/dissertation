@@ -1,17 +1,19 @@
 \begin{figure}[ht]
   \centering
-  \begin{tikzpicture}[>=Stealth, node distance=4cm]
-    \node[draw, rounded corners, fill=gray!8, minimum width=3cm, minimum height=4cm, align=center] (cek) {CEK\\MACHINE};
-    \node[draw, rounded corners, fill=gray!8, minimum width=3cm, minimum height=4cm, align=center, right=of cek] (stackful) {STACKFUL\\(RECURSIVE)\\INTERPRETER};
-    % entry arrow
-    \node[above=7mm of cek] (entry) {};
-    \draw[->, dashed, thick] (entry) -- (cek.north);
-    \node[above] at (entry) {\small Entry};
+  \scalebox{0.9}{
+    \begin{tikzpicture}[>=Stealth, node distance=4cm]
+      \node[draw, rounded corners, fill=gray!8, minimum width=3cm, minimum height=4cm, align=center] (cek) {CEK\\MACHINE};
+      \node[draw, rounded corners, fill=gray!8, minimum width=3cm, minimum height=4cm, align=center, right=of cek] (stackful) {STACKFUL\\(RECURSIVE)\\INTERPRETER};
+      % entry arrow
+      \node[above=7mm of cek] (entry) {};
+      \draw[->, dashed, thick] (entry) -- (cek.north);
+      \node[above] at (entry) {\small Entry};
 
-    % conversion arrows
-    \draw[->, thick] ([yshift= 15pt]cek.east) -- node[above, sloped] {\small convert-to-stackful} ([yshift= 15pt]stackful.west);
-    \draw[->, thick] ([yshift=-15pt]stackful.west) -- node[below, sloped] {\small convert-to-cek} ([yshift=-15pt]cek.east);
-  \end{tikzpicture}
+      % conversion arrows
+      \draw[->, thick] ([yshift= 15pt]cek.east) -- node[above, sloped] {\small convert-to-stackful} ([yshift= 15pt]stackful.west);
+      \draw[->, thick] ([yshift=-15pt]stackful.west) -- node[below, sloped] {\small convert-to-cek} ([yshift=-15pt]cek.east);
+    \end{tikzpicture}
+  }
 \caption{Stackful \& CEK Switch}
 \label{fig:cek-convert-stack}
 \end{figure}
