@@ -1,0 +1,578 @@
+The whole model is available online at \url{https://github.com/cderici/linklets-redex-model/tree/master}.
+
+\begin{lstlisting}[language=pltredex,
+                basicstyle=\ttfamily\scriptsize,
+                numbers=none, xleftmargin=2em]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; lang.rkt
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-language RC
+  [e   ::= x v (e e ...) (if e e e) (o e e)
+       (begin e e ...) (lambda (x_!_ ...) e)
+       (raises e) (set! x e)
+       (var-ref x) (var-ref/no-check x)
+       (var-set! x e) (var-set/check-undef! x e)] ;; expressiosn
+  [v   ::= n b c (void) uninit] ;; values
+  [c   ::= (closure (x ...) e ρ)]
+  [n   ::= number]
+  [b   ::= true false]
+  [x cell ::= variable-not-otherwise-mentioned] ;; variables
+  [o   ::= + * <]
+  [E   ::= hole (v ... E e ...) (o E e) (o v E)
+       (var-set! x E) (var-set/check-undef! x E)
+       (begin v ... E e ...) (set! x E) (if E e e)] ;; eval context
+  [ρ   ::= ((x any) ...)] ;; environment
+  [σ   ::= ((x any) ...)] ;; store
+
+  [e-test ::= x n b (void)
+          (e-test e-test ...) (lambda (x_!_ ...) e-test) (if e-test e-test e-test)
+          (p2 e-test e-test) (p1 e-test) (set! x e-test) (begin e-test e-test ...)
+          (raises e-test)] ;; to be used to generate test cases (i.e. exclude closures)
+  )
+(define-extended-language LinkletSource RC
+  [L ::= (linklet ((imp-id ...) ...) (exp-id ...) l-top ... e)]
+
+  [l-top ::= (define-values (x) e) e] ; linklet body expressions
+
+  ;; (external-imported-id internal-imported-id)
+  [imp-id ::= x (x x)]
+  ;; (internal-exported-id external-exported-id)
+  [exp-id ::= x (x x)])
+
+(define-extended-language Linklets LinkletSource
+  ;; compile
+  [CL ::= (compile-linklet L)]
+  [L-obj ::= (Lα c-imps c-exps l-top l-top ...) (Lβ x l-top ...)]
+  [c-imps ::= ((imp-obj ...) ...)]
+  [c-exps ::= (exp-obj ...)]
+  ;; import & export objects
+  [imp-obj ::= (Import n x x x)] ; group-index id(<-gensymed) int_id ext_id
+  [exp-obj ::= (Export x x x)] ; int_gensymed int_id ext_id
+
+  ;; instantiate
+  [LI ::= x (linklet-instance (x cell) ...)] ;; note that an instance have no exports
+  [I ::= (make-instance)
+         (instantiate-linklet linkl-ref x ...)
+         (instantiate-linklet linkl-ref x ... #:target x)]
+
+  [linkl-ref ::= x L-obj (raises e)]
+
+  [v ::= .... (v x)]
+  ;; program-stuff
+  [p ::= (program (use-linklets (x_!_ L) ...) p-top)]
+  [p-top ::= v I (let-inst x p-top p-top) (seq p-top ...)
+             (instance-variable-value x x)]
+
+
+  ;; evaluation-context for the programs
+  [EP ::= hole
+          (instantiate-linklet (Lβ x v ... EP l-top ...) x ...) ;; instantiate
+          (define-values (x) EP)
+          (let-inst x EP p-top)
+          (seq v ... EP p-top ...)
+
+          (program (use-linklets) EP)]
+  ;; evaluation-context for the linklet body
+  [EI ::= hole (Lα ((imp-obj ...) ...) (exp-obj ...) v ... EI l-top ...)]
+  )
+
+(define-extended-language LinkletProgramTest Linklets
+  [p-test ::= (program (use-linklets (x_!_ L) ...) p-top-test ...)]
+  [p-top-test ::= (instantiate-linklet x x ... #:target I-test)
+                  (instantiate-linklet x x ...)
+                  (let-inst x (instantiate-linklet x x ...) p-top-test)
+                  (instance-variable-value x x)
+                  v-test]
+  [I-test ::= x (linklet-instance)]
+  [v-test ::= n b (void)])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; racket-core.rkt
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-metafunction RC
+  [(let-values (((x) e) ...) e_body)
+   ((lambda (x ...) e_body) e ...)])
+
+(define-metafunction RC
+  δ : (o any any) -> v or true or false or (raises e)
+  [(δ (< n_1 n_2)) ,(if (< (term n_1) (term n_2))
+                        (term true) (term false))]
+  [(δ (+ n_1 n_2)) ,(+ (term n_1) (term n_2))]
+  [(δ (* n_1 n_2)) ,(* (term n_1) (term n_2))]
+  [(δ (o any_1 any_2)) (raises (o any_1 any_2))])
+
+(define-metafunction RC
+  extend : ((x any) ...)  (x ...) (any ...) -> ((x any) ...)
+  [(extend ((x any) ...) (x_1 ...) (any_1 ...))
+   ((x_1 any_1) ... (x any) ...)])
+
+(define-metafunction RC
+  lookup : ((x any) ...) x -> any
+  [(lookup ((x_1 any_1) ... (x any_t) (x_2 any_2) ...) x)
+   any_t
+   (side-condition (not (member (term x) (term (x_1 ...)))))]
+  [(lookup any_1 any_2)
+   (raises any_1)])
+
+;; standard reduction
+(define -->βr
+  (reduction-relation
+   Linklets
+   #:domain (p ρ σ)
+   (--> [(in-hole EP (in-hole E (raises e))) ρ σ]
+        [(in-hole EP (raises e)) ρ σ] "error")
+
+   (--> [(in-hole EP (in-hole E x)) ρ σ]
+        [(in-hole EP (in-hole E (lookup σ x_1))) ρ σ] "lookup"
+        (where x_1 ,(term (lookup ρ x))))
+
+   (--> [(in-hole EP (in-hole E (var-ref x))) ρ σ]
+        [(in-hole EP (in-hole E v)) ρ σ]
+        (where v (lookup σ (lookup ρ x)))
+        "var-ref")
+   (--> [(in-hole EP (in-hole E (var-ref/no-check x))) ρ σ]
+        [(in-hole EP (in-hole E v)) ρ σ]
+        (where v (lookup σ (lookup ρ x)))
+        "var-ref/no-check") ; for now the same with var-ref
+   (--> [(in-hole EP (in-hole E (var-set! x v))) ρ σ]
+        [(in-hole EP (in-hole E (void))) ρ (extend σ (cell_var) (v))]
+        (where cell_var (lookup ρ x))
+        "var-set!")
+   (--> [(in-hole EP (in-hole E (var-set/check-undef! x v))) ρ σ]
+        [(in-hole EP (in-hole E (void))) ρ (extend σ (cell_var) (v))]
+        (where cell_var (lookup ρ x))
+        (where v_var (lookup σ cell_var)) ; to make sure it's there
+        "var-set/check-undef!") ; for now the same with var-set!
+
+   (--> [(in-hole EP (in-hole E (lambda (x ...) e))) ρ σ]
+        [(in-hole EP (in-hole E (closure (x ...) e ρ))) ρ σ] "closure")
+   (--> [(in-hole EP (in-hole E (set! x v))) ρ σ]
+        [(in-hole EP (in-hole E (void))) ρ (extend σ (x_1) (v))]
+        (side-condition (not (equal? (term (raises ,(term x))) (term (lookup ρ x)))))
+        (where x_1 ,(term (lookup ρ x))) "set!")
+   (--> [(in-hole EP (in-hole E (begin v_1 ... v_n))) ρ σ]
+        [(in-hole EP (in-hole E v_n)) ρ σ] "begin")
+   (--> [(in-hole EP (in-hole E (if v_0 e_1 e_2))) ρ σ]
+        [(in-hole EP (in-hole E e_1)) ρ σ]
+        (side-condition (not (equal? (term v_0) (term false)))) "if-true")
+   (--> [(in-hole EP (in-hole E (if false e_1 e_2))) ρ σ]
+        [(in-hole EP (in-hole E e_2)) ρ σ] "if-false")
+   (--> [(in-hole EP (in-hole E (o v_1 v_2))) ρ σ]
+        [(in-hole EP (in-hole E (δ (o v_1 v_2)))) ρ σ] "δ")
+   (--> [(in-hole EP (in-hole E ((closure (x ..._n) e ρ_1) v ..._n))) ρ_2 σ]
+        [(in-hole EP (in-hole E e)) (extend ρ_1 (x ...) (x_2 ...)) (extend σ (x_2 ...) (v ...))] "βv"
+        (where (x_2 ...) ,(variables-not-in (term e) (term (x ...)))))))
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; compile-linklets.rkt
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-extended-language LinkletsCompile Linklets
+  [exprs ::= (l-top ...)]
+  [lex-ids ::= (x ...)]
+  [mut-ids ::= (x ...)]
+  [top-ids ::= (x ...)])
+
+; A separate pass
+(define-metafunction LinkletsCompile
+  all-toplevels : (l-top ...) (x ...) -> (x ...)
+  [(all-toplevels () (x ...)) (x ...)]
+  [(all-toplevels ((define-values (x) e) l-top ...) (x_tops ...))
+   (all-toplevels (l-top ...) (x_tops ... x))]
+  [(all-toplevels (l-top_1 l-top ...) (x ...))
+   (all-toplevels (l-top ...) (x ...))])
+
+; A separate (slightly deeper) pass
+(define-metafunction LinkletsCompile
+  get-mutated-vars-expr : l-top (x ...) -> (x ...)
+  [(get-mutated-vars-expr (set! x v) (x_muts ...)) (x x_muts ...)]
+  [(get-mutated-vars-expr (begin l-top ...) (x_muts ...))
+   (get-all-mutated-vars (l-top ...) (x_muts ...))]
+  [(get-mutated-vars-expr l-top (x ...)) (x ...)])
+
+(define-metafunction LinkletsCompile
+  get-all-mutated-vars : (l-top ...) (x ...) -> (x ...)
+  [(get-all-mutated-vars () (x ...)) (x ...)]
+  [(get-all-mutated-vars (l-top_1 l-top ...) (x_muts ...))
+   (get-all-mutated-vars (l-top ...) (x_muts ... x_new_muts ... ))
+   (where (x_new_muts ...) (get-mutated-vars-expr l-top_1 ()))])
+
+; Process Imports
+(define-metafunction LinkletsCompile
+  process-import : n (imp-id ...) (imp-obj ...) -> (imp-obj ...)
+  [(process-import n () (imp-obj ...)) (imp-obj ...)]
+  [(process-import n (x imp-id ...) (imp-obj ...))
+   (process-import n (imp-id ...) (imp-obj ... (Import n x_gen x x) ))
+   (where x_gen ,(variable-not-in (term (x imp-id ...)) (term x)))]
+  [(process-import n ((x_ext x_int) imp-id ...) (imp-obj ...))
+   (process-import n (imp-id ...) (imp-obj ... (Import n x_gen x_int x_ext)))
+   (where x_gen ,(variable-not-in (term ((x_ext x_int) imp-id ...)) (term x)))])
+
+(define-metafunction LinkletsCompile
+  process-importss : n ((imp-id ...) ...) ((imp-obj ...) ...) -> ((imp-obj ...) ...)
+  [(process-importss n () ((imp-obj ...) ...)) ((imp-obj ...) ...)]
+  [(process-importss n ((imp-id_1 ...) (imp-id ...) ...) ((imp-obj ...) ...))
+   (process-importss ,(add1 (term n))
+                     ((imp-id ...) ...)
+                     ((imp-obj ...) ... (imp-obj_1 ...)))
+   (where (imp-obj_1 ...) (process-import n (imp-id_1 ...) ()))])
+
+; Process Exports
+(define-metafunction LinkletsCompile
+  process-exports : (exp-id ...) (exp-obj ...) -> (exp-obj ...)
+  [(process-exports () (exp-obj ...)) (exp-obj ...)]
+  [(process-exports (x exp-id ...) (exp-obj ...))
+   (process-exports (exp-id ...) (exp-obj ... (Export x_gen x x)))
+   (where x_gen ,(variable-not-in (term (x exp-id ...)) (term x)))]
+  [(process-exports ((x_int x_ext) exp-id ...) (exp-obj ...))
+   (process-exports (exp-id ...) (exp-obj ... (Export x_gen x_int x_ext)))
+   (where x_gen ,(variable-not-in (term ((x_int x_ext) exp-id ...)) (term x)))])
+
+
+
+
+
+
+#|
+ ----  Define-values
+if we see a define-values, we look at exported vars.
+if the defined id is exported, we add a new linklet variable for that.
+export's internal id should be the same with the defined id.
+we create the variable with the exports internal gensym.
+|#
+(define-metafunction LinkletsCompile
+  c-def-val : x e c-exps  -> exprs
+  [(c-def-val x e_body (exp-obj_before ... (Export x_gen x x_ext) exp-obj_after ...))
+   ((define-values (x) e_body) (var-set! x_gen x))]
+  [(c-def-val x e_body c-exps)
+   ((define-values (x) e_body))])
+
+#|
+----  Symbol
+Important parts are if the symbol is one of exports or imports.
+If it's not, then it's either a toplevel defined (within linklet)
+or a primitive (op)(which is handled in a separate case below)
+|#
+(define-metafunction LinkletsCompile
+  c-symbol : x mut-ids top-ids c-imps c-exps -> l-top
+  ; 1) if it's one of imports
+  [(c-symbol x_current mut-ids top-ids
+             ((imp-obj_before ...) ...
+              ((Import n_bef x_gen_bef x_int_bef x_ext_bef) ...
+               (Import n_cur x_gen_cur x_current x_ext_cur)
+               (Import n_aft x_gen_aft x_int_aft x_ext_aft) ...)
+              (imp-obj_after ...) ...) c-exps)
+   (var-ref/no-check x_gen_cur)]
+  ; 2-a) if it's one of exports, and it is mutated
+  [(c-symbol x_current mut-ids top-ids c-imps
+             ((Export x_gen_bef x_int_bef x_ext_bef) ...
+              (Export x_gen_cur x_current x_ext_cur)
+              (Export x_gen_aft x_int_aft x_ext_aft) ...))
+   (var-ref x_gen_cur)
+   (side-condition (member (term x_current) (term mut-ids)))]
+  ; 2-b) if it's one of exports, and not defined in the toplevel
+  ; (within the linklet)
+  [(c-symbol x_current mut-ids top-ids c-imps
+             ((Export x_gen_bef x_int_bef x_ext_bef) ...
+              (Export x_gen_cur x_current x_ext_cur)
+              (Export x_gen_aft x_int_aft x_ext_aft) ...))
+   (var-ref x_gen_cur)
+   (side-condition (not (member (term x_current) (term top-ids))))]
+  ; 3) symbol is neither import nor export, treat normal
+  [(c-symbol x_current mut-ids top-ids c-imps c-exps) x_current])
+
+;; ----  Set!
+(define-metafunction LinkletsCompile
+  c-set-bang : x c-exps e -> l-top
+  [(c-set-bang x ((Export x_gen_bef x_int_bef x_ext_bef) ...
+                  (Export x_gen_cur x x_ext_cur)
+                  (Export x_gen_aft x_int_aft x_ext_aft) ...)
+               e_rhs)
+   (var-set/check-undef! x_gen_cur e_rhs)]
+  [(c-set-bang x c-exps e_rhs) (set! x e_rhs)])
+
+;; c-body == sexp_to_ast (in Pycket)
+(define-metafunction LinkletsCompile
+  c-body : exprs lex-ids c-imps c-exps mut-ids top-ids exprs -> exprs
+  ; base case
+  [(c-body () lex-ids c-imps c-exps mut-ids top-ids exprs) exprs]
+  ; define-values
+  [(c-body ((define-values (x) e) l-top ...) (x_lex ...) c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) (x_lex ...) c-imps c-exps mut-ids top-ids (l-top_compiled ... l-top_def_val ...))
+   (where (e_new) (c-body (e) (x x_lex ...) c-imps c-exps mut-ids top-ids ()))
+   (where (l-top_def_val ...) (c-def-val x e_new c-exps))]
+  ; symbols
+  [(c-body (x_current l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ... l-top_sym))
+   (where l-top_sym (c-symbol x_current mut-ids top-ids c-imps c-exps))]
+  ; set!
+  [(c-body ((set! x e) l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ... l-top_set_bang))
+   (where (e_new) (c-body (e) lex-ids c-imps c-exps mut-ids top-ids ()))
+   (where l-top_set_bang (c-set-bang x c-exps e_new))]
+  ; others
+  [(c-body exprs lex-ids c-imps c-exps mut-ids top-ids exprs_compiled)
+   (c-expr exprs lex-ids c-imps c-exps mut-ids top-ids exprs_compiled)])
+
+(define-metafunction LinkletsCompile
+  c-expr : exprs lex-ids c-imps c-exps mut-ids top-ids exprs -> exprs
+  ; values
+  [(c-expr (v l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ... v))]
+  ; begin
+  [(c-expr ((begin e ...) l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ... (begin e_new ...)))
+   (where (e_new ...) (c-body (e ...) lex-ids c-imps c-exps mut-ids top-ids ()))]
+  ; op
+  [(c-expr ((o e ...) l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ... (o e_new ...)))
+   (where (e_new ...) (c-body (e ...) lex-ids c-imps c-exps mut-ids top-ids ()))]
+  ; if
+  [(c-expr ((if e_tst e_thn e_els) l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ... (if e_tst_new e_thn_new e_els_new)))
+   (where (e_tst_new) (c-body (e_tst) lex-ids c-imps c-exps mut-ids top-ids ()))
+   (where (e_thn_new) (c-body (e_thn) lex-ids c-imps c-exps mut-ids top-ids ()))
+   (where (e_els_new) (c-body (e_els) lex-ids c-imps c-exps mut-ids top-ids ()))]
+  ; lambda
+  [(c-expr ((lambda (x ...) e_body) l-top ...) (x_lex ...) c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) (x_lex ...) c-imps c-exps mut-ids top-ids (l-top_compiled ... (lambda (x ...) e_body_new)))
+   (where (e_body_new) (c-body (e_body) (x ... x_lex ...) c-imps c-exps mut-ids top-ids ()))]
+  ; let-values
+  [(c-expr ((let-values (((x_rhs) e_rhs) ...) e_body) l-top ...) (x_lex ...)
+           c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) (x_lex ...) c-imps c-exps mut-ids top-ids
+           (l-top_compiled ... (let-values (((x_rhs) e_rhs_new) ...) e_body_new)))
+   (where (e_rhs_new ...) (c-body (e_rhs ...) (x_lex ...) c-imps c-exps mut-ids top-ids ()))
+   (where (e_body_new) (c-body (e_body) (x_rhs ... x_lex ...) c-imps c-exps mut-ids top-ids ()))]
+  ; raises
+  [(c-expr ((raises e) l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ... (raises e)))]
+  ; app
+  [(c-expr ((e ...) l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ...))
+   (c-body (l-top ...) lex-ids c-imps c-exps mut-ids top-ids (l-top_compiled ... (e_new ...)))
+   (where (e_new ...) (c-body (e ...) lex-ids c-imps c-exps mut-ids top-ids ()))])
+
+(define-metafunction LinkletsCompile
+  compile-linklet : L -> L-obj or stuck
+  [(compile-linklet (linklet ((imp-id ...) ...) (exp-id ...) l-top ...))
+   (Lα c-imps c-exps l-top_compiled ...)
+   ; where
+   (where c-imps (process-importss 0 ((imp-id ...) ...) ()))
+   (where c-exps (process-exports (exp-id ...) ()))
+   (where mut-ids (get-all-mutated-vars (l-top ...) ()))
+   (where top-ids (all-toplevels (l-top ...) ()))
+   (where (l-top_compiled ...)
+          (c-body (l-top ...) () c-imps c-exps mut-ids top-ids ()))])
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; linklets.rkt
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#|
+Instantiating a linklet is basically getting the imported vars into
+the env and evaluating all the forms in the body in the presence of
+a "target" linklet instance.
+
+If a target instance is not provided to the instantiation (as an
+initial argument), then it's a regular instantiation, we will create a
+new instance and evaluate all the forms in the linklet body and the
+instantiation will return the created linklet instance (the variables
+inside the created instance depends on the evaluated forms within the
+linklet body).
+
+If a target is provided to the instantiation, then the instantiation
+will take place similarly, but the result will be the result of
+evaluating the last expression in the linklet body, i.e. the
+instantiation will return a value instead of an instance. This is what
+we call "evaluating a linklet".
+|#
+
+(define -->βp
+  (reduction-relation
+   Linklets
+   #:domain (p ρ σ)
+   #;(--> [(in-hole EP (raises e)) ω Ω ρ σ]
+          [(raises e) ω Ω ρ σ] "error")
+   (--> [(program (use-linklets (x_1 L_1) (x L) ...) p-top) ρ σ]
+        [(program (use-linklets (x L) ...) p-top_new) ρ σ]
+        (where L-obj_1 (compile-linklet L_1))
+        (where (p-top_new) (substitute-linklet x_1 L-obj_1 (p-top))) "compile and load")
+
+   (--> [(in-hole EP (make-instance)) ρ σ]
+        [(in-hole EP ((void) x_li)) ρ σ_1]
+        (where x_li ,(variable-not-in (term σ) (term li)))
+        (where σ_1 (extend σ (x_li) ((linklet-instance)))) "make-instance")
+   (--> [(in-hole EP (instance-variable-value x_li x)) ρ σ]
+        [(in-hole EP (v x_li)) ρ σ]
+        (where v (lookup σ (get-var-from-instance x x_li σ))) "instance variable value")
+   (--> [(in-hole EP (let-inst x (v x_i) p-top)) ρ σ]
+        [(in-hole EP p-top) ρ (extend σ (x) (LI))]
+        (where LI (lookup σ x_i)) "let-inst")
+   (--> [(in-hole EP (seq v_1 ... v_n)) ρ σ]
+        [(in-hole EP v_n) ρ σ] "seq")
+
+   (--> [(in-hole EP (instantiate-linklet (Lβ x_target v ... v_last))) ρ σ]
+        [(in-hole EP (v_last x_target)) ρ σ] "return instance/value")
+
+   (--> [(in-hole EP (instantiate-linklet (Lβ x_target v_prev ... (define-values (x) v) l-top ...))) ρ σ]
+        [(in-hole EP (instantiate-linklet (Lβ x_target v_prev ... l-top ...))) ρ_1 σ_1]
+        (where cell ,(variable-not-in (term (x ρ σ)) (term cell_1)))
+        (where (ρ_1 σ_1) ((extend ρ (x) (cell)) (extend σ (cell) (v)))))
+
+   (--> [(in-hole EP (instantiate-linklet (Lα c-imps c-exps l-top ...) LI ...)) ρ σ]
+        [(in-hole EP (instantiate-linklet (Lα c-imps c-exps l-top ...) LI ... #:target x_target)) ρ σ_1]
+        (where x_target ,(variable-not-in (term σ) (term li)))
+        (where σ_1 (extend σ (x_target) ((linklet-instance)))))
+   (--> [(in-hole EP (instantiate-linklet (Lα c-imps c-exps l-top ...) LI ... #:target x_target)) ρ σ]
+        [(in-hole EP (instantiate-linklet (Lβ x_target l-top ...))) ρ_2 σ_1]
+        ; set the stage for target/imports/exports
+        (where ρ_1 (instantiate-imports c-imps (LI ...) ρ σ))
+        (where (ρ_2 σ_1) (instantiate-exports c-exps x_target ρ_1 σ))
+        "set the stage for evaluation")))
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Instantiation Utilities
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Utils for Imports
+(define-metafunction Linklets
+  get-var-from-instance : x x σ -> cell
+  [(get-var-from-instance x x_li σ)
+   cell
+   (where (linklet-instance (x_bef cell_bef) ... (x cell) (x_aft cell_aft) ...)
+          (lookup σ x_li))]
+  [(get-var-from-instance x LI σ) (raises not-found)])
+
+(define-metafunction Linklets
+  get-instance : n n (LI ...) -> LI
+  [(get-instance n n (LI LI_rest ...)) LI]
+  [(get-instance n_1 n_2 (LI LI_rest ...))
+   (get-instance ,(add1 (term n_1)) n_2 (LI_rest ...))])
+
+(define-metafunction Linklets
+  process-import-group : (imp-obj ...) (LI ...) ρ σ -> ρ
+  [(process-import-group () (LI ...) ρ σ) ρ]
+  [(process-import-group ((Import n x_id x_int x_ext) imp-obj_rest ...)
+                             (LI ...) ρ σ)
+   (process-import-group (imp-obj_rest ...) (LI ...) ρ_1 σ)
+   (where LI_inst (get-instance 0 n (LI ...)))
+   (where cell_var (get-var-from-instance x_ext LI_inst σ))
+   (where ρ_1 (extend ρ (x_id) (cell_var)))])
+
+(define-metafunction Linklets
+  instantiate-imports : c-imps (LI ...) ρ σ -> ρ
+  [(instantiate-imports () (LI ...) ρ σ) ρ]
+  [(instantiate-imports ((imp-obj ...) (imp-obj_rest ...) ...)
+                               (LI ...) ρ σ)
+   (instantiate-imports ((imp-obj_rest ...) ...) (LI ...) ρ_1 σ)
+   (where ρ_1 (process-import-group (imp-obj ...) (LI ...) ρ σ))])
+
+; Utils for Exports
+(define-metafunction Linklets
+  process-one-export : exp-obj x ρ σ -> (ρ σ)
+  ; target has it
+  [(process-one-export (Export x_gen x_id x_ext) x_target ρ σ)
+   (ρ_1 σ) ; <- same store (σ) and instances (Ω), i.e. don't create new variable
+   (where (linklet-instance (x_bef cell_bef) ... (x_ext cell) (x_aft cell_aft) ...)
+          (lookup σ x_target))
+   (where ρ_1 (extend ρ (x_gen) (cell)))]
+  ; target doesn't have it
+  [(process-one-export (Export x_gen x_id x_ext) x_target ρ σ)
+   (ρ_1 (extend σ_1 (x_target) ((linklet-instance (x cell) ... (x_ext cell_new)))))
+   ; create a new variable and put a reference to it within the target
+   (where (linklet-instance (x cell) ...) (lookup σ x_target))
+   (where cell_new ,(variable-not-in (term (ρ σ x ... cell ...)) (term cell_1)))
+   (where (ρ_1 σ_1) ((extend ρ (x_gen) (cell_new)) (extend σ (cell_new) (uninit))))])
+
+(define-metafunction Linklets
+  instantiate-exports : c-exps x ρ σ -> (ρ σ)
+  [(instantiate-exports () x ρ σ) (ρ σ)]
+  [(instantiate-exports ((Export x_gen x_id x_ext) exp-obj ...) x_target ρ σ)
+   (instantiate-exports (exp-obj ...) x_target ρ_1 σ_1)
+   (where (ρ_1 σ_1) (process-one-export (Export x_gen x_id x_ext) x_target ρ σ))])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; util.rkt
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-metafunction Linklets
+  substitute-one : x L-obj p-top -> p-top
+  [(substitute-one x L-obj (instantiate-linklet x x_imp_inst ...))
+   (instantiate-linklet L-obj x_imp_inst ...)]
+  [(substitute-one x L-obj (instantiate-linklet x x_imp_inst ... #:target x_t))
+   (instantiate-linklet L-obj x_imp_inst ... #:target x_t)]
+  [(substitute-one x L-obj (let-inst x_1 I p-top))
+   (let-inst x_1 I_s p-top_new)
+   (where I_s (substitute-one x L-obj I))
+   (where p-top_new (substitute-one x L-obj p-top))]
+  [(substitute-one x L-obj (let-inst x_1 LI p-top))
+   (let-inst x_1 LI p-top_new)
+   (where p-top_new (substitute-one x L-obj p-top))]
+  [(substitute-one x L-obj (seq p-top ...))
+   (seq p-top_new ...)
+   (where (p-top_new ...) ((substitute-one x L-obj p-top) ...))]
+  [(substitute-one x L-obj p-top) p-top])
+
+(define-metafunction Linklets
+  [(substitute-linklet x L-obj (p-top ...))
+   (p-top_new ...)
+   (where (p-top_new ...) ((substitute-one x L-obj p-top) ...))])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; main.rkt
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-metafunction Linklets
+  ;; return
+  [(run-prog ((program (use-linklets) (n _)) ρ σ)) n] ;; number
+  [(run-prog ((program (use-linklets) (b _)) ρ σ)) b] ;; boolean
+  [(run-prog ((program (use-linklets) ((void) _)) ρ σ)) (void)] ;; void
+  [(run-prog ((raises e) ρ σ)) stuck] ;; stuck
+
+  ;; problem in intermediate steps
+  [(run-prog ((program (use-linklets (x L) ...) stuck) ρ σ)) stuck]
+
+  ;; reduce
+  [(run-prog any_1)
+   (run-prog any_again)
+   (where (any_again) ,(apply-reduction-relation -->βp (term any_1)))]
+  [(run-prog any_1)
+   (run-prog any_again)
+   (where (any_again) ,(apply-reduction-relation -->βr (term any_1)))]
+
+  [(run-prog any_1) stuck])
+
+
+(define-metafunction Linklets
+  ;eval-prog :Linklets-> v or closure or stuck or void
+  [(eval-prog (program (use-linklets (x_L L) ...) p-top))
+   (run-prog ((program (use-linklets (x_L L) ...) p-top) () ()))
+   (where ((x_L L-obj) ...) ((x_L (compile-linklet L)) ...))
+   (side-condition (and (term (check-free-varss L ...))
+                        (term (no-exp/imp-duplicates L ...))
+                        (term (no-export-rename-duplicates L ...))
+                        (term (no-non-definable-variables L ...))
+                        (term (no-duplicate-binding-namess L ...))
+                        (term (linklet-refs-check-out
+                               (p-top ...)
+                               (x_L ...)
+                               (get-defined-instance-ids (p-top ...) ())))))]
+  [(eval-prog p) stuck])
+\end{lstlisting}
