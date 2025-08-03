@@ -1,9 +1,13 @@
-\begin{figure}[!htbp]
-  \scriptsize
+%
+%\begin{sidewaysfigure}[p]
+%\begin{landscape}
+
+  \begin{figure}[!h]
+  \tiny
   \centering
-  \hspace*{-1.7cm}
+  \hspace*{-1.5cm}
   \fbox{%
-    \begin{minipage}{0.93\textwidth}
+    \begin{minipage}{\textwidth}
       \setlength{\jot}{2pt}
       \begin{align*}
         [\,x,\;\rho,\;\Sigma,\;\kappa\,]
@@ -17,132 +21,132 @@
         &&\textsc{[closure]}\\[6pt]
 %
 % ──────────────────────────────── plug frame rules ────────────────────────────────
-        [\,v_1,\;\rho,\;\Sigma,\;((\operatorname{op\!-\!\kappa}\;op\;(v\;\ldots)\;()\;\rho_{op})\;\kappa\;\ldots)\,]
+        [\,v_1,\;\rho,\;\Sigma,\;((\operatorname{op-\kappa}\;op\;(v\;\ldots)\;()\;\rho_{op})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,\delta(op\;v\;\ldots\;v_1),\;\rho_{op},\;\Sigma,\;(\kappa\;\ldots)\,]
         &&\textsc{[op‑plug]}\\[2pt]
 %
-        [\,v,\;\rho,\;\Sigma,\;((\operatorname{if\!-\!\kappa}\;e_1\;e_2)\;\kappa\;\ldots)\,]
+        [\,v,\;\rho,\;\Sigma,\;((\operatorname{if-\kappa}\;e_1\;e_2)\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,e,\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         \;\where e = (if\;(equal?\;v\;false)\;e_2\;e_1)
         &&\textsc{[if‑true‑plug]}\\[2pt]
 %
-        [\,v,\;\rho,\;\Sigma,\;((\operatorname{set\!-\!\kappa}\;x)\;\kappa\;\ldots)\,]
+        [\,v,\;\rho,\;\Sigma,\;((\operatorname{set-\kappa}\;x)\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,(void),\;\rho,\;\operatorname{overwrite}(\Sigma,x,v),\;(\kappa\;\ldots)\,]
         &&\textsc{[set‑plug]}\\[2pt]
 %
-        [\,v,\;\rho,\;\Sigma,\;((\operatorname{let\!-\!\kappa}\;()\;(x_{\!rhs}\;\ldots)\;(v_{\!rhs}\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]
+        [\,v,\;\rho,\;\Sigma,\;((\operatorname{let-\kappa}\;()\;(x_{rhs}\;\ldots)\;(v_{rhs}\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{body},\;\operatorname{extend}(\rho,(x_{\!rhs}\;\ldots),(cell_{\!addr}\;\ldots)),\\
+        [\,e_{body},\;\operatorname{extend}(\rho,(x_{rhs}\;\ldots),(cell_{addr}\;\ldots)),\\
         &\hspace{7.6em}
-          \operatorname{extend}(\Sigma,(cell_{\!addr}\;\ldots),(v\;v_{\!rhs}\;\ldots)),\;(\kappa\;\ldots)\,] \\
+          \operatorname{extend}(\Sigma,(cell_{addr}\;\ldots),(v\;v_{rhs}\;\ldots)),\;(\kappa\;\ldots)\,] \\
         &\hspace{1em}
-          \where (cell_{\!addr}\;\ldots)=\operatorname{variables\!-\!not\!-\!in}(e_{body},(x_{\!rhs}\;\ldots))
+          \where (cell_{addr}\;\ldots)=\operatorname{variables-not-in}(e_{body},(x_{rhs}\;\ldots))
         &&\textsc{[let‑plug]}\\[2pt]
 %
-        [\,v,\;\rho,\;\Sigma,\;((\operatorname{letrec\!-\!\kappa}\;()\;x_{prev}\;e_{body})\;\kappa\;\ldots)\,]
+        [\,v,\;\rho,\;\Sigma,\;((\operatorname{letrec-\kappa}\;()\;x_{prev}\;e_{body})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,e_{body},\;\rho,\;\operatorname{extend}(\Sigma,(\operatorname{lookup}(\rho,x_{prev})),(v)),\;(\kappa\;\ldots)\,]
         &&\textsc{[letrec‑plug]}\\[2pt]
 %
-        [\,(\operatorname{letrec\!-\!values}\;()\;e_{body}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
+        [\,(\operatorname{letrec-values}\;()\;e_{body}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,e_{body},\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &&\textsc{[letrec‑no‑rhs]}\\[6pt]
 %
 % ──────────────────────────────── op frame rules ────────────────────────────────
-        [\,v_1,\;\rho,\;\Sigma,\;((\operatorname{op\!-\!\kappa}\;op\;(v\;\ldots)\;(e_1\;e_{\ldots})\;\rho_{op})\;\kappa\;\ldots)\,]
+        [\,v_1,\;\rho,\;\Sigma,\;((\operatorname{op-\kappa}\;op\;(v\;\ldots)\;(e_1\;e_{\ldots})\;\rho_{op})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_1,\;\rho_{op},\;\Sigma,\;((\operatorname{op\!-\!\kappa}\;op\;(v\;\ldots\;v_1)\;(e_{\ldots})\;\rho_{op})\;\kappa\;\ldots)\,]
+        [\,e_1,\;\rho_{op},\;\Sigma,\;((\operatorname{op-\kappa}\;op\;(v\;\ldots\;v_1)\;(e_{\ldots})\;\rho_{op})\;\kappa\;\ldots)\,]
         &&\textsc{[op‑switch]}\\[2pt]
 %
         [\,(op\;e_1\;e_{\ldots}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{op\!-\!\kappa}\;op\;()\;(e_{\ldots})\;\rho)\;\kappa\;\ldots)\,]
+        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{op-\kappa}\;op\;()\;(e_{\ldots})\;\rho)\;\kappa\;\ldots)\,]
         &&\textsc{[op‑push]}\\[6pt]
 %
 % ──────────────────────────────── if / set! / begin ─────────────────────────────
         [\,(if\;e_{test}\;e_1\;e_2),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{test},\;\rho,\;\Sigma,\;((\operatorname{if\!-\!\kappa}\;e_1\;e_2)\;\kappa\;\ldots)\,]
+        [\,e_{test},\;\rho,\;\Sigma,\;((\operatorname{if-\kappa}\;e_1\;e_2)\;\kappa\;\ldots)\,]
         &&\textsc{[if‑push]}\\[2pt]
 %
         [\,(set!\;x\;e),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e,\;\rho,\;\Sigma,\;((\operatorname{set\!-\!\kappa}(\operatorname{lookup}(\rho,x)))\;\kappa\;\ldots)\,]
+        [\,e,\;\rho,\;\Sigma,\;((\operatorname{set-\kappa}(\operatorname{lookup}(\rho,x)))\;\kappa\;\ldots)\,]
         &&\textsc{[set‑push]}\\[2pt]
 %
         [\,(begin\;e_1\;e_{\ldots}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{seq\!-\!\kappa}\;e_{\ldots})\;\kappa\;\ldots)\,]
+        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa}\;e_{\ldots})\;\kappa\;\ldots)\,]
         &&\textsc{[begin‑push]}\\[2pt]
 %
-        [\,v,\;\rho,\;\Sigma,\;((\operatorname{seq\!-\!\kappa}\;e_1\;e_{\ldots})\;\kappa\;\ldots)\,]
+        [\,v,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa}\;e_1\;e_{\ldots})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{seq\!-\!\kappa}\;e_{\ldots})\;\kappa\;\ldots)\,]
+        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa}\;e_{\ldots})\;\kappa\;\ldots)\,]
         &&\textsc{[begin‑switch]}\\[2pt]
 %
-        [\,v,\;\rho,\;\Sigma,\;((\operatorname{seq\!-\!\kappa})\;\kappa\;\ldots)\,]
+        [\,v,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,v,\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &&\textsc{[begin‑plug]}\\[6pt]
 %
 % ───────────────────────────── let‑values (push / switch) ────────────────────────
-        [\,v_{rhs},\;\rho,\;\Sigma,\;((\operatorname{let\!-\!\kappa}(((x_1)\,e_{rhs\_next})((x_2)\,e_2)\;\ldots)
-                                        (x\;\ldots)\;(v\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]
+        [\,v_{rhs},\;\rho,\;\Sigma,\;((\operatorname{let-\kappa}(((x_1)\,e_{rhs\_next})((x_2)\,e_2)\;\ldots)\\(x\;\ldots)\;(v\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rhs\_next},\;\rho,\;\Sigma,\;((\operatorname{let\!-\!\kappa}(((x_2)\,e_2)\;\ldots)
-                                        (x_1\;x\;\ldots)\;(v_{rhs}\;v\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]
+        [\,e_{rhs\_next},\;\rho,\;\Sigma,\;((\operatorname{let-\kappa}(((x_2)\,e_2)\;\ldots)\\
+        &\hspace{7.6em}
+          (x_1\;x\;\ldots)\;(v_{rhs}\;v\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]
         &&\textsc{[let‑rhs‑switch]}\\[2pt]
 %
         [\,(let\!-\!values\ (((x_{rhs})\,e_{rhs})((x_2)\,e_2)\;\ldots)\ e_{body}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rhs},\;\rho,\;\Sigma,\;((\operatorname{let\!-\!\kappa}(((x_2)\,e_2)\;\ldots)(x_{rhs})()\;e_{body})\;\kappa\;\ldots)\,]
+        [\,e_{rhs},\;\rho,\;\Sigma,\;((\operatorname{let-\kappa}(((x_2)\,e_2)\;\ldots)(x_{rhs})()\;e_{body})\;\kappa\;\ldots)\,]
         &&\textsc{[let‑push]}\\[6pt]
 %
 % ─────────────────────────── letrec‑values (push / switch) ──────────────────────
-        [\,v_{rhs},\;\rho,\;\Sigma,\;((\operatorname{letrec\!-\!\kappa}(((x_{rhs\_next})\,e_{rhs\_next})((x_{rhs\_rest})\,e_{rhs\_rest})\;\ldots)
+        [\,v_{rhs},\;\rho,\;\Sigma,\;((\operatorname{letrec-\kappa}\\(((x_{rhs\_next})\,e_{rhs\_next})((x_{rhs\_rest})\,e_{rhs\_rest})\;\ldots)\\
                                        x_{prev}\;e_{body})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,e_{rhs\_next},\;\rho,\;\operatorname{extend}(\Sigma,(\operatorname{lookup}(\rho,x_{prev})),(v_{rhs})),\\
         &\hspace{7.6em}
-          ((\operatorname{letrec\!-\!\kappa}(((x_{rhs\_rest})\,e_{rhs\_rest})\;\ldots)\;x_{rhs\_next}\;e_{body})\;\kappa\;\ldots)\,]
+          ((\operatorname{letrec-\kappa}(((x_{rhs\_rest})\,e_{rhs\_rest})\;\ldots)\;x_{rhs\_next}\;e_{body})\;\kappa\;\ldots)\,]
         &&\textsc{[letrec‑rhs‑switch]}\\[2pt]
 %
-        [\,(letrec\!-\!values\ (((x_{rhs})\,e_{rhs})((x_{rhs\_next})\,e_{rhs\_next})\;\ldots)\ e_{body}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
+        [\,(letrec\!-\!values\ (((x_{rhs})\,e_{rhs})((x_{rhs\_next})\,e_{rhs\_next})\;\ldots)\ e_{body}),\\ \rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,e_{rhs},\;
           \operatorname{extend}(\rho,(x_{rhs}\;x_{rhs\_next}\;\ldots),(cell_{addr}\;\ldots)),\;\Sigma,\\
         &\hspace{7.6em}
-          ((\operatorname{letrec\!-\!\kappa}(((x_{rhs\_next})\,e_{rhs\_next})\;\ldots)\;x_{rhs}\;e_{body})\;\kappa\;\ldots)\,] \\
+          ((\operatorname{letrec-\kappa}(((x_{rhs\_next})\,e_{rhs\_next})\;\ldots)\;x_{rhs}\;e_{body})\;\kappa\;\ldots)\,] \\
         &\hspace{1em}
-          \where (cell_{addr}\;\ldots)=\operatorname{variables\!-\!not\!-\!in}(e_{body},(x_{rhs}\;x_{rhs\_next}\;\ldots))
+          \where (cell_{addr}\;\ldots)=\operatorname{variables-not-in}(e_{body},(x_{rhs}\;x_{rhs\_next}\;\ldots))
         &&\textsc{[letrec‑push]}\\[6pt]
 %
 % ─────────────────────────────── application rules ──────────────────────────────
         [\,(e_{rator}\;e_{rands}\;\ldots),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rator},\;\rho,\;\Sigma,\;((\operatorname{arg\!-\!\kappa}(e_{rands}\;\ldots))\;\kappa\;\ldots)\,]
+        [\,e_{rator},\;\rho,\;\Sigma,\;((\operatorname{arg-\kappa}(e_{rands}\;\ldots))\;\kappa\;\ldots)\,]
         &&\textsc{[app‑rator‑push]}\\[2pt]
 %
-        [\,(closure\ x\;\ldots\;e_{body}\;\rho_{clo}),\;\rho,\;\Sigma,\;((\operatorname{arg\!-\!\kappa}())\;\kappa\;\ldots)\,]
+        [\,(closure\ x\;\ldots\;e_{body}\;\rho_{clo}),\;\rho,\;\Sigma,\;((\operatorname{arg-\kappa}())\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,e_{body},\;\rho_{clo},\;\Sigma,\;(\kappa\;\ldots)\,]
         &&\textsc{[app‑no‑rand‑plug]}\\[2pt]
 %
-        [\,v_{clo},\;\rho,\;\Sigma,\;((\operatorname{arg\!-\!\kappa}(e_{rand_1}\;e_{rands}\;\ldots))\;\kappa\;\ldots)\,]
+        [\,v_{clo},\;\rho,\;\Sigma,\;((\operatorname{arg-\kappa}(e_{rand_1}\;e_{rands}\;\ldots))\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rand_1},\;\rho,\;\Sigma,\;((\operatorname{fun\!-\!\kappa}v_{clo}(e_{rands}\;\ldots)())\;\kappa\;\ldots)\,]
+        [\,e_{rand_1},\;\rho,\;\Sigma,\;((\operatorname{fun-\kappa}v_{clo}(e_{rands}\;\ldots)())\;\kappa\;\ldots)\,]
         &&\textsc{[app‑rand‑push]}\\[2pt]
 %
-        [\,v_{rand},\;\rho,\;\Sigma,\;((\operatorname{fun\!-\!\kappa}v_{clo}(e_{rand_1}\;e_{rands}\;\ldots)(v\;\ldots))\;\kappa\;\ldots)\,]
+        [\,v_{rand},\;\rho,\;\Sigma,\;((\operatorname{fun-\kappa}v_{clo}(e_{rand_1}\;e_{rands}\;\ldots)(v\;\ldots))\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rand_1},\;\rho,\;\Sigma,\;((\operatorname{fun\!-\!\kappa}v_{clo}(e_{rands}\;\ldots)(v\;\ldots\;v_{rand}))\;\kappa\;\ldots)\,]
+        [\,e_{rand_1},\;\rho,\;\Sigma,\;((\operatorname{fun-\kappa}v_{clo}(e_{rands}\;\ldots)(v\;\ldots\;v_{rand}))\;\kappa\;\ldots)\,]
         &&\textsc{[app‑rand‑switch]}\\[2pt]
 %
-        [\,v_{rand},\;\rho,\;\Sigma,\;((\operatorname{fun\!-\!\kappa}
+        [\,v_{rand},\;\rho,\;\Sigma,\;((\operatorname{fun-\kappa}
             (\operatorname{closure}\;x\;\ldots\;e_{body}\;\rho_{clo})() (v\;\ldots))\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
         [\,e_{body},\;
@@ -150,12 +154,13 @@
         &\hspace{7.6em}
           \operatorname{extend}(\Sigma,(cell_{addr}\;\ldots),(v\;\ldots\;v_{rand})),\;(\kappa\;\ldots)\,] \\
         &\hspace{1em}
-          \where (cell_{addr}\;\ldots)=\operatorname{variables\!-\!not\!-\!in}(e_{body},(x\;\ldots))
+          \where (cell_{addr}\;\ldots)=\operatorname{variables-not-in}(e_{body},(x\;\ldots))
         &&\textsc{[app‑plug]}
       \end{align*}
     \end{minipage}%
   }
   \vspace{0.6em}
-  \caption{CEK Reduction Relation [PLACEHOLDER]}
+  \caption{CEK Reduction Relation}
   \label{fig:cek-reduction-relation-redacted}
 \end{figure}
+%\end{landscape}
