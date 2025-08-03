@@ -89,7 +89,7 @@
     \paragraph{}% 13
       For the shallow path scenario, all approaches perform similarly to vanilla Pycket, as expected, since shallow branches are traced by all three interpreters. For the deep path scenario, both meta-hints and the augmented green variables approaches successfully avoid generating overly specialized, long traces. However, this does not translate directly into better overall performance; instead, runtime performance worsens because the deeply nested loops remain interpreted rather than \gls{jit}-compiled. In other words, we do eliminate time for recording, compiling, and optimizing, but if these deep branchy paths are not \gls{jit}ted, then it gets much worse as they are frequently taken. With randomized inputs, however, we observe a beneficial trade-off: the optimized versions avoid some overhead from large, unnecessary trace compilations. Nonetheless, performance here remains highly input-dependent; once tracing starts due to sufficient shallow branch hits, subsequent deep branch executions still accumulate into the recorded trace, reducing potential gains. These results confirm our hypothesis that strategically avoiding tracer entry into deeply nested branches can indeed yield performance improvements, while highlighting the complexity and limitations of applying these strategies more broadly.
 
-    \paragraph{}% 13.1
+    \paragraph{}% 14
       Now we turn to an experiment that's closer to a real-world scenario to better evaluate the practical applicability of the techniques we introduced. Recall from \secref{section:there-is-no-loop} that Pycket has a manually written regular expression matcher implementation in RPython, as well as an equivalent Racket-based version provided through a utility linklet bundled in the bootstrapping linklets, which we call the \emph{regexp linklet}. Previously, we leveraged this dual implementation to highlight performance issues during program expansion; results comparing these two implementations are presented in \figref{fig:regexp-overall-comparison}. To further assess the techniques discussed earlier in this section, we devised a set of targeted experiments using the regexp linklet implementation under scenarios analogous to those used in our earlier Branchy experiments. Specifically, we evaluated the following interpreter variants:
 
     \begin{itemize}
@@ -108,46 +108,48 @@
 
      \inputFigure{solution}{approaches-regexp-experiments}
 
-    \paragraph{}% 13.2
+    \paragraph{}% 15
       \figref{fig:approaches-regexp-experiment} shows the results of the experiments described above. All runtime values represent averages over 1000 runs. In experiment (A)—the shallow branching loop—the captured traces were identical across all interpreter configurations. The meta-hints approach exhibits a slight slowdown due to its own overhead, however both optimizations perform comparably to vanilla Pycket using the regexp linklet, as anticipated. In experiment (B)—the deeper, repeatedly branched loop—both optimization approaches demonstrate a slowdown similar to what we observed previously with Branchy. This slowdown occurs because these optimizations successfully prevent tracing and compiling overly specialized complex traces, leading to frequent interpretation of the heavily branched paths. For experiment (C)—the complex randomized input—we observe a significant slowdown for the meta-hints approach. This is because, once \racketcode{can_enter_jit} is activated by shallow branches, the tracer subsequently follows all branches regardless of their depth, resulting again in long, overly specialized traces. Conversely, the extended green variables approach yielded more promising results, consistent with the earlier Branchy experiments. Since this approach indirectly favors shallow branches without explicitly controlling \racketcode{can_enter_jit} annotations, it successfully avoids generating large, over-specialized traces while encouraging shallow computations to be \gls{jit} compiled. Consequently, this method seems to effectively balance trace utilization with the performance trade-off between \gls{jit}-compilation and interpretation, suggesting its superiority as a potential optimization technique for branch-heavy computations.
 
-    \paragraph{}% 14
+    \paragraph{}% 16
       While the targeted nature of these approaches prevents them from delivering a clear overall performance improvement for the general case, evidence validates their potential effectiveness in certain scenarios, thus indicating that they are worth further investigation. In particular, the meta-hints strategy can be extended and generalized by allowing dynamic modification of the green variables at the user-code level. Similar to our augmented-depth approach, the interpreter could dynamically adjust the profiling performed by the tracer, providing finer-grained control over tracing behavior. Although such extensions would likely amplify the annotation burden on the user-level code and further specialize the profiling mechanism, this fine-grained control may enable more precise and effective tracing decisions. Additionally, the interpreter could leverage multiple \gls{jit} drivers simultaneously—one driver focusing on branch-heavy computations alongside another utilizing the original green variable definitions—to achieve even finer control over trace generation and optimization strategies.
 
-    \paragraph{}% 15
+    \paragraph{}% 17
       Fundamentally, as discussed extensively in \chapterRef{chapter:problem}, the challenge lies in identifying optimal tracing strategies for branch-heavy computations. Traces capturing all conditional decisions inevitably become highly specialized and less reusable, making them impractical unless identical execution paths—dictated by specific input patterns—are frequently taken, which is typically unrealistic. Conversely, frequently executed paths that are intentionally not traced—such as those omitted due to our proposed techniques—may save the overhead associated with tracing but progressively degrade runtime performance as they remain interpreted rather than \gls{jit}-compiled. Nevertheless, our evidence indicates that addressing the unique tracing issues arising specifically from self-hosting through targeted approaches, such as those described here, indeed offers a viable path toward efficient self-hosting of functional languages on meta-tracing \gls{jit} compilers.
 
 	\section[\texorpdfstring{Mitigating Memory Pressure in Branch-Heavy Computation}{CEK + Stackful Model}]{Mitigating Memory Pressure in Branch-Heavy Computation}
     \label{section:stackful}
 
-    \paragraph{}%
+    \paragraph{}% 1
       A prominent contributor to the performance overhead in self-hosting via meta-tracing \gls{jit} compilers is the considerable memory pressure arising from frequent heap allocations, especially continuations and environments. Recall from \chapterRef{chapter:problem} that the explicit continuations allocated on the heap are fundamental to the CEK machine's ability to implement complex control operations, including proper tail-calls, which inherently leads to frequent continuation allocations in Pycket.
 
-    \paragraph{}%
+    \paragraph{}% 2
       To address memory issues without altering the underlying runtime system or garbage collector installed automatically by the RPython framework, we propose incorporating a stackful interpreter alongside the existing CEK machine in Pycket. This hybrid approach leverages the stack to handle certain computation phases, thereby significantly reducing the number of continuation allocations on the heap. The stackful interpreter is realized as a simple recursive interpreter compiled by the RPython framework into a recursive C program utilizing the native stack. For example, when interpreting a \racketcode{let}-form, instead of creating a \racketcode{LetCont} to evaluate its body after the right-hand-side like we do in the CEK machine, in the stackful interpreter we recursively evaluate the right-hand-side and then interpret the body, using the native stack for the natural continuation.
 
-    \paragraph{}%
+    \paragraph{}% 3
       Despite its simplicity, the use of a stackful interpreter introduces notable challenges related to stack management, particularly concerning stack overflows due to arbitrarily deep recursion. Furthermore, entirely replacing the CEK interpreter with a stack-based alternative would forgo the performance benefits offered by explicit continuations in the CEK machine, particularly in managing complex control operations and proper tail-calls.
 
-    \paragraph{}%
+    \paragraph{}% 4
       Consequently, we advocate for an approach where the two interpreters operate in tandem, strategically switching between them to optimize overall performance. The primary goal of this dual-interpreter strategy is to judiciously balance heap and stack usage—leveraging rapid stack allocations and improved locality while retaining the sophisticated control and optimization capabilities provided by the heap-based CEK interpreter.
 
     \subsection{CEK \+ Stackful Prototype on Pycket}
 
-      \paragraph{}%
+      \inputFigure{solution}{cek-stackful-switch}
+
+      \paragraph{}% 5
         We implemented a practical prototype of the hybrid interpreter approach on Pycket. This prototype aligns closely with the conceptual framework illustrated in \figref{fig:cek-convert-stack}, though it primarily initiates computations using the CEK interpreter. This design choice accommodates Pycket's need to load and instantiate the bootstrapping linklets at startup, subsequently beginning computations via the \racketcode{read}, \racketcode{expand}, and evaluation processes.
 
-      \paragraph{}%
+      \paragraph{}% 6
         In the implemented prototype, the CEK interpreter transfers control to the stackful interpreter upon encountering computational constructs such as \racketcode{let} or \racketcode{begin}. The switching mechanism itself is straightforward, via direct invocation of the stackful interpreter. The stackful interpreter is augmented with a trampoline mechanism to efficiently manage tail-call optimizations. Furthermore, it automatically hands control back to the CEK interpreter under three key conditions: (i) completion of computation and return, (ii) execution involving CPS-transformed primitives (e.g. \racketcode{call/cc}), or (iii) detection of potential stack overflow situations. The return to CEK is handled by unwinding the stack and installing necessary continuations via a \verb|ConvertStack| exception mechanism, effectively allowing seamless continuation of the computation in CEK mode.
 
 
-      \begin{paragraph-here}% 1
+      \begin{paragraph-here}% 7
         The central investigative goals for this prototype revolve around confirming reduced memory overhead, minimal interpreter-switching overhead, and bounded copying of activation records from the stack to the heap. To assess these goals, we conducted experiments using the \texttt{Branchy} program from \chapterRef{chapter:problem} (see \figref{fig:branchy-introduce-code}). We executed \texttt{Branchy} on Pycket under two configurations: the hybrid Stackful+CEK interpreter and the CEK-only vanilla interpreter. We used the same inputs that we used for the experiments in \secref{section:hot-branches}; one that exclusively takes the shallow Exit A, one that takes the deeper Exit B, and input with randomized sequences, with all inputs having 2000 numbers. Similar to the earlier experiments, they're all ran with the setup detailed in \secref{benchmark-setup} and all results are averages over 1000 runs with bootstrapped confidence intervals at the 95\% confidence level~\cite{davisonBootstrapMethods2013}. Note that \texttt{Branchy} program-intentionally-doesn't involve any continuation primitives, to isolate the measurement to only the run-time allocated continuations. The hybrid model starts the computation at the CEK interpreter, and switches to the stackful when it encounters the first \racketcode{let} form, and continues from there.
       \end{paragraph-here}
 
       \inputFigure{solution}{cek-stackful-overall-runtime}
 
-      \begin{paragraph-here}% 2
+      \begin{paragraph-here}% 8
         \figref{fig:hybrid-model-overall-good} presents median runtime results. One slight overhead that we observe in all experiments is higher warmup times for the hybrid model. This is expected, as RPython's meta-tracing \gls{jit} is not designed for recursive interpreter structures, and that needs to be optimized in isolation. The CEK in Pycket's core has been under improvement for years, while the stackful interpreter is only a primitive prototype. Nevertheless, we see comparable performance when combined with the CEK. For the experiment that takes the shallow branch path, we see a slight slowdown due to warmup and the overhead of switching, but still comparable. We observe that that difference closes when we run on deeper branching computations. Notably, we observe a consistently improved run time performance in the hybrid configuration during experiment running randomized inputs. This is due to the reduced memory footprint as we further demonstrate below with memory analyses. Evidently, this suggests that this is indeed a viable approach that warrants further research.
       \end{paragraph-here}
 
@@ -166,46 +168,27 @@
         \label{table:memory-footprints-cek-vs-hybrid}
 		  \end{table}
 
-      \begin{paragraph-here}% 3
+      \begin{paragraph-here}% 9
         \tableRef{table:memory-footprints-cek-vs-hybrid} presents the memory footprint of CEK-only Pycket vs the hybrid Pycket with CEK \& Stackful, each running Branchy with randomized input. All values presented in the table are averages computed over 1000 runs during the benchmarks presented in \figref{fig:hybrid-model-overall-good}. We observe that using a stackful interpreter along with the CEK model dramatically decreases the frequency of minor garbage collections-from an average of 32 collections in the original CEK-only Pycket to 10 collections in the hybrid model. The amount of bytes that are copied is larger in the hybrid model, which is expected, since switching to the CEK requires re-building the whole continuation in the heap. And the old-generation heap growth is dramatically reduced, because i) the CEK doesn't run enough by itself to retain objects in the heap, it switches to the stackful, ii) in the stackful we don't need to keep large continuation objects. This explains the run time results we see in \figref{fig:hybrid-model-overall-good}.
       \end{paragraph-here}
 
-      \begin{show-experiment}
-        Continuation-heavy programs behave like this on CEK+Stackful hybrid model.
-      \end{show-experiment}
-
-      \begin{show-experiment}
-       Run memory experiments/demos from [[chapter - problem]] with the CEK+Stackful to show the difference.
-      \end{show-experiment}
-
-
-
-      \begin{todo}[Technical TODO]
-        Figure out how to show that the memory overhead is reduced.
-      \end{todo}
-
-      \begin{paragraph-here}
-        We didn't add much by doing this. [DUE TECH WORK]
+      \begin{paragraph-here}% 10
+        Thus, the preliminary evidence shows that this approach is a potential solution for mitigating memory pressure that's incurred by self-hosting. While this is a demonstration on a small prototype, this can be developed into a full hybrid model to further analyze the performance benefits in larger programs. This would also reveal interesting runtime behaviors for programs involving continuations, since for those the stackful interpreter will be forced to switch to CEK. This requires significant engineering effort, however, since each form needs to be handled individually, and proper error handling, retaining proper tail calls, while preserving the switch overhead bounded at all times, all present considerable challenges.
       \end{paragraph-here}
 
-      \begin{todo}[Technical TODO]
-        Figure out how to show that the number of points where a switch occurs between the two interpreters and the switching overhead should both be minimal
-      \end{todo}
-
-      \begin{todo}[Technical TODO]
-        Figure out how to show that the amount of copying activation records from the stack into the continuations in the heap should be bounded.
-      \end{todo}
+      % \begin{todo}[Technical TODO]
+      %   Figure out how to show that the amount of copying activation records from the stack into the continuations in the heap should be bounded.
+      % \end{todo}
 
     \subsection{Formalism for CEK \+ Stackful}
 
       \inputFigure{solution}{cek-stackful-grammar}
 
-      \paragraph{}%
-        To facilitate deeper understanding and enable further research, we developed a formal model integrating both the CEK and stackful interpreters. This formalism evaluates a simplified subset of Racket, closely resembling the Racket Core language described previously in \secref{section:linklet-semantics}, but excluding the linklet variable forms. Additionally, this model introduces specialized \racketcode{convert} forms explicitly designed for managing interpreter transitions directly from the source code. \figref{fig:st-cek-grammar} illustrates this simplified language, and \figref{fig:cek-convert-stack} depicts the fundamental interaction model, allowing for deliberate interpreter switching through these special forms.
+      \begin{paragraph-here}% 11
+        To facilitate deeper understanding and enable further research in this technique, we developed a formal model integrating both the CEK and stackful interpreters using PLT Redex. The basic interaction model depicted in \figref{fig:cek-convert-stack}. This formalism evaluates a simplified subset of Racket, closely resembling the Linklet Kernel language described previously in \secref{section:linklet-semantics}, but excluding the linklet variable forms. Additionally, this model introduces specialized \racketcode{convert} forms explicitly designed for managing interpreter transitions directly from the source code. \figref{fig:st-cek-grammar} illustrates this simplified language that allows for deliberate interpreter switching through these special forms.
+      \end{paragraph-here}
 
-      \inputFigure{solution}{cek-stackful-switch}
-
-      \paragraph{}%
+      \paragraph{}% 12
         The underlying objective of this approach is to reduce heap memory pressure induced by large, long-lived continuations. Developed as an executable formalism using PLT Redex, this model enables rigorous experimentation with the semantics of interpreter transitions. \figref{fig:cek-reduction-relation-redacted} and \figref{fig:interpret-stack-redacted} provide simplified versions of the CEK and Stackful reduction semantics, respectively. Complete semantics are available in \appendixRef{appendix:cek-stackful-redex}.
 
       \begin{figure}[!h]
@@ -232,7 +215,7 @@
 
       % \inputSub{solution}{cek-stackful-lemmas}
 
-      \paragraph{}%
+      \paragraph{}% 13
         Taking a step towards addressing the fundamental challenges in self-hosting on meta-tracing frameworks—namely, intelligent meta-tracing of programs with complex control flows and effective management of heap memory pressure—we demonstrate viable strategies for achieving efficient self-hosting of Racket on Pycket. We believe the approaches explored herein hold broad applicability, potentially serving as foundational methods for self-hosting on meta-tracing frameworks more generally.
 
 
