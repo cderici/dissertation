@@ -183,31 +183,11 @@
         To better understand and reason about the hybrid Stackful+CEK interpreter approach, we developed a formal model integrating both interpreters using PLT Redex. The model, illustrated in \figref{fig:cek-convert-stack}, evaluates a simplified subset of Racket similar to the Linklet Kernel language described in \sectionRef{section:linklet-semantics}, excluding linklet variable forms. Additionally, it introduces special \racketcode{convert} forms that explicitly trigger interpreter switches directly from the source code. The grammar for this simplified language is shown in \figref{fig:st-cek-grammar}, clearly depicting how deliberate transitions between the interpreters are controlled. This formal model enables further experimentation and analysis, helping to clarify the conditions under which interpreter switching can effectively reduce memory pressure.
 
       \paragraph{}% 12
-        The ultimate goal of this approach is to reduce heap memory pressure induced by large, long-lived continuations. Developed as an executable formalism using PLT Redex, this model enables rigorous experimentation with the semantics of interpreter transitions. \figref{fig:cek-reduction-relation-redacted} and \figref{fig:interpret-stack-redacted} provide simplified versions of the CEK and Stackful reduction semantics, respectively. Complete semantics are available in \appendixRef{appendix:cek-stackful-redex}.
+        The primary goal of this formal model is to allow precise reasoning about reducing heap memory pressure from large, long-lived continuations. Developed as an executable formalism using PLT Redex, the model supports rigorous experimentation with interpreter transitions. The complete reduction semantics for the CEK and stackful interpreters are presented in \appendixRef{appendix:cek-stackful-redex}.
 
-      \begin{figure}[!h]
-        \centering
-        \includegraphics[scale=0.4]{\inputFigPath{solution}{cek-reduction-relation}}
-        \caption{CEK Reduction Relation [PLACEHOLDER]}
-        \label{fig:cek-reduction-relation-redacted}
-      \end{figure}
-
-      \inputFigure{solution}{cek-reduction-relation-redacted}
-
-      \begin{figure}[!h]
-        \centering
-        \includegraphics[scale=0.4]{\inputFigPath{solution}{interpret-stack-redacted}}
-        \caption{Stackful Model (Redacted) [PLACEHOLDER]}
-        \label{fig:interpret-stack-redacted}
-      \end{figure}
-
-      \begin{todo}[Technical TODO]
-        Figure out how to use this model to show the general heap memory usage drops, as opposed to CEK alone.
-      \end{todo}
-
-      % \inputSub{solution}{cek-stackful-formalism}
-
-      % \inputSub{solution}{cek-stackful-lemmas}
+      % \begin{todo}[Technical TODO]
+      %   Figure out how to use this model to show the general heap memory usage drops, as opposed to CEK alone.
+      % \end{todo}
 
       \paragraph{}% 13
         Taking a step towards addressing the fundamental challenges in self-hosting on meta-tracing frameworks—namely, intelligent meta-tracing of programs with complex control flows and effective management of heap memory pressure—we demonstrate viable strategies for achieving efficient self-hosting of Racket on Pycket. We believe the approaches explored herein hold broad applicability, potentially serving as foundational methods for self-hosting on meta-tracing frameworks more generally.
