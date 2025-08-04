@@ -170,13 +170,13 @@
         \paragraph{}%
             The corresponding RPython code implementing the CEK loop (\figref{fig:pycket-annotated-cek}) on Pycket continuously transforms CEK triples $(\text{ast}, \text{env}, \text{cont})$ into new states by invoking the \texttt{interpret} method on the current AST node. This iterative process proceeds until an empty continuation is encountered, at which point a \texttt{Done} exception is triggered, storing and returning the computation’s final result.
 
-        \begin{paragraph-here}[TODO]
-            Possible good spot for mentioning environment pruning.
-        \end{paragraph-here}
+        % \begin{paragraph-here}[TODO]
+        %     Possible good spot for mentioning environment pruning.
+        % \end{paragraph-here}
 
-        \begin{paragraph-here}[TODO]
-            Talk about strategies on data structures, strings etc.
-        \end{paragraph-here}
+        % \begin{paragraph-here}[TODO]
+        %     Talk about strategies on data structures, strings etc.
+        % \end{paragraph-here}
 
         \paragraph{}%
             Pycket help the meta-tracer identify loops using two complementary mechanisms: the \emph{two-state tracking} and a dynamic \emph{call-graph} approach. In two-state tracking, Pycket filters out false loops by associating potential loop points with caller-callee pairs, represented by the current and previous AST nodes. Without additional context, the \gls{jit} may incorrectly recognize various control-flow points as loops, and the two-state approach effectively reduces such false positives. However, this mechanism alone struggles with complex recursive patterns, such as indirect recursion or proxy-based calls. To complement two-state tracking, Pycket employs a dynamic call-graph technique. This method incrementally constructs a call graph at runtime, with nodes representing invoked functions and edges representing caller-callee relationships. Whenever adding a new edge creates a cycle, Pycket recognizes the target function as a loop header suitable for tracing. The combination of these two approaches ensures robust loop detection and optimized trace generation, particularly in programs with intricate control flows involving recursion and higher-order functions~\cite{pycketmain, pycketmain2}.

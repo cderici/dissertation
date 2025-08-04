@@ -162,6 +162,8 @@
 
 		\inputFigure{linklets}{compile-linklet-transformation-rules-table}
 
+		\vspace{-0.5cm}
+
 		\paragraph{}% 7
 			\tableRef{table:linklet-compilation-rules} lists the transformation rules applied by \racketcode{compile-linklet} to handle linklet variables. Exported and top-level defined identifiers are compiled into linklet variables expected to be created during instantiation. An exported identifier that is targeted by a \racketcode{set!} is compiled into a \racketcode{var-set/check-undef!} operation to persist mutation across linklets. References to imported variables are also compiled as runtime linklet variable references. Additionally, an exported identifier without a definition, or one that is targeted by mutation, is similarly compiled into a runtime linklet variable reference, as it will be provided by the target instance during instantiation.
 
