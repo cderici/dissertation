@@ -48,139 +48,138 @@
 	\section[\texorpdfstring{Enriching Compiler \& Runtime Communication}{Motivation}]{Enriching Compiler \& Runtime Communication}
 	\label{section:linklet-motivation}
 
-		\paragraph{}% 1
+		\paragraph{}% 7
 			A tight coupling exists between the runtime and the reduction semantics of a programming language. This coupling arises because the runtime must concretely implement the abstract semantics specified by the language. For example, languages with macro systems may require runtimes to adopt specialized parsing mechanisms to handle macro expansions, differing from standard reading approaches. Similarly, custom serialization semantics defined by a language necessitate that the runtime can correctly serialize and deserialize language-specific objects. Additionally, languages that define semantics for user-level (green) threads demand explicit runtime support for mapping these constructs to \gls{os} threads. Clearly specifying these interactions is essential for streamlined and efficient language implementations.
 
-		\paragraph{}% 2
+		\paragraph{}% 8
 			Without explicit support from the language itself, each runtime that aims to implement the language must manually reconstruct all of these intricate interactions. Such manual reconstruction is costly, error-prone, and challenging to maintain, especially since subtle changes in language semantics often require extensive adjustments within the runtime. Consequently, portability becomes limited, forcing each runtime to independently handle the complexities inherent in language semantics. Therefore, introducing a mechanism to mitigate these difficulties would significantly improve portability.
 
-		\paragraph{}% 3
+		\paragraph{}% 9
 			Racket is a good example that successfully leverages such a mechanism to significantly enhance its portability. In 2019, Racket transitioned to Chez Scheme as its primary runtime and introduced a structured intermediate representation called \emph{linklets} as units of compilation, designed to simplify the runtime implementation~\cite{icfp2019}. Linklets, discussed in detail in the next section, streamlined the process of re-targeting Racket to Chez Scheme and established a robust foundation for self-hosting on other platforms, directly aligning with our thesis.
 
 		\inputFigure{linklets}{racket-on-chez-3-stacks-figure}
 
-		\paragraph{}% 4
+		\paragraph{}% 10
 			The transition of Racket to Chez Scheme is illustrated in \figref{fig:racket-on-chez}. To concretely improve portability, Racket shifted several high-level components—initially and most notably the macro expander—from a C-based implementation to Racket itself. The left-most column of \figref{fig:racket-on-chez} highlights the first ever version of Racket with its expander implemented in Racket. The macro expander defines critical functionality, including the macro system, module system, reader, and code expansion and elaboration. It is the essential component enabling reading and elaborating Racket code, thereby it plays a central role in supporting self-hosting of the language.
 
 		\inputFigure{linklets}{racket-expand-example-figure}
 
-		\paragraph{}% 5
+		\paragraph{}% 11
 			Furthermore, the expander transforms Racket code into a core \gls{ir} designed explicitly for consumption by the hosting runtime. This intermediate representation closely resembles $\lambda$-calculus with some syntactic extensions. Instead of conventional \racketcode{lambda} forms, which consume and produce values, this intermediate form employs \racketcode{linklet} forms that consume and produce potentially mutable variables. By strictly segregating evaluation phases (e.g., compile-time versus run-time), the expander produces distinct linklets corresponding to different phases for a given Racket module. \figref{fig:racket-expand-example} demonstrates this elaboration with an example module, showing distinct linklets for expansion-time (compile-time), run-time, and literal syntax objects to bridge these phases.
 
-		\paragraph{}% 6
+		\paragraph{}% 12
 			The bundle of linklets generated for a Racket module can subsequently be flattened into a single, self-contained runtime linklet. This way, Racket applies the macro expander to each layer of high-level functionality to produce self-contained linklets that can be exported offline by the language. For example, applying the macro expander to itself produces an independent linklet that encapsulates all subsystems essential for bootstrapping Racket, such as the module and macro systems. We will refer to the high-level functionalities that are exported in this way together as the \emph{bootstrapping linklets} in the rest of the dissertation.
 
-		\paragraph{}% 7
+		\paragraph{}% 13
 			Given the bootstrapping linklets, a runtime that aims to implement Racket needs only to understand how to compile and execute serialized linklets to turn into a full runtime for the language. By loading these linklets, a runtime instantly acquires Racket's entire high-level functionalities, such as the macro and module system, \racketcode{read}, \racketcode{expand}, and more without having to explicitly reimplement them separately. Consequently, it gains the capacity to self-host Racket, by utilizing the module system to locate and load the core Racket libraries, and reading and expanding all the modules to load a Racket language (e.g. \emph{racket/base}), fully supporting Racket’s semantics. In \chapterRef{chapter:pycket} we present this process in detail by which we turn Pycket into a full Racket implementation.
 
-		\paragraph{}% 8
+		\paragraph{}% 14
 			In the next section, we delve into the semantics of the central construct enabling this enhanced portability—linklets. We present a formal operational semantics for linklets and describe an executable PLT Redex model that captures their compilation and execution semantics.
 
 	\section[\texorpdfstring{Linklets as Units of Compilation}{Example Use: REPL}]{Linklets as Units of Compilation}
 		\label{section:linklet-semantics}
 
-		\paragraph{}% 1
+		\paragraph{}% 15
 			In this section, we demonstrate through a practical example how linklets facilitate interesting runtime functionalities, laying the groundwork for improved compiler-runtime communication and, eventually, self-hosting.
 
 		\inputFigure{linklets}{linklet-source-language-figure}
 
-		\paragraph{}% 2
+		\paragraph{}% 16
 			A \emph{linklet}, as depicted in \figref{fig:linklet-grammar}, is a lambda-like binding construct composed of three primary components: a set of imported variables, a set of exported variables, and a body containing definitions and expressions. Real-world examples of linklets, represented as s-expressions, can be seen in \figref{fig:racket-expand-example}. Imported variables allow linklets to utilize external definitions, while exported variables provide definitions to other linklets. Notably, the exported set can include variables without corresponding definitions in the body, enabling dynamic binding resolution at runtime.
 
-		\paragraph{}% 3
+		\paragraph{}% 17
 			Linklets as standalone s-expressions are no more inherently meaningful than a conventional \racketcode{lambda} expression. But when \emph{compiled} by a hosting runtime into a linklet object, a linklet becomes ready for \emph{instantiation}, a process analogous to a function application, wherein imported variables are provided, and the linklet body expressions are sequentially evaluated. Instantiation can occur in two modes that we will refer to as \emph{regular instantiation} and \emph{targeted instantiation} in the rest of the chapter, each resulting in different outcomes.
 
 		\inputFigure{linklets}{basic-linklet-instantiation-figure}
 
-		\paragraph{}% 4
+		\paragraph{}% 18
 			Regular instantiation is where a linklet evaluates its body after receiving imported variables from other linklet instances. As illustrated in \figref{fig:regular-linklet-instantiation}, regular instantiation produces a fresh \emph{linklet instance}, which serves as a container holding exported variables and additional runtime data such as namespaces. The resulting linklet instance subsequently provides its variables to other linklet instantiations.
 
-		\paragraph{}% 5
+		\paragraph{}% 19
 			A targeted instantiation, by contrast, is where a linklet is provided with a pre-existing \emph{target} instance alongside linklet instances for the imported variables. In this case, the variables in the target instance is used and modified for the linklet definitions and expressions during the evaluation of the expressions within the linklet body. This kind of instantiation is often used for side-effects, and the result is the value of the last expression in the linklet rather than a new linklet instance.
 
-		\paragraph{}% 6
+		\paragraph{}% 20
 			The linklet design does not impose a specific internal representation, allowing a \gls{vm} flexibility in selecting preferred representations for linklets and instances. For example, Chez Scheme represents linklets as Scheme functions, whereas Pycket employs a custom runtime class named \pycketcode{W\_Linklet}. To manage these diverse representations uniformly, Racket specifies a minimal runtime \gls{api} for \glspl{vm}, comprising two functions: \racketcode{compile-linklet} for preparing linklets and \racketcode{instantiate-linklet} for executing them.
 
-		\paragraph{}% 7
+		\paragraph{}% 21
 			Loading linklets into a \gls{vm} runtime involves compiling linklet s-expressions into runtime objects and subsequently instantiating these objects to obtain their exported variables. Specifically, \racketcode{compile-linklet} transforms linklet s-expressions into runtime objects containing the runtime AST for the enclosed code. Once instantiated, all exported variables become immediately available to other linklets via the resulting instance. These variables can encapsulate any Racket value, including callable closures, allowing the runtime to directly invoke powerful functions without explicitly reimplementing them, such as the \racketcode{expand} function from the expander linklet.
 
 
 		\subsection{Using Linklets: A Small Top-level REPL Interaction}
 		\label{subsec:toplevel-example}
 
-		\paragraph{}% 8
+		\paragraph{}% 22
 			To clarify and illustrate the semantics of linklets in a more concrete manner, we introduce a small yet informative example of how a \gls{vm} implements a high-level Racket feature using linklets: the top-level \gls{repl}. Although the top-level implementation itself is quite complex and beyond our scope, this example demonstrates clearly how the runtime utilizes high-level features provided via linklets—particularly those exported by the expander, including \racketcode{read}, \racketcode{expand}, and \racketcode{eval}—to create a \gls{repl} behavior.
 
-		\paragraph{}% 9
+		\paragraph{}% 23
 			As a running example, consider the simple \gls{repl} interaction in \figref{fig:toplevel-example-repl-interactions}, in which a closure \racketcode{k} references an initially undefined variable \racketcode{a}. Subsequently, the variable \racketcode{a} is defined, and the closure is invoked, yielding the result 10. This scenario is intended to illustrate how linklets implement dynamic variable bindings.
 
 		\inputFigure{linklets}{toplevel-example-interaction-listing}
 
-		\paragraph{}% 10
+		\paragraph{}% 24
 			This interaction, despite seemingly contradicting lexical scoping, is perfectly valid within \gls{repl} environments, which are historically designed to evaluate expressions incrementally within mutable top-level namespaces. Such environments allow the definition of constructs like mutually recursive functions in a step-by-step manner. To simulate this dynamic behavior, our \gls{vm} maintains a dedicated \emph{top-level} linklet instance, initially empty, that serves as a mutable namespace for dynamically defining and modifying variables throughout the \gls{repl} session.
 
-		\paragraph{}% 11
+		\paragraph{}% 25
 			At each interaction step in the \gls{repl}, the VM receives a Racket s-expression to evaluate. It first applies Racket's \racketcode{read} and \racketcode{expand} functions—provided by the expander linklet—to convert the s-expression into a linklet. This newly generated linklet is then compiled using \racketcode{compile-linklet} into a linklet object, which undergoes targeted instantiation with the top-level instance as its target. \figref{fig:topevel-example-step-by-step} shows the generated and compiled linklets along with the updated state of the environment and top-level instance after each step\footnote{For clarity, we will omit the non-essential details and focus only on the simplified run-time linklet for the expression}.
 
 		\inputFigure{linklets}{toplevel-example-step-by-step-figure}
 
-		\paragraph{}% 12
+		\paragraph{}% 26
 			Each step in the \gls{repl} involves dynamically using Racket's own \racketcode{read} and \racketcode{expand} functions provided by the expander linklet, rather than runtime-specific implementations. This demonstrates a core advantage of linklets, allowing the runtime to leverage the high-level functionalities directly exported from Racket itself, significantly simplifying the runtime's implementation burden.
 
-		\paragraph{}% 13
+		\paragraph{}% 27
 			An interesting point about the top-level in this example is the handling of the undefined identifier \racketcode{a}. When the runtime compiles a linklet containing such an identifier, it designates that identifier as an exported variable of the linklet (despite having no corresponding definition for it). During the compilation, a new linklet variable is created for it with the special value \emph{uninitialized} (e.g. $var_a$ in our example). When the runtime for later refers to such an identifier, it will be dynamically provided using the \emph{target} instance (in this case using the top-level instance), essentially forming a low-level dynamic scope. Note that in the first row of the \figref{fig:topevel-example-step-by-step}, we have the variable mappings for both \racketcode{a} and the \racketcode{k} within the target instance after the instantiation. They contain the values \racketcode{uninitialized} and a closure with no arguments and body with a reference to $var_a$ respectively.
 
-		\paragraph{}% 14
+		\paragraph{}% 28
 			Since each instantiation within the \gls{repl} is a targeted instantiation, changes made to the top-level instance persist across interactions. For instance, after the second interaction step depicted in \figref{fig:topevel-example-step-by-step}, \racketcode{a}'s value (10) is directly assigned to $var_a$ via a \racketcode{variable-set!} operation in the compiled linklet. If $var_a$ had not existed in the top-level instance initially, a new variable initialized as \emph{uninitialized} would have been created (as occurred in the first interaction). In this case, however, since $var_a$ existed, it was simply updated to hold the new value.
 
-		\paragraph{}% 15
+		\paragraph{}% 29
 			At the third interaction step, when executing the closure \racketcode{k}, the identifier \racketcode{a} inside the closure is dynamically resolved to the $var_a$ via the \racketcode{variable-ref} call inside the compiled linklet. Then the runtime consults the \emph{target} top-level instance to obtain \racketcode{a}'s current value (10), already set thanks to the previous step. This demonstrates linklets' flexibility in managing runtime variable bindings across dynamic execution contexts.
 
-		\paragraph{}% 16
+		\paragraph{}% 30
 			This dynamic interplay of linklets is made possible by the clever use of linklet variables and target instances, specified by the semantics that are embedded in the \racketcode{compile-linklet}. In the subsequent section, we present these formal operational semantics in detail, underpinning the correctness and robustness of linklet interactions and their use in runtime implementations.
-
 
 	\section[\texorpdfstring{Formal Operational Semantics of Linklets}{Formal Semantics}]{Formal Operational Semantics of Linklets}
 	\label{section:linklet-formal-semantics}
 
-		\paragraph{}% 1
+		\paragraph{}% 31
 			In this section, we present a formal specification of the operational semantics of linklets, which serves as the foundation for their implementation in Pycket, discussed in the following chapter (\chapterRef{chapter:pycket}). We develop this formalism using the PLT Redex language, making it executable and enabling rigorous validation through randomized testing~\cite{redexBook, randomizedTesting}. The validation methodology, including details of randomized testing and model correctness, is further elaborated in \chapterRef{chapter:validation}.
 
-		\paragraph{}% 2
+		\paragraph{}% 32
 			The grammar of the linklet language, presented earlier in \figref{fig:linklet-grammar}, defines a minimal subset of fully-expanded Racket programs extended with the special \racketcode{linklet} form and top-level definitions (e.g., \racketcode{define-values}). Besides common forms like \racketcode{begin}, \racketcode{set!}, and \racketcode{if}, the grammar includes additional constructs specifically for manipulating variables (e.g., \racketcode{var-ref}), as shown in the rule for expressions (\verb|e|). These special constructs handle what we refer to as \emph{linklet variables}, which semantically behave just like regular variables in the runtime but are explicitly manipulated within linklets. We will detail these variable manipulation forms further when discussing the semantics of \racketcode{compile-linklet}.
 
-		\paragraph{}% 3
+		\paragraph{}% 33
 			The sub-language used within a linklet body, which we refer to as \gls{lkl}, is essentially a $\lambda$-calculus enriched with a minimal set of syntactic extensions. We present the detailed grammar, a standard reduction relation, and an evaluator for \gls{lkl} in \appendixRef{appendix:linklet-kernel-language}, as these form the core language referred to by the linklet semantics. Importantly, \gls{lkl} aligns closely with Racket's \racketcode{\#\%kernel} language, thus any rudimentary interpreter for \racketcode{\#\%kernel} forms can easily be extended to support linklets by solely adding the linklet-specific semantics.
 
 		\inputFigure{linklets}{linklet-runtime-language-figure}
 
-		\paragraph{}% 4
+		\paragraph{}% 34
 			\figref{fig:linklet-runtime-language} illustrates the runtime representations for compiled linklets and linklet instances. Given a linklet $L$, \racketcode{compile-linklet} produces a compiled linklet object $\la$ ready for instantiation. Such an object includes \emph{Import} and \emph{Export} entries that encode the imported and exported variables, respectively. For clarity, we omit the details concerning compilation of basic forms (e.g., \racketcode{begin}, \racketcode{set!}) into runtime \glspl{ast}, focusing instead only on the constructs specific to linklets. Furthermore, the body of a compiled linklet will include additional runtime expressions inserted during compilation to manage dynamic variable manipulations, as explained in detail in subsequent paragraphs.
 
-		\paragraph{}% 5 + 6
+		\paragraph{}% 35
 			Before \racketcode{compile-linklet} is invoked, several preprocessing passes are performed on the linklet body. These passes produce \emph{Import} and \emph{Export} objects, each containing internal and external identifiers to accommodate potential renaming, as well as freshly (gensym) generated identifiers for runtime use. Additionally, these preprocessing steps gather information about identifiers defined within the linklet body, and those targeted by mutation operations, all to be used during compilation. Given the sets of \emph{Import}s ($\mathit{C_I}$), \emph{Export}s ($\mathit{C_E}$), top-level defined identifiers ($\mathit{X_T}$), and mutated identifiers ($\mathit{X_M}$), \racketcode{compile-linklet} processes each expression within the linklet body one-by-one. It utilizes the data collected in preprocessing to correctly compile variable references and mutation operations into the appropriate runtime forms.
 
 		\inputFigure{linklets}{compile-linklet-transformation-rules-table}
 
 		\vspace{-0.5cm}
 
-		\paragraph{}% 7
+		\paragraph{}% 36
 			\tableRef{table:linklet-compilation-rules} lists the transformation rules applied by \racketcode{compile-linklet} to handle linklet variables. Exported and top-level defined identifiers are compiled into linklet variables expected to be created during instantiation. An exported identifier that is targeted by a \racketcode{set!} is compiled into a \racketcode{var-set/check-undef!} operation to persist mutation across linklets. References to imported variables are also compiled as runtime linklet variable references. Additionally, an exported identifier without a definition, or one that is targeted by mutation, is similarly compiled into a runtime linklet variable reference, as it will be provided by the target instance during instantiation.
 
-		\paragraph{}% 8
+		\paragraph{}% 37
 			Instantiation of a compiled linklet begins by processing its \emph{Import} and \emph{Export} objects. Imported variables are collected from the provided linklet instances, and exported variables are either fetched from the target instance or freshly created, as previously described in the top-level example (\sectionRef{subsec:toplevel-example}). For simplicity, we denote by $\lb$ a compiled linklet object after this initial step, meaning that $\lb$ no longer explicitly includes import and export objects as these have been resolved. With such a prepared $\lb$, instantiation then proceeds to evaluation of its body expressions.
 
-		\paragraph{}% 9
+		\paragraph{}% 38
 			Recall that instantiation occurs in two distinct modes: \emph{regular instantiation}, resulting in a new linklet instance, and \emph{targeted instantiation}, which uses an existing target instance and returns the value of the last evaluated expression. As part of preparing a compiled linklet for instantiation, \racketcode{compile-linklet} transitions from $\la$ to $\lb$ by plugging in a target instance. In regular instantiation, this target instance is freshly created as an empty instance, whereas in targeted instantiation, it is the pre-existing instance provided as input to the \racketcode{instantiate-linklet}. For simplicity, we unify these two modes in the semantics by always considering an explicit target instance, and denote the instantiation result uniformly as a pair consisting of the last expression's value and the target instance used during evaluation.
 
 		\inputFigure{linklets}{program-source-language}
 
-		\paragraph{}% 10
+		\paragraph{}% 39
 			Since linklets alone are binding constructs and cannot initiate computation, we introduce a top-level construct named \racketcode{program} to demonstrate their operational semantics in context. A \racketcode{program} comprises a set of linklets to load and a single top-level expression to initiate computation. The grammar for \racketcode{program} is shown in \figref{fig:linklet-program-source-language}, where the \racketcode{let-inst} form names linklet instances, and the \racketcode{seq} form sequences computations. Additionally, the function $\bm{\Phi^V}$ (\emph{instance-variable-value}) retrieves the value of an exported variable from a given instance.
 
 		\inputFigure{linklets}{linklets-reduction-relation}
 
-		\paragraph{}% 11
+		\paragraph{}% 40
 			\figref{fig:linklets-reduction-relation} presents the reduction relation, $\beta_p$, which defines the evaluation of linklet programs along with the reduction relation $\beta_l$ for the \gls{lkl}. For clarity and simplicity, the evaluation of programs and linklet instantiations are both expressed by the single relation $\beta_p$, thus forming a coherent, small-step evaluation sequence from programs to values. To maintain readability, trivial reduction rules for forms such as \racketcode{seq} and \racketcode{let-inst} are omitted.
 
 		\subsection{Top-level REPL Example in the Formal Model}
@@ -188,33 +187,33 @@
 
 		\inputFigure{linklets}{toplevel-example-formal-program}
 
-		\paragraph{}% 12
+		\paragraph{}% 41
 			To concretely illustrate how our formal semantics capture the top-level \gls{repl} interaction described earlier (\sectionRef{subsec:toplevel-example}), we represent it as a \racketcode{program} form and simulate its evaluation within our semantics. \figref{fig:toplevel-example-repl-interactions-formal} shows this top-level interaction represented as a \racketcode{program}. We prepare individual linklets for each step of the interaction, then instantiate (execute) them sequentially using a shared target instance introduced by the \racketcode{let-inst} form.
 
-		\paragraph{}% 13
+		\paragraph{}% 42
 			The initial steps of the formal (multi-step) reduction, namely $\betaprel$, for the program are shown in \tableRef{table:toplevel-example-step-by-step-formal}, following the reduction relation defined in \figref{fig:linklets-reduction-relation}. The reduction begins by compiling each linklet provided to the \racketcode{program}. Once compilation is complete, the resulting $\la$ forms are plugged in the program's body, and evaluation starts. For clarity, the remaining reduction steps, which ultimately yield the final value (10), are presented in \appendixRef{appendix:formal-reduction-steps-toplevel-example}.
 
 		\inputFigure{linklets}{toplevel-example-step-by-step-formal-table}
 
-		\paragraph{}% 14
+		\paragraph{}% 43
 			At the beginning of linklet instantiation, imported variables are gathered from the provided linklet instances. Each imported variable reference is then mapped in the environment according to the identifiers in the corresponding \emph{Import} objects created during compilation. Recall that a linklet may export variables without corresponding definitions. For these, each exported variable is fetched from the target instance if present; otherwise, a new variable is created with an initial value of \emph{uninitialized}. The environment and the target instance mappings are updated accordingly.
 
-		\paragraph{}% 15
+		\paragraph{}% 44
 			After setting up import and export variables, the linklet object $\la$ reduces to $\lb$, triggering evaluation of the linklet body expressions. The earlier compilation ensures each variable reference within the linklet body resolves correctly. Evaluation then proceeds through each expression sequentially. Once all expressions are evaluated, the instantiation concludes, returning a pair consisting of the last expression's value and the target instance that was used.
 
-		\paragraph{}% 16
+		\paragraph{}% 45
 			The formalism described in this section is fully implemented as an executable PLT Redex model. The complete Redex model code, including definitions and tests, is available in the \appendixRef{appendix:linklet-semantics-model-redex-code}. Additionally, the Redex model implementation is accessible online at the project's repository\footnote{\url{https://github.com/cderici/linklets-redex-model}}. The complete sequence of reductions for the top-level \gls{repl} example discussed previously is provided in \appendixRef{appendix:formal-reduction-steps-toplevel-example}.
 
 	\refstepcounter{section}
 	\section*{\thesection\quad Conclusion}
 
-		\paragraph{}% 1
+		\paragraph{}% 46
 			The ability to provide high-level functionalities as callable functions to a hosting \gls{vm} is central to improving language portability. By exporting implementations of essential features—such as the module system and macro system—as self-contained linklets, Racket substantially reduces the effort required for runtimes to support its semantics. This approach enables runtimes to seamlessly incorporate and reuse complex, high-level functionalities directly, as demonstrated by the top-level \gls{repl} example in \secref{subsec:toplevel-example}.
 
-		\paragraph{}% 2
+		\paragraph{}% 47
 			Moreover, the interaction between the Racket language and its hosting runtime via linklets is inherently bidirectional. On one hand, the runtime implements \racketcode{compile-linklet} and \racketcode{instantiate-linklet}, allowing it to load and invoke high-level functionalities provided by the language. On the other hand, these high-level language components—such as the expander linklet—rely directly on runtime-implemented primitives and the linklet APIs themselves. For instance, Racket's \racketcode{dynamic-require} function dynamically resolves module paths, interacts with the file system, and utilizes runtime-provided functions to compile and instantiate necessary modules. Similarly, the \racketcode{eval} function leverages the same set of runtime primitives to execute Racket code. This mutual dependence between high-level language features and low-level runtime support via linklets is fundamental to Racket's enhanced portability.
 
-		\paragraph{}% 3
+		\paragraph{}% 48
 			In this chapter, we examined how enhancing compiler and runtime communication at the language level significantly improves portability. Using Racket’s linklets as a concrete example, we introduced a formal operational semantics, executable in PLT Redex, to precisely specify how linklets encapsulate high-level functionalities for convenient runtime adoption. Building on these semantic foundations, the next chapter (\chapterRef{chapter:pycket}) concretely realizes self-hosting of Racket on Pycket, demonstrating the practical viability of language-powered runtimes and effectively providing proof for our thesis statement.
 
 
