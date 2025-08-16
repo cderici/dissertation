@@ -1,10 +1,78 @@
 \chapter*{Vita}
 \addtocontents{toc}{
- \unexpanded{\unexpanded{\renewcommand{\cftchapdotsep}{\cftnodots}}}%  
+ \unexpanded{\unexpanded{\renewcommand{\cftchapdotsep}{\cftnodots}}}%
 }
 \addcontentsline{toc}{chapter}{Curriculum Vitae}
 
 \doublespacing
-Vita may be provided by doctoral students only. The length of the vita is preferably one page. It may include the place of birth and should be written in third person. This vita is similar to the author biography found on book jackets.
+
+% ---------- Vita (self-contained) ----------
+% Minimal helpers (no extra packages required)
+\newlength{\cvdatewidth}\setlength{\cvdatewidth}{3.2cm}
+\newcommand{\vitaSection}[1]{\par\vspace{0.75em}\noindent{\Large\textsc{#1}}\par\vspace{0.25em}\hrule\vspace{0.6em}}
+% Smart \cvitem: if the left arg is empty, use full width (fixes short wrapping in Publications)
+\makeatletter
+\newcommand{\cvitem}[2]{%
+  \noindent
+  \if\relax\detokenize{#1}\relax
+    \parbox[t]{\linewidth}{#2}\par\vspace{0.35em}% full width
+  \else
+    \parbox[t]{\cvdatewidth}{\raggedright #1}\hspace{1em}% date col
+    \parbox[t]{\dimexpr\linewidth-\cvdatewidth-1em\relax}{#2}\par\vspace{0.35em}% body col
+  \fi}
+\makeatother
+% Tight linebreak helper to reduce the double-spaced gap between two consecutive lines
+\newcommand{\tightline}{\\[-0.35\baselineskip]} % tweak -0.35 as needed
+
+% Header
+\begin{center}
+{\Large \textsc{Caner Derici}}\\
+\small caner@dericilab.live
+\end{center}
+
+% Education
+\vitaSection{Education}
+
+\cvitem{Sep 2025}{\textbf{PhD in Computer Science}, \textsc{Indiana University}, Bloomington, IN\\Dissertation: \smartQL \thesisTitle \smartQR}
+\cvitem{2013}{\textbf{M.S. in Computer Science}, \textsc{Boğaziçi University}, Istanbul, Turkey\\Areas: Machine Learning, Natural Language Processing}
+\cvitem{2010}{\textbf{B.S. in Computer Science}, \textsc{Istanbul Bilgi University}, Istanbul, Turkey}
+
+% Work (positions / appointments)
+\vitaSection{Work}
+
+\cvitem{2021--2024}{\textbf{Software Engineer II (L4), Enterprise Cloud Engineering, Juju team}\tightline \textsc{Canonical USA}, Remote, US\\[-0.25\baselineskip]
+\begin{itemize}\itemsep0.25em
+    \vspace{-0.5cm}
+  \item Architected distributed components improving reliability, fault tolerance, and back-pressure on an eventually consistent backend.
+  \item Doubled the user base of client libraries (Python-libjuju, Terraform Juju Provider); owned deliverables and maintained release cadence.
+  \item Contributed to roadmap planning, cross-team coordination, mentoring, and hiring.
+\end{itemize}
+}
+
+\cvitem{2015--2021}{\textbf{Course Instructor, Teaching \& Research Assistant}\tightline \textsc{Indiana University}, Bloomington, IN\\[-0.25\baselineskip]
+\begin{itemize}\itemsep0.25em
+    \vspace{-0.5cm}
+  \item Taught data structures \& algorithms, compilers, virtual machines, and domain-specific languages.
+  \item Researched runtime performance of \gls{jit}-compiled virtual machines for functional languages.
+\end{itemize}
+}
+
+\cvitem{2012--2013}{\textbf{Software Engineer}\tightline \textsc{Asseco SEE Group}\\[-0.25\baselineskip]
+\begin{itemize}\itemsep0.25em
+    \vspace{-0.5cm}
+  \item Developed virtual payment platforms for e-commerce; delivered three point-of-sale projects in one year (Java, Apache Tomcat, Spring, Mercurial, Jira).
+\end{itemize}
+}
+
+% Publications (selected)
+\vitaSection{Publications}
+
+\cvitem{}{\textit{Flatt, M.}, \textit{Derici, C.}, Dybvig, R.\,K., Keep, A.\,W., et al. “Rebuilding Racket on Chez Scheme (experience report)”. \textit{ICFP} 2019.}
+\cvitem{}{\textit{Derici, C.}, et al. “A closed-domain question answering framework using reliable resources to assist students”. \textit{Natural Language Engineering} 2018.}
+\cvitem{}{\textit{Derici, C.}, et al. “Question analysis for a closed domain question answering system”. \textit{CICLING} 2015.}
+\cvitem{}{\textit{Derici, C.}, et al. “Rule-based focus extraction in Turkish question answering systems”. \textit{SIU} 2014.}
+\cvitem{}{Başar, R.\,E., \textit{Derici, C.}, Şenol, Ç. “World With Web: A compiler from world applications to JavaScript”. Technical Report, \textit{Scheme and Functional Programming Workshop} 2009.}
+
+% ---------- End Vita ----------
 
 \pagenumbering{gobble}
