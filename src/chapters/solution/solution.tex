@@ -8,13 +8,15 @@
 
     We have identified solution approaches that are worthy of further investigation for improving self-hosting performance.
 
-    You either try to avoid branch-heavy code, or you try to get better at it.
-
     Sections:
 		\begin{itemize}
 			\item \ref{section:hot-branches} Guiding Tracer Away from Branch-Heavy Computation
 
-				Present approaches for detecting branch-heavy computations and helping tracer avoid them.
+        The problem originates from the weak nature of tracing JIT compilation against branch-heavy computations because of over-specialization.
+
+        So we get around the issue by trying to stay away from branch-heavy computations.
+
+        Presenting two approaches that help tracer avoid such computations. They exhibit promising results in benchmarks for certain scenarios.
 			\item \ref{section:stackful} Mitigating Memory Pressure in Branch-Heavy Computation
 
 				A hybrid model of computation (e.g., a stackful model alongside CEK) seems to mitigate memory issues in some cases.
