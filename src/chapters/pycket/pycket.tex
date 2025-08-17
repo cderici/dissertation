@@ -225,7 +225,9 @@
 		\inputFigure{pycket}{welcome-to-pycket}
 
 		\paragraph{}% 1
-			With all the bootstrapping linklets successfully loaded into its runtime, Pycket completes its transition into a fully operational, self-hosting Racket implementation. This marks the point where Pycket no longer relies on external Racket executables for critical runtime functionality, as it now internally provides the necessary components—such as macro expansion, module handling, and I/O—required to independently load and run Racket modules. Consequently, Pycket now fulfills the self-hosting hypothesis introduced earlier.
+			With all the bootstrapping linklets successfully loaded into its runtime, Pycket completes its transition into a fully operational, self-hosting Racket implementation. The full front-end with the bootstrapping linklets is shown in \figref{fig:pycket-full-front-end-with-bootstrapping-linklets}. This marks the point where Pycket no longer relies on external Racket executables for critical runtime functionality, as it now internally provides the necessary components—such as macro expansion, module handling, and I/O—required to independently load and run Racket modules. Consequently, Pycket now fulfills the self-hosting hypothesis introduced earlier.
+
+		\inputFigure{pycket}{figure-pycket-full-front-end}
 
 		\paragraph{}% 2
 			Pycket's enhanced front-end supports a variety of execution modes, including directly running a provided \texttt{.rkt} source file or launching an interactive session to start the Racket \gls{repl}, as illustrated in \figref{fig:welcome-to-pycket}. These capabilities demonstrate that Pycket integrates core Racket functionality via bootstrapping linklets and exposes standard user-facing features. Furthermore, as new features are added to Racket itself, Pycket can readily incorporate them by simply running the corresponding Racket modules. This capability ensures Pycket remains robust and future-proof as a complete implementation of the language.

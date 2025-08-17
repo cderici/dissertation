@@ -1,0 +1,39 @@
+\begin{figure}[!h]
+  \centering
+  \newcommand{\linkletsepgap}{3mm}
+  \newcommand{\busx}{5mm}
+  \newcommand{\jitdrop}{36mm}
+  \newcommand{\setraise}{33mm}
+  \begin{tikzpicture}[scale=0.6, font=\footnotesize]
+    \node[circle, draw, minimum size=10mm, fill=gray!8] (m1) {input.rkt};
+    \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=10mm of m1] (m2) {Pycket\\Entry};
+    \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=10mm of m2] (m3) {Racket\\Entry};
+    \draw[-Stealth, thick] (m1) -- (m2);
+    \draw[-Stealth, thick] (m2.south east) to[out=0,in=0,looseness=1.25] node[right, font=\footnotesize] {input.rkt} (m3.north east);
+
+    \node[draw, rounded corners, align=center, minimum width=32mm, minimum height=8mm, fill=gray!8, below=\jitdrop of m3] (m4) {JITted CEK};
+    \draw[-Stealth, thick] (m3.south) -- node[left, font=\footnotesize, pos=0.45] {dynamic-require input.rkt} (m4.north);
+
+    \node[draw, rounded corners, align=center, minimum width=28mm, minimum height=10mm, fill=gray!8, right=24mm of m3, yshift=\setraise] (expander) {Expander\\Linklet};
+    \node[draw, rounded corners, align=center, minimum width=28mm, minimum height=10mm, fill=gray!8, below=\linkletsepgap of expander] (io) {IO\\Linklet};
+    \node[draw, rounded corners, align=center, minimum width=28mm, minimum height=10mm, fill=gray!8, below=\linkletsepgap of io] (thread) {Thread\\Linklet};
+    \node[draw, rounded corners, align=center, minimum width=28mm, minimum height=10mm, fill=gray!8, below=\linkletsepgap of thread] (fasl) {Fasl\\Linklet};
+    \node[draw, rounded corners, align=center, minimum width=28mm, minimum height=10mm, fill=gray!8, below=\linkletsepgap of fasl] (regexp) {Regexp\\Linklet};
+    \node[draw, rounded corners, align=center, minimum width=28mm, minimum height=10mm, fill=gray!8, below=\linkletsepgap of regexp] (boot) {Pycket Boot\\Linklet};
+
+    \coordinate (busTop) at ($(expander.west)+(-\busx,0)$);
+    \coordinate (busBot) at ($(boot.west)+(-\busx,0)$);
+    \draw[thick] (busTop) -- (busBot);
+    \draw[thick] ($(expander.west)+(-\busx,0)$) -- (expander.west);
+    \draw[thick] ($(io.west)+(-\busx,0)$) -- (io.west);
+    \draw[thick] ($(thread.west)+(-\busx,0)$) -- (thread.west);
+    \draw[thick] ($(fasl.west)+(-\busx,0)$) -- (fasl.west);
+    \draw[thick] ($(regexp.west)+(-\busx,0)$) -- (regexp.west);
+    \draw[thick] ($(boot.west)+(-\busx,0)$) -- (boot.west);
+
+    \coordinate (midTF) at ($ (thread.west)!0.5!(fasl.west) $);
+    \draw[-Stealth, thick] ($(midTF)+(-\busx,0)$) -- (m3.east |- midTF);
+  \end{tikzpicture}
+  \caption{Full Pycket Front-end Augmented with Racket Bootstrapping Linklets}
+  \label{fig:pycket-full-front-end-with-bootstrapping-linklets}
+\end{figure}
