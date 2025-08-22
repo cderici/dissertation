@@ -1,0 +1,47 @@
+\begin{figure}[!htbp]
+\centering
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[language=racket,
+                basicstyle=\ttfamily\footnotesize,
+                numbers=left, xleftmargin=2em]
+(define/jit-merge-point (match-pat pattern p-pos str s-pos m)
+  (cond
+    ;; Done with the pattern
+    [(>= p-pos (string-length pattern)) m]
+    ;; $ - Match the end of a string 	a$
+    [(char=? (string-ref pattern p-pos) #\$) (and (>= s-pos (string-length str)) m)]
+    ;; ? - Match 0 or 1 of the previous character 	a? 	"", a
+    [(and (< (+ p-pos 1) (string-length pattern)) (char=? (string-ref pattern (+ p-pos 1)) #\?))
+     (match-huh pattern p-pos str s-pos (+ p-pos 1) m)]
+    ;; * - Match 0 or more of the previous character 	a* 	"", a, aa, aaa
+    [(and (< (+ p-pos 1) (string-length pattern)) (char=? (string-ref pattern (+ p-pos 1)) #\*))
+     (match-star pattern p-pos str s-pos (+ p-pos 1) m)]
+    ;; . - Match any character literal 	. 	a, b, c, d, e ...
+    [(char=? (string-ref pattern p-pos) #\.)
+     (and (< s-pos (string-length str))
+          (meta-can-enter-jit (match-pat pattern (add1 p-pos) str (add1 s-pos)
+                                       (cons (string-ref str s-pos) m))))]
+    ;; literal - Match the specified character literal 	x, q
+    [else
+     (and (char=? (string-ref pattern p-pos) (string-ref str s-pos))
+          (meta-can-enter-jit (match-pat pattern (add1 p-pos) str (add1 s-pos)
+                                       (cons (string-ref str s-pos) m))))]))
+
+(define (match-huh pattern p-pos str s-pos huh-pos m)
+  (or (and (< s-pos (string-length str))
+           (char=? (string-ref pattern p-pos) (string-ref str s-pos))
+           (match-pat pattern (add1 huh-pos) str (add1 s-pos)
+                      (cons (string-ref str s-pos) m)))
+      (match-pat pattern (add1 huh-pos) str s-pos m)))
+
+(define (match-star pattern p-pos str s-pos star-pos m)
+  (or (and (< s-pos (string-length str))
+           (char=? (string-ref pattern p-pos) (string-ref str s-pos))
+           (match-pat pattern p-pos str (add1 s-pos)
+                      (cons (string-ref str s-pos) m)))
+      (match-pat pattern (add1 star-pos) str s-pos m)))
+\end{lstlisting}
+\end{minipage}
+\caption{A simple regular expression matcher annotated with meta-hints}
+\label{fig:regexp-annotated-with-meta-hints}
+\end{figure}
