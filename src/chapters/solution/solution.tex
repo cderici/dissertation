@@ -190,21 +190,30 @@
       %   Figure out how to show that the amount of copying activation records from the stack into the continuations in the heap should be bounded.
       % \end{todo}
 
+      \paragraph{}% 35
+        To place the prototype in the broader self-hosting evaluation, we measured expansion-only performance of the CEK+Stackful hybrid on the full cross-benchmark suite. Using the same harness and configuration as \secref{benchmark-setup}, and the same suite from \secref{section:cross-benchmarks}, we compare three systems: vanilla CEK-only Pycket, Pycket with the hybrid model, and Racket 8.18. This isolates macro expansion and asks whether the memory-pressure relief we observed on Branchy carries over to real expander workloads, where deeply nested loops and recursive driver code can trigger frequent switches between CEK and the stackful interpreter due to native stack overflows as well as heavy use of continuation primitives.
+
+      \inputFigure{solution}{approaches-cek-stackful-expansion}
+
+      \paragraph{}% 36
+        \figref{fig:crossbenchmark-expansion-times-vs-R-hybrid-model} shows that the hybrid model is roughly two orders of magnitude slower than vanilla Pycket across the suite (geometric mean around 356000 ms vs.\ 4060 ms, about 90x). The Racket expander used here is far larger than Branchy, and expansion repeatedly descends into inner loops with many indirections, which triggers frequent switches between the stackful and CEK interpreters. Each switch unwinds the native stack and rebuilds continuations in CEK, so the conversion cost dominates the measurement. As a result, any benefit from reduced heap pressure is masked by switching overhead, and the prototype requires tuning of both the switching policy and the conversion mechanics before a fair assessment is possible. For the same reason, combining this hybrid model with the extended green-variables technique would not be informative yet, since the hybrid model’s overhead would dominate the combined results.
+
+
     \subsection{Formalism for CEK \+ Stackful}
 
       \inputFigure{solution}{cek-stackful-grammar}
 
-      \paragraph{}% 35
+      \paragraph{}% 37
         To better understand and reason about the hybrid Stackful+CEK interpreter approach, we developed a formal model integrating both interpreters using PLT Redex. The model, illustrated in \figref{fig:cek-convert-stack}, evaluates a simplified subset of Racket similar to the Linklet Kernel language described in \sectionRef{section:linklet-semantics}, excluding linklet variable forms. Additionally, it introduces special \racketcode{convert} forms that explicitly trigger interpreter switches directly from the source code. The grammar for this simplified language is shown in \figref{fig:st-cek-grammar}, clearly depicting how deliberate transitions between the interpreters are controlled. This formal model enables further experimentation and analysis, helping to clarify the conditions under which interpreter switching can effectively reduce memory pressure.
 
-      \paragraph{}% 36
+      \paragraph{}% 38
         The primary goal of this formal model is to allow precise reasoning about reducing heap memory pressure from large, long-lived continuations. Developed as an executable formalism using PLT Redex, the model supports rigorous experimentation with interpreter transitions. The complete reduction semantics for the CEK and stackful interpreters are presented in \appendixRef{appendix:cek-stackful-redex}.
 
       % \begin{todo}[Technical TODO]
       %   Figure out how to use this model to show the general heap memory usage drops, as opposed to CEK alone.
       % \end{todo}
 
-      \paragraph{}% 37
+      \paragraph{}% 39
         Taking a step towards addressing the fundamental challenges in self-hosting on meta-tracing frameworks—namely, intelligent meta-tracing of programs with complex control flows and effective management of heap memory pressure—we demonstrate viable strategies for achieving efficient self-hosting of Racket on Pycket. We believe the approaches explored herein hold broad applicability, potentially serving as foundational methods for self-hosting on meta-tracing frameworks more generally.
 
 
