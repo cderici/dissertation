@@ -23,80 +23,79 @@
 		\end{itemize}
   \end{chaptersynopsis}
 
-  \paragraph{}%
+  \paragraph{}% 1
     We demonstrated extensively in \chapterRef{chapter:problem}, that the predominant performance degradation on Pycket self-hosting Racket arises from intricate branching patterns during macro expansion and associated runtime computations. This degradation significantly inflates both trace sizes and the GC overhead. In other words, branch-heavy computation and memory problems appear central to the performance challenges encountered when self-hosting on a meta-tracing \gls{jit} compiler.
 
-  \paragraph{}%
+  \paragraph{}% 2
     Addressing these core issues has the potential to transform self-hosting from a theoretical convenience into a practical and robust methodology for building language runtimes. By reducing the impact of branch-heavy computations and controlling memory usage, we can achieve consistent performance benefits from meta-tracing \gls{jit} compilers.
 
-  \paragraph{}%
+  \paragraph{}% 3
     The fundamental nature of self-hosting entails extensive branching, especially during the macro expansion phase. In Racket's case, macro expansion inherently involves deeply nested pattern-matching and conditional branching \cite{icfp2019}. Similarly, the limitations of meta-tracing \gls{jit} compilers like RPython when handling interpreters with complex control-flow patterns—such as extensive branching and recursion—are extensively documented in Bolz's dissertation \cite{bolzPhDThesis}. Additionally, Bolz et al.'s work further emphasizes how intricate branching within interpreters can lead to trace explosion and limited reuse \cite{pypy-main}. More generally, literature on compiler bootstrapping and self-hosting underscores that these processes inherently involve extensive branching and recursive computations, making simplification intrinsically challenging \cite{appelCompilingContinuations2007}. Consequently, while simplifying these computations might theoretically seem feasible, practical evidence and prior research consistently indicate intrinsic limitations in reducing branch complexity within self-hosting environments.
 
+  \paragraph{}% 4
+    \gls{pe} is a commonly used optimization technique in tracing \gls{jit} compilers. Being a program transformation (and specialization) operation, given a program and some \emph{static} variables (e.g. inputs or annotations), \gls{pe} attempts to constant-fold away every operation that it can infer to be constants. The rest of the program (the operations that it can't fold) are outputted as the --hopefully-- more optimized and specialized version of the original program. \cite{truffle-graal} uses \gls{pe} to collapse interpreter dispatch, and \cite{practical-partial} reports good results across JavaScript, Ruby, and R.  \cite{traceMonkey} applies a closely related form of runtime specialization, while \cite{trace-vs-PE} treats both tracing and partial evaluation as general meta-compilation techniques.
 
-  \paragraph{}%
-    Partial evaluation (PE) is a commonly used optimization technique in tracing \gls{jit} compilers. Being a program transformation (and specialization) operation, given a program and some \emph{static} variables (e.g. inputs or annotations), PE attempts to constant-fold away every operation that it can infer to be constants. The rest of the program (the operations that it can't fold) are outputted as the --hopefully-- more optimized and specialized version of the original program. \cite{truffle-graal} uses PE to collapse interpreter dispatch, and \cite{practical-partial} reports good results across JavaScript, Ruby, and R.  \cite{traceMonkey} applies a closely related form of runtime specialization, while \cite{trace-vs-PE} treats both tracing and partial evaluation as general meta-compilation techniques.
+  \paragraph{}% 5
+    Despite these successes, applying \gls{pe} to Pycket's embedded Racket macro expander would be detrimental, particularly due to the branch-heavy nature of macro expansion. In Pycket, the Racket macro expander is loaded as ordinary Racket code through the \textit{expander linklet} and evaluated at boot time. Partially evaluating this code would transform a single, general-purpose expander into many \emph{program-specific} expanders. Given the macro expander's reliance on deeply nested, pattern-matching conditionals, the specialized traces would inline substantial amounts of branching logic. This process in a meta-tracing system results in trace explosion, diminished reuse across different programs, and frequent trace invalidation once trace-size thresholds are reached—behavior already documented extensively in PyPy’s meta-tracer.
 
-  \paragraph{}%
-    Despite these successes, applying PE to Pycket's embedded Racket macro expander would be detrimental, particularly due to the branch-heavy nature of macro expansion. In Pycket, the Racket macro expander is loaded as ordinary Racket code through the \textit{expander linklet} and evaluated at boot time. Partially evaluating this code would transform a single, general-purpose expander into many \emph{program-specific} expanders. Given the macro expander's reliance on deeply nested, pattern-matching conditionals, the specialized traces would inline substantial amounts of branching logic. This process in a meta-tracing system results in trace explosion, diminished reuse across different programs, and frequent trace invalidation once trace-size thresholds are reached—behavior already documented extensively in PyPy’s meta-tracer.
+  \paragraph{}% 6
+    Furthermore, since macro expansion typically occurs infrequently (usually once per module load), any upfront overhead incurred by \gls{pe} would not be amortized by repeated execution, diminishing its potential performance benefits. Given these factors, we opted not to implement \gls{pe} in our current setup. Implementing such specialization within the RPython framework would entail development efforts comparable to building Pycket itself from scratch, rendering it impractical as an exploratory optimization.
 
-  \paragraph{}%
-    Furthermore, since macro expansion typically occurs infrequently (usually once per module load), any upfront overhead incurred by PE would not be amortized by repeated execution, diminishing its potential performance benefits. Given these factors, we opted not to implement PE in our current setup. Implementing such specialization within the RPython framework would entail development efforts comparable to building Pycket itself from scratch, rendering it impractical as an exploratory optimization.
-
-  \paragraph{}%
+  \paragraph{}% 7
     In this chapter, we explore targeted strategies to enhance performance specifically for branch-heavy computations on meta-tracing \gls{jit} compilers and propose viable directions for addressing these central performance challenges. First, we discuss techniques to guide the compiler away from generating extensive, non-reusable traces that degrade performance. Second, we propose methods aimed explicitly at mitigating memory pressure—a critical bottleneck in self-hosting environments. While recognizing the preliminary nature of our current evidence, as discussed in detail in \chapterRef{chapter:problem}, we nonetheless demonstrate the potential efficacy of these approaches, providing motivation for further research and investigation.
 
 	\section[\texorpdfstring{Guiding Tracer Away from Branch-Heavy Computation}{Hot Branches}]{Guiding Tracer Away from Branch-Heavy Computation}
     \label{section:hot-branches}
 
-    \paragraph{}% 1
+    \paragraph{}% 8
       A critical observation from \chapterRef{chapter:problem} is that performance overhead in self-hosting Racket on meta-tracing \gls{jit} compilers primarily comes from generating large and overly specialized traces during the macro expansion phase. Such expansive traces degrade runtime performance due to the frequent and intricate branching patterns inherent in macro expanders. These traces are rarely reusable, as they encode extensive branching decisions tied closely to specific input cases, thus compounding the inefficiency.
 
-    \paragraph{}% 2
+    \paragraph{}% 9
       Importantly, analyses in \chapterRef{chapter:problem} demonstrate that once macro expansion concludes, the performance of self-hosted Pycket closely aligns with that of the original non-self-hosted implementation. This clearly indicates that the macro expansion phase, dominated by branching complexity, constitutes the primary bottleneck to overall runtime efficiency. Therefore, any improvement targeted specifically at managing branch-heavy computations during macro expansion is likely to yield significant performance benefits.
 
-    \paragraph{}% 3
+    \paragraph{}% 10
       Thus, guiding the tracer away from branch-heavy computations that yield large, non-reusable traces represents a targeted strategy to alleviate this bottleneck. Rather than eliminating branching entirely—an unrealistic goal given the nature of macro expansion—the idea is to minimize or selectively avoid tracing computations involving deep or overly complicated branching. This selective tracing strategy can prevent generating costly traces, improving the runtime efficiency during the most performance-critical phases.
 
-    \paragraph{}% 4
+    \paragraph{}% 11
       To investigate the effectiveness of this targeted approach, we experimented with specific strategies to guide the tracer away from branch-heavy computations. We will describe each strategy clearly and provide evidence regarding their efficacy. Although, as we will see, none of these strategies completely resolves the performance issues, our experiments confirm that the proposed techniques do indeed provide measurable improvements in specific cases, demonstrating that they are worthy of further investigation, while also highlighting the substantial nature of the underlying challenge. Consequently, this challenge warrants extensive additional research, potentially constituting a separate research effort in itself.
 
-    \paragraph{}% 5
+    \paragraph{}% 12
       Recall from \chapterRef{chapter:rpython} that a language interpreter written in RPython leverages \emph{JitDriver} reflection provided by the RPython framework to define a custom \gls{pc}. Interpreter hints such as \racketcode{jit_merge_point} and \racketcode{can_enter_jit} are used to indicate loop headers and points where the interpreter might jump backwards, respectively. Each invocation of \racketcode{can_enter_jit} increments a profiling counter associated with the green variables, as illustrated previously in \figref{fig:pycket-annotated-cek} in \secref{section:tracing-meta-tracing}. Pycket’s two-state tracking defines its \gls{pc} (the green variables) as a pair consisting of an \gls{ast} (lambda) and its corresponding call-site (application), which helps determine the loop headers accurately. Additionally, each lambda \gls{ast} node in Pycket has methods \racketcode{enable_jitting()} and \racketcode{disable_jitting()} that indirectly control whether \racketcode{can_enter_jit} is invoked during execution of the CEK loop.
 
-    \paragraph{}% 6
+    \paragraph{}% 13
       Unfortunately, RPython currently lacks a dynamic mechanism for instructing the tracer to abort an ongoing trace explicitly at the interpreter level (i.e., there is no option to declare “this path is not worth tracing, abort tracing now”). As a result, strategies involving the dynamic detection of deeply nested branching to abort the tracing of a lambda function mid-trace are unavailable. This limitation constrains our approach to guiding the tracer away from problematic branch-heavy paths, necessitating alternative strategies that work either statically or via explicit annotations in user code.
 
-    \paragraph{Statically disabling \gls{jit} for branch-heavy lambdas}% 7
+    \paragraph{Statically disabling \gls{jit} for branch-heavy lambdas}% 14
       A straightforward approach to avoid tracing excessively branch-heavy paths is to detect such patterns statically and prevent them from entering the \gls{jit} altogether. Recall from \chapterRef{chapter:rpython} that Pycket performs whole-code analyses, including \emph{A-normalization} and \emph{assignment conversion}, which rebuild the AST from inside out. During these transformations, we mark any lambda with deeply nested conditional branches as \emph{jit-blocked}, effectively setting its \racketcode{should_enter} field to be always \racketcode{False}, thus ensuring that \racketcode{can_enter_jit} is never invoked for that lambda. However, as discussed in \chapterRef{chapter:problem}, branching complexity is not purely a static property but depends on runtime input patterns. Consequently, this static approach can inadvertently prevent tracing of functions that, while containing many nested conditionals, also possess frequently executed shallow branches. Thus, the overall performance degrades due to the lack of \gls{jit} optimization on paths that would benefit from it, as well as the overhead of interpretation all throughout the computation.
 
-    \paragraph{Using meta-hints to guide the tracer}% 8
+    \paragraph{Using meta-hints to guide the tracer}% 15
       An alternative and more dynamic approach involves the introduction of \emph{meta-hints}, a generalization of interpreter hints, which expands the communication between the interpreter and the tracing \gls{jit} at the user-code level. We introduce two new Racket forms: \racketcode{define/jit-merge-point} and \racketcode{meta-can-enter-jit}. The form \racketcode{define/jit-merge-point} creates lambdas that are \emph{jit-blocked} by default (with their \racketcode{should_enter} set to \racketcode{False}). Tracing is enabled dynamically only when a \racketcode{meta-can-enter-jit} annotation is encountered in the Racket code, flipping the switch to invoke \racketcode{can_enter_jit} explicitly. By carefully placing \racketcode{meta-can-enter-jit} annotations at shallow branches within loops, we ensure that profiling counters associated with the loop header and the call site (green variables) increment only when shallow, less branch-intensive paths are repeatedly executed. In other words, deep branches within a loop do not contribute to the hotness of that loop initially; only the shallow ones increase the hotness. This selective approach encourages tracing and compilation of loops that are more likely to produce reusable and efficient traces, potentially reducing the overhead from deeply branched computations.
 
     \inputFigure{solution}{branchy-with-meta-hints}
 
-    \paragraph{}% 9
+    \paragraph{}% 16
       \figref{fig:branchy-with-meta-hints} shows the Branchy example from \figref{fig:branchy-introduce-code}, now annotated explicitly with the introduced meta-hints. In this annotated version, only the shallow loop paths—for example the branch leading to Exit A (marked as \textcircled{\scriptsize{18}})—are labeled with \racketcode{meta-can-enter-jit}. Consequently, during execution, taking deeper branches (such as those leading to Exit C at \textcircled{\scriptsize{4}} or beyond) does not increment profiling counters, thus not contributing to the perceived hotness of the loop. However, it is important to note that while this technique helps ensure that only loops frequently taking shallow branches trigger tracing, it does not entirely prevent deeper branches from being included in traces once tracing has commenced. In other words, once a shallow path has become sufficiently hot to initiate tracing, subsequent deep branches executed during tracing will also be recorded, potentially causing traces to become larger and less reusable again.
 
-    \paragraph{}% 10
+    \paragraph{}% 17
       A notable downside of the meta-hints approach is the requirement for explicit annotations in the interpreted Racket code (e.g. the macro expander). While feasible in small-scale, isolated programs such as Branchy, annotating complex and larger-scale programs—such as the macro expander used in Racket's self-hosting setup—can quickly become impractical due to their complexity and the extensive indirections they often employ. Additionally, explicit annotation compromises modularity by making exported functionalities cumbersome to use directly, as they require meta-hint integration to maintain optimal performance. Thus, while this approach has potential benefits in targeted scenarios, the practical overhead of annotation presents significant limitations for general use in large-scale scenarios.
 
     \inputFigure{solution}{regexp-with-meta-hints}
 
-    \paragraph{}% 10.1
+    \paragraph{}% 17.1
       \figref{fig:regexp-annotated-with-meta-hints} illustrates this program-specific nature on a small regexp matcher: the main driver \racketcode{match-pat} is defined with \racketcode{define/jit-merge-point}, and only the shallow-progress cases—literal-character and “.” matches—are annotated with \racketcode{meta-can-enter-jit}; in contrast, the loops that implement “?” and “*” are left unannotated because their helpers \racketcode{match-huh} and \racketcode{match-star} perform internal recursive search that induces deep branching. Restricting hotness to these simpler branches encourages the tracer to \gls{jit}-compile paths that are less susceptible to trace explosion, while heavily branched paths remain interpreted until needed. This example underscores that effective placement of meta-hints requires detailed, program-specific knowledge and does not scale uniformly to large codebases, motivating the interpreter-level alternative we present next.
 
-    \paragraph{Extend current Pycket green variables with nested \racketcode{if} depth}% 11
+    \paragraph{Extend current Pycket green variables with nested \racketcode{if} depth}% 18
       Recall from Pycket's two state representation we have the lambda \gls{ast} and \racketcode{come_from} information to detect loops (the green variables). Each time the \gls{jit} crosses a \racketcode{can_enter-jit} with the same green variables, it increments a counter associated with those exact green variables (i.e. the compound program counter). In this approach, we add a third variable to the green variables that represents a “depth” score for nested conditionals. For instance in Branchy, Exit A would have a depth score of 1, and Exit B would have a depth score of 5. These scores are assigned to the \racketcode{application} nodes during the A-normalization automatically. The idea is that every time we cross those looping points, if the depth score is more than a certain number, we add that number to the depth. So for example, if we have a threshold of 3, next time we take the Exit B, the depth variable would become 10 (because 5 > 3), but at Exit A the depth stays the same (because 1 < 3). This way, the green variables that \racketcode{can_enter_jit} method increases the counter for will be different each time we loop at a deep branch. This way, the deep branches won't contribute to the hotness of the loop, while the shallow branches will consistently increment the same counter.
 
     \inputFigure{solution}{approaches-experiments}
 
-    \paragraph{}% 12
+    \paragraph{}% 19
       \figref{fig:approaches-experiment} shows the runtime results of Branchy for three input scenarios: an "only shallow" path (input always taking the shallow Exit A), an "only deep" path (input always taking the Exit B), and randomized inputs. We compare vanilla Pycket with the two proposed approaches: meta-hints and augmented green variables with depth information. Each measurement is averaged over 1000 runs with input lists containing 2000 numbers each, with bootstrapped confidence intervals at the 95\% confidence level~\cite{davisonBootstrapMethods2013}. All run times are averages over 1000 runs with the same setup explained in \secref{benchmark-setup}. The random inputs are generated freshly at each iteration and kept the same across the interpreters at each run.
 
-    \paragraph{}% 13
+    \paragraph{}% 20
       For the shallow path scenario, all approaches perform similarly to vanilla Pycket, as expected, since shallow branches are traced by all three interpreters. For the deep path scenario, both meta-hints and the augmented green variables approaches successfully avoid generating overly specialized, long traces. However, this does not translate directly into better overall performance; instead, runtime performance worsens because the deeply nested loops remain interpreted rather than \gls{jit}-compiled. In other words, we do eliminate time for recording, compiling, and optimizing, but if these deep branchy paths are not \gls{jit}ted, then it gets much worse as they are frequently taken. With randomized inputs, however, we observe a beneficial trade-off: the optimized versions avoid some overhead from large, unnecessary trace compilations. Nonetheless, performance here remains highly input-dependent; once tracing starts due to sufficient shallow branch hits, subsequent deep branch executions still accumulate into the recorded trace, reducing potential gains. These results confirm our hypothesis that strategically avoiding tracer entry into deeply nested branches can indeed yield performance improvements, while highlighting the complexity and limitations of applying these strategies more broadly.
 
-    \paragraph{}% 14
+    \paragraph{}% 21
       Now we turn to an experiment that's closer to a real-world scenario to better evaluate the practical applicability of the techniques we introduced. Recall from \secref{section:there-is-no-loop} that Pycket has a manually written regular expression matcher implementation in RPython, as well as an equivalent Racket-based version provided through a utility linklet bundled in the bootstrapping linklets, which we call the \emph{regexp linklet}. Previously, we leveraged this dual implementation to highlight performance issues during program expansion; results comparing these two implementations are presented in \figref{fig:regexp-overall-comparison}. To further assess the techniques discussed earlier in this section, we devised a set of targeted experiments using the regexp linklet implementation under scenarios analogous to those used in our earlier Branchy experiments. Specifically, we evaluated the following interpreter variants:
 
     \begin{itemize}
@@ -115,46 +114,46 @@
 
      \inputFigure{solution}{approaches-regexp-experiments}
 
-    \paragraph{}% 15
+    \paragraph{}% 22
       \figref{fig:approaches-regexp-experiment} shows the results of the experiments described above. All runtime values represent averages over 1000 runs. In experiment (A)—the shallow branching loop—the captured traces were identical across all interpreter configurations. The meta-hints approach exhibits a slight slowdown due to its own overhead, however both optimizations perform comparably to vanilla Pycket using the regexp linklet, as anticipated. In experiment (B)—the deeper, repeatedly branched loop—both optimization approaches demonstrate a slowdown similar to what we observed previously with Branchy. This slowdown occurs because these optimizations successfully prevent tracing and compiling overly specialized complex traces, leading to frequent interpretation of the heavily branched paths. For experiment (C)—the complex randomized input—we observe a significant slowdown for the meta-hints approach. This is because, once \racketcode{can_enter_jit} is activated by shallow branches, the tracer subsequently follows all branches regardless of their depth, resulting again in long, overly specialized traces. Conversely, the extended green variables approach yielded more promising results, consistent with the earlier Branchy experiments. Since this approach indirectly favors shallow branches without explicitly controlling \racketcode{can_enter_jit} annotations, it successfully avoids generating large, over-specialized traces while encouraging shallow computations to be \gls{jit} compiled. Consequently, this method seems to effectively balance trace utilization with the performance trade-off between \gls{jit}-compilation and interpretation, suggesting its superiority as a potential optimization technique for branch-heavy computations.
 
-    \paragraph{}% 16
+    \paragraph{}% 23
       While the targeted nature of these approaches prevents them from delivering a clear overall performance improvement for the general case, evidence validates their potential effectiveness in certain scenarios, thus indicating that they are worth further investigation. In particular, the meta-hints strategy can be extended and generalized by allowing dynamic modification of the green variables at the user-code level. Similar to our augmented-depth approach, the interpreter could dynamically adjust the profiling performed by the tracer, providing finer-grained control over tracing behavior. Although such extensions would likely amplify the annotation burden on the user-level code and further specialize the profiling mechanism, this fine-grained control may enable more precise and effective tracing decisions. Additionally, the interpreter could leverage multiple \gls{jit} drivers simultaneously—one driver focusing on branch-heavy computations alongside another utilizing the original green variable definitions—to achieve even finer control over trace generation and optimization strategies.
 
-    \paragraph{}% 17
+    \paragraph{}% 24
       Fundamentally, as discussed extensively in \chapterRef{chapter:problem}, the challenge lies in identifying optimal tracing strategies for branch-heavy computations. Traces capturing all conditional decisions inevitably become highly specialized and less reusable, making them impractical unless identical execution paths—dictated by specific input patterns—are frequently taken, which is typically unrealistic. Conversely, frequently executed paths that are intentionally not traced—such as those omitted due to our proposed techniques—may save the overhead associated with tracing but progressively degrade runtime performance as they remain interpreted rather than \gls{jit}-compiled. Nevertheless, our evidence indicates that addressing the unique tracing issues arising specifically from self-hosting through targeted approaches, such as those described here, indeed offers a viable path toward efficient self-hosting of functional languages on meta-tracing \gls{jit} compilers.
 
 	\section[\texorpdfstring{Mitigating Memory Pressure in Branch-Heavy Computation}{CEK + Stackful Model}]{Mitigating Memory Pressure in Branch-Heavy Computation}
     \label{section:stackful}
 
-    \paragraph{}% 1
+    \paragraph{}% 25
       A prominent contributor to the performance overhead in self-hosting via meta-tracing \gls{jit} compilers is the considerable memory pressure arising from frequent heap allocations, especially continuations and environments. Recall from \chapterRef{chapter:problem} that the explicit continuations allocated on the heap are fundamental to the CEK machine's ability to implement complex control operations, including proper tail-calls, which inherently leads to frequent continuation allocations in Pycket.
 
-    \paragraph{}% 2
+    \paragraph{}% 26
       To address memory issues without altering the underlying runtime system or garbage collector installed automatically by the RPython framework, we propose incorporating a stackful interpreter alongside the existing CEK machine in Pycket. This hybrid approach leverages the stack to handle certain computation phases, thereby significantly reducing the number of continuation allocations on the heap. The stackful interpreter is realized as a simple recursive interpreter compiled by the RPython framework into a recursive C program utilizing the native stack. For example, when interpreting a \racketcode{let}-form, instead of creating a \racketcode{LetCont} to evaluate its body after the right-hand-side like we do in the CEK machine, in the stackful interpreter we recursively evaluate the right-hand-side and then interpret the body, using the native stack for the natural continuation.
 
-    \paragraph{}% 3
+    \paragraph{}% 27
       Despite its simplicity, the use of a stackful interpreter introduces notable challenges related to stack management, particularly concerning stack overflows due to arbitrarily deep recursion. Furthermore, entirely replacing the CEK interpreter with a stack-based alternative would forgo the performance benefits offered by explicit continuations in the CEK machine, particularly in managing complex control operations and proper tail-calls.
 
-    \paragraph{}% 4
+    \paragraph{}% 28
       Consequently, we advocate for an approach where the two interpreters operate in tandem, strategically switching between them to optimize overall performance. The primary goal of this dual-interpreter strategy is to judiciously balance heap and stack usage—leveraging rapid stack allocations and improved locality while retaining the sophisticated control and optimization capabilities provided by the heap-based CEK interpreter.
 
     \subsection{CEK \+ Stackful Prototype on Pycket}
 
       \inputFigure{solution}{cek-stackful-switch}
 
-      \paragraph{}% 5
+      \paragraph{}% 29
         We implemented a practical prototype of the hybrid interpreter approach on Pycket. This prototype aligns closely with the conceptual framework illustrated in \figref{fig:cek-convert-stack}, though it primarily initiates computations using the CEK interpreter. This design choice accommodates Pycket's need to load and instantiate the bootstrapping linklets at startup, subsequently beginning computations via the \racketcode{read}, \racketcode{expand}, and evaluation processes.
 
-      \paragraph{}% 6
+      \paragraph{}% 30
         In the implemented prototype, the CEK interpreter transfers control to the stackful interpreter upon encountering computational constructs such as \racketcode{let} or \racketcode{begin}. The switching mechanism itself is straightforward, via direct invocation of the stackful interpreter. The stackful interpreter is augmented with a trampoline mechanism to efficiently manage tail-call optimizations. Furthermore, it automatically hands control back to the CEK interpreter under three key conditions: (i) completion of computation and return, (ii) execution involving CPS-transformed primitives (e.g. \racketcode{call/cc}), or (iii) detection of potential stack overflow situations. The return to CEK is handled by unwinding the stack and installing necessary continuations via a \verb|ConvertStack| exception mechanism, effectively allowing seamless continuation of the computation in CEK mode.
 
-      \paragraph{}% 7
+      \paragraph{}% 31
         To evaluate the runtime performance and demonstrate the effectiveness of our hybrid Stackful+CEK interpreter in reducing memory overhead, we conducted experiments using the \texttt{Branchy} program from \chapterRef{chapter:problem} (see \figref{fig:branchy-introduce-code}). We ran \texttt{Branchy} on Pycket under two configurations: the hybrid interpreter and the original CEK-only interpreter. The experimental inputs matched those used previously in \sectionRef{section:hot-branches}: one exclusively taking the shallow Exit A path, one exclusively taking the deeper Exit B path, and one with randomized inputs, each consisting of 2000 numbers. As before, the experiments followed the setup detailed in \sectionRef{benchmark-setup}, with reported runtimes averaged over 1000 runs and using bootstrapped 95\% confidence intervals~\cite{davisonBootstrapMethods2013}. To isolate the measurement strictly to runtime-allocated continuations, the \texttt{Branchy} program intentionally avoids continuation primitives. Computation begins with the CEK interpreter and switches to the stackful interpreter upon encountering the first \racketcode{let} form, proceeding from there.
 
       \inputFigure{solution}{cek-stackful-overall-runtime}
 
-      \paragraph{}% 8
+      \paragraph{}% 32
         \figref{fig:hybrid-model-overall-good} presents the runtime results for these experiments. We observe slightly longer warmup times for the hybrid Stackful+CEK interpreter in all input scenarios. This is expected because RPython's meta-tracing \gls{jit} is not optimized specifically for recursive interpreter structures, unlike Pycket's highly-tuned CEK interpreter. Despite this initial overhead, the hybrid interpreter achieves performance comparable to the original CEK for both shallow and deep branch inputs. Notably, in the scenario with randomized inputs, the hybrid interpreter consistently improves overall runtime performance. This improvement arises primarily from the reduced memory footprint, as will be confirmed through the memory analysis shortly, highlighting the viability of using the hybrid Stackful+CEK interpreter in reducing memory pressure. These preliminary results clearly motivate further research into this hybrid interpreter approach.
 
       \begin{table}[!h]
@@ -172,10 +171,10 @@
         \label{table:memory-footprints-cek-vs-hybrid}
 		  \end{table}
 
-      \paragraph{}% 9
+      \paragraph{}% 33
         \tableRef{table:memory-footprints-cek-vs-hybrid} presents the memory footprint comparison between the CEK-only Pycket and the hybrid Stackful+CEK Pycket, both running the \texttt{Branchy} program with randomized input. All values in the table represent averages over 1000 runs and correspond to the same experiments presented previously in \figref{fig:hybrid-model-overall-good}. We observe a notable reduction in the number of minor garbage collections, dropping from an average of 32 collections in CEK-only Pycket to just 10 in the hybrid model. While the hybrid interpreter increases the bytes copied—expected due to the need to reconstruct continuations in the heap when switching from stackful mode—it substantially reduces growth in the old-generation heap. This improvement occurs because computations largely take place on the native stack rather than the heap, thus avoiding long-lived continuation allocations. This reduction in memory pressure clearly explains the runtime improvements observed in the randomized-input scenario (\figref{fig:hybrid-model-overall-good}) and further supports the viability of our hybrid interpreter approach.
 
-      \paragraph{}% 10
+      \paragraph{}% 34
         These preliminary results suggest that the hybrid Stackful+CEK interpreter might offer a potential solution to mitigate memory pressure in self-hosting scenarios. While the evidence is promising, it comes from an isolated experiment with a small prototype. Developing this prototype further into a complete hybrid interpreter could allow a more thorough evaluation of performance, particularly for larger programs and those involving frequent use of continuations that trigger switches back to the CEK interpreter. However, significant engineering effort would be required to handle interpreter switching robustly, preserve proper tail-calls, and ensure overhead remains bounded. Nonetheless, given these initial promising observations, further investigation into this hybrid approach is indeed warranted.
 
       % \begin{todo}[Technical TODO]
@@ -186,17 +185,17 @@
 
       \inputFigure{solution}{cek-stackful-grammar}
 
-      \paragraph{}% 11
+      \paragraph{}% 35
         To better understand and reason about the hybrid Stackful+CEK interpreter approach, we developed a formal model integrating both interpreters using PLT Redex. The model, illustrated in \figref{fig:cek-convert-stack}, evaluates a simplified subset of Racket similar to the Linklet Kernel language described in \sectionRef{section:linklet-semantics}, excluding linklet variable forms. Additionally, it introduces special \racketcode{convert} forms that explicitly trigger interpreter switches directly from the source code. The grammar for this simplified language is shown in \figref{fig:st-cek-grammar}, clearly depicting how deliberate transitions between the interpreters are controlled. This formal model enables further experimentation and analysis, helping to clarify the conditions under which interpreter switching can effectively reduce memory pressure.
 
-      \paragraph{}% 12
+      \paragraph{}% 36
         The primary goal of this formal model is to allow precise reasoning about reducing heap memory pressure from large, long-lived continuations. Developed as an executable formalism using PLT Redex, the model supports rigorous experimentation with interpreter transitions. The complete reduction semantics for the CEK and stackful interpreters are presented in \appendixRef{appendix:cek-stackful-redex}.
 
       % \begin{todo}[Technical TODO]
       %   Figure out how to use this model to show the general heap memory usage drops, as opposed to CEK alone.
       % \end{todo}
 
-      \paragraph{}% 13
+      \paragraph{}% 37
         Taking a step towards addressing the fundamental challenges in self-hosting on meta-tracing frameworks—namely, intelligent meta-tracing of programs with complex control flows and effective management of heap memory pressure—we demonstrate viable strategies for achieving efficient self-hosting of Racket on Pycket. We believe the approaches explored herein hold broad applicability, potentially serving as foundational methods for self-hosting on meta-tracing frameworks more generally.
 
 
