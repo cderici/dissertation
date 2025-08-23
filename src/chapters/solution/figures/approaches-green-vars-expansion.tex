@@ -3,8 +3,7 @@
   \begin{tikzpicture}
   \begin{axis}[
     ybar,
-    bar shift=0pt,
-    bar width=3pt,
+    bar width=3pt,            % keep slender for many categories
     width=15cm,
     height=8cm,
     ymode=log,
@@ -17,33 +16,30 @@
       graphs,divrec,mazefun,sboyer,tak,perm9,nboyer,earley,paraffins,,g. mean},
     xtick=data,
     xticklabel style={rotate=55,anchor=east,font=\scriptsize},
-    enlarge x limits=0.04,
+    enlarge x limits=0.06,
     ymajorgrids=true,
     grid style=dashed,
     legend style={
-        at={(0.5,1.05)},
+        at={(0.5,1.08)},
         anchor=south,
-        legend columns=2,
-        column sep=6pt,
+        legend columns=3,
+        column sep=8pt,
         draw=none,
         fill=none,
         font=\small,
         /tikz/column 2/.style={anchor=west},
     },
-    legend image code/.code={
-        \draw[#1,fill=#1] (-0.15cm,-0.10cm) rectangle (0.15cm,0.10cm);
-    },
+    legend image code/.code={\draw[#1,fill=#1] (-0.15cm,-0.10cm) rectangle (0.15cm,0.10cm);},
   ]
 
-  %────────────────────────  Pycket Self‑hosting  ────────────────────────
+  %────────────────────────  Pycket Self‑hosting (vanilla)  ────────────────────────
+  % widen spacing between series with explicit bar shifts: +4pt / 0pt / -4pt
   \addplot[
     ybar,
     fill=gray!20,
     draw=black,
-    bar shift=+1.5pt,
-    error bars/.cd,
-      y dir=both,
-      y explicit,
+    bar shift=+4pt,
+    error bars/.cd, y dir=both, y explicit,
   ] coordinates {
     (string,2609)     +- (0,97.68)
     (sumloop,1878)    +- (0,68.15)
@@ -81,15 +77,57 @@
     (g. mean,4060)    +- (0,0)
   };
 
+  %──────────────  Pycket Self‑hosting + extended green variables  ────────────────
+  \addplot[
+    ybar,
+    fill=gray!50,
+    draw=black,
+    bar shift=0pt,
+    error bars/.cd, y dir=both, y explicit,
+  ] coordinates {
+    (string,3392)   +- (0,169.60)
+    (sumloop,2441)  +- (0,122.05)
+    (sumfp,1401)    +- (0,70.05)
+    (fft,13614)     +- (0,680.70)
+    (mbrot,7188)    +- (0,359.40)
+    (ctak,3937)     +- (0,196.85)
+    (pnpoly,9636)   +- (0,481.80)
+    (sum,1529)      +- (0,76.45)
+    (fibfp,1663)    +- (0,83.15)
+    (pi,17233)      +- (0,861.65)
+    (triangl,4802)  +- (0,240.10)
+    (array1,4261)   +- (0,213.05)
+    (simplex,23978) +- (0,1198.90)
+    (puzzle,18163)  +- (0,908.15)
+    (primes,3025)   +- (0,151.25)
+    (diviter,2136)  +- (0,106.80)
+    (fib,1664)      +- (0,83.20)
+    (nqueens,5977)  +- (0,298.85)
+    (takl,4264)     +- (0,213.20)
+    (cpstak,2524)   +- (0,126.20)
+    (gcold,19716)   +- (0,985.80)
+    (ack,1777)      +- (0,88.85)
+    (gcbench,13088) +- (0,654.40)
+    (graphs,24223)  +- (0,1211.15)
+    (divrec,1659)   +- (0,82.95)
+    (mazefun,17258) +- (0,862.90)
+    (sboyer,13042)  +- (0,652.10)
+    (tak,1530)      +- (0,76.50)
+    (perm9,7189)    +- (0,359.45)
+    (nboyer,24779)  +- (0,1238.95)
+    (earley,16834)  +- (0,841.70)
+    (paraffins,12432) +- (0,621.60)
+    % empty spacer: no coordinate
+    (g. mean,5804)  +- (0,0.00)
+  };
+
   %────────────────────────────  Racket 8.18  ────────────────────────────
   \addplot[
     ybar,
     fill=gray!80,
     draw=black,
-    bar shift=-1.5pt,
-    error bars/.cd,
-      y dir=both,
-      y explicit,
+    bar shift=-4pt,
+    error bars/.cd, y dir=both, y explicit,
   ] coordinates {
     (string,65)     +- (0,0.77)
     (sumloop,58)    +- (0,0.79)
@@ -127,9 +165,9 @@
     (g. mean,114)   +- (0,0)
   };
 
-  \legend{Pycket Self‑Hosting Racket, Racket 8.18}
+  \legend{Vanilla Pycket, Pycket with extended green variables, Racket 8.18}
   \end{axis}
   \end{tikzpicture}
-  \caption{Program‑expansion performance. Pycket with Self‑hosting with and without extended green variables optimization vs.\ Racket 8.18 — lower is better.}
+  \caption{Program‑expansion performance. Pycket self‑hosting with and without the extended green variables optimization vs.\ Racket~8.18 — lower is better.}
   \label{fig:crossbenchmark-expansion-times-vs-R-green-vars}
 \end{figure}
