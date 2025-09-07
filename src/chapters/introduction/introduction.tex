@@ -7,7 +7,7 @@
 
        Thesis:
 
-        \textit{Efficient self-hosting of full-scale functional languages on meta-tracing \gls{jit} compilers is achievable.}
+        \textit{Self-hosting full-scale functional languages on meta-tracing \gls{jit} compilers is achievable.}
 
         \vspace{2em}
 
@@ -17,7 +17,7 @@
 
         2. The first formalization for the operational semantics of linklets.
 
-        3. Rudimentary operational semantics for a hybrid computational model (\racketcode{CEK} \& Stackful) that utilizes both the native stack and the heap for optimized memory use.
+        3. Rudimentary operational semantics for a hybrid computational model (CEKs \& Stackful) that utilizes both the native stack and the heap for optimized memory use.
 
         4. Identification and analysis of performance issues fundamental to self-hosting on meta-tracing \gls{jit} compilers for future studies.
 
@@ -32,13 +32,15 @@
 
     \section{Thesis}
 
-    \textit{Efficient self-hosting of a full-scale functional language on a meta-tracing \gls{jit} compiler is achievable.}
-
+    \textit{Self-hosting a full-scale functional language on a meta-tracing \gls{jit} compiler is achievable.}
 
     \section[\texorpdfstring{Motivation \& Context}{Context}]{Motivation \& Context}
 
         \paragraph{}% 1
-            One significant milestone in the evolution of a programming language implementation is the capability to compile or interpret its own source code. This process, historically known as “meta-circular evaluation” \cite{sicpbook}, is now commonly referred to as bootstrapping, or as we will call it throughout this dissertation, self-hosting. Self-hosting requires the language to possess certain essential features, such as expressive completeness and a robust run-time system. Therefore, the ability to self-host indicates a language's semantic maturity, broadly considered as a combination of expressive power and practical real-world applicability.
+            The capability to compile or interpret its own implementation source code is a significant milestone in the evolution of a programming language. This process, historically known as “meta-circular evaluation” \cite{sicpbook}, described in the computational theory as Universal Turing Machines is now commonly referred to as bootstrapping, or as we will call it throughout this dissertation, self-hosting. Self-hosting requires the language to possess certain essential features, and is an indication of a semantic maturity, broadly considered as a combination of expressive completeness and practical real-world applicability.
+
+        \paragraph{}% 1.5
+            Self-hosting enables a language to grow over itself organically: new features and even substantial run-time functionalities can be implemented in the language rather than in the implementation language of the hosting runtime, so a small kernel plus a thin primitive layer suffices to sustain implementation growth. This reduces re-implementation effort, improves portability, and makes cross-\gls{vm} comparisons meaningful because they measure identical semantics rather than potentially diverging implementations.
 
         \paragraph{}% 2
             Self-hosting dynamic programming languages inherently involves challenging performance trade-offs, even in specialized research compilers such as Tachyon for JavaScript \cite{self-hosted-tachyon}, and these challenges become increasingly complex for fully developed, real-world language run-times. Ideally, we would like a canonical method to implement efficient run-times for dynamic languages while retaining semantic maturity. This approach would enhance language portability, enabling practical benefits such as leveraging the unique capabilities of different \glspl{vm} for various computational tasks without the need to re-implement the language repeatedly. Such redundant re-implementations are not only error-prone but also complicate performance comparisons across different \glspl{vm}.
@@ -47,7 +49,7 @@
             Meta-tracing has proven to be an effective implementation technique for dynamic programming languages, as demonstrated by Bolz in his foundational work \cite{bolzPhDThesis}. Unlike traditional meta-circular approaches, meta-tracing enables the semantics of a language to be specified through an interpreter, automatically generating a virtual machine (via C code) equipped with a specialized tracing \gls{jit} compiler. This method has been successfully applied in PyPy, a Python implementation that significantly outperforms standard CPython in runtime performance \cite{pypy-main}. Thus, meta-tracing represents a promising strategy for achieving both ease of language implementation and efficiency at the same time.
 
         \paragraph{}% 4
-            Given the practical advantages of self-hosting and the demonstrated strengths of meta-tracing, we hypothesize that efficient self-hosting of a full-scale dynamically-typed language on a meta-tracing \gls{jit} compiler is achievable. Therefore, this dissertation explores this open research question by investigating whether a meta-tracing run-time system can indeed serve as an efficient \gls{vm} for a self-hosting, general-purpose, dynamically-typed functional programming language.
+            Given the practical advantages of self-hosting and the demonstrated strengths of meta-tracing, we hypothesize that self-hosting a full-scale dynamically-typed language on a meta-tracing \gls{jit} compiler can prove to be an effective technique for fast-prototyping full-scale language implementations. Therefore, this dissertation explores this open research question by investigating whether a meta-tracing run-time system can indeed serve as an efficient \gls{vm} for a self-hosting, general-purpose, dynamically-typed functional programming language.
 
         \paragraph{}% 5
             We choose Racket as our main language for demonstrating this hypothesis. Racket is a particularly suitable candidate because it is reasonably well-adopted, explicitly designed to facilitate programming language research, and has recently enhanced its portability by migrating its core run-time to Chez Scheme. This transition has significantly improved targeting different \glspl{vm}, making Racket an ideal language for exploring efficient self-hosting on a meta-tracing \gls{jit} compiler \cite{icfp2019}.
@@ -56,10 +58,10 @@
             Additionally, Racket has an existing, although rudimentary, meta-tracing interpreter named Pycket, developed as a research project using the RPython framework--the same meta-tracing framework on which PyPy was built \cite{bolzPhDThesis,bolzMetatracingMakesFast2014}. Pycket has already demonstrated notable performance improvements and has been shown to eliminate 90\% of the performance overhead associated with dynamic language features such as gradual typing \cite{pycketmain,pycketmain2}. These characteristics position Pycket as an excellent candidate for this study, providing a solid starting point for validating our hypothesis.
 
         \paragraph{}% 7
-            To substantiate our hypothesis, we first enhance Pycket from a simple interpreter to a full-scale virtual machine capable of hosting Racket. Leveraging Racket's improved self-hosting capabilities, we demonstrate concretely that an efficient, self-hosting implementation of a full-scale functional language on a meta-tracing \gls{jit} compiler is achievable. This transformation provides clear evidence in support of our primary thesis statement.
+            To substantiate our hypothesis, we enhance Pycket from a rudimentary interpreter to a full-scale \gls{vm} capable of self-hosting Racket. Leveraging Racket's improved self-hosting capabilities, we demonstrate concretely that an implementation of a full-scale functional language on a meta-tracing \gls{jit} compiler is achievable. This transformation provides clear evidence in support of our primary thesis statement.
 
         \paragraph{}% 8
-            During this process, we identify and analyze several performance issues fundamental to self-hosting languages using meta-tracing compilers. While these issues pose challenges, we provide evidence that such performance limitations can be effectively addressed and mitigated, reinforcing our claim that efficient self-hosting on meta-tracing JIT compilers is feasible.
+            We also present a full investigation of the performance profile of self-hosting on meta-tracing. In this study, we identify and analyze several performance issues fundamental to self-hosting languages using meta-tracing \gls{jit} compilers. As we present progress in understanding the posed challenges, we also develop and present some targeted approaches that show promising results in certain controlled scenarios in mitigating these issues.
 
     \section[\texorpdfstring{Dissertation Structure \& Contributions}{Structure \& Contributions}]{Dissertation Structure \& Contributions}
 
@@ -67,10 +69,10 @@
             This dissertation is structured as follows. We start by examining meta-tracing \gls{jit} compilers in \chapterRef{chapter:rpython}, providing a primer on Pycket and its underlying RPython framework. We then analyze the concept of portability in programming languages in \chapterRef{chapter:linklets}, giving a detailed explanation of Racket's key innovation that significantly improved its portability.
 
         \paragraph{}% 10
-            In \chapterRef{chapter:pycket}, we describe our methodology and detail the steps taken to achieve a full-scale, self-hosting implementation of Racket on Pycket, addressing the first part of our thesis statement. We validate the correctness and completeness of our resulting system in \chapterRef{chapter:validation}, confirming that Pycket indeed functions as a complete Racket implementation.
+            In \chapterRef{chapter:pycket}, we describe our methodology and detail the steps taken to achieve a full-scale, self-hosting implementation of Racket on Pycket, directly addressing our thesis statement. We validate the correctness and completeness of our resulting system in \chapterRef{chapter:validation}, confirming that Pycket indeed functions as a complete Racket implementation.
 
         \paragraph{}% 11
-            Next, we provide a full performance evaluation in \chapterRef{chapter:problem}. We present a thorough evaluation of self-hosting on meta-tracing \gls{jit} compilers, identifying and analyzing critical performance bottlenecks that inherently arise in this approach. In \chapterRef{chapter:solution}, we explore various strategies to overcome these performance challenges. Through concrete evidence, we demonstrate that despite these fundamental limitations, self-hosting on a meta-tracing compiler can be efficiently realized. Finally, we conclude with a discussion of related work and broader implications of our findings in \chapterRef{chapter:conclusion}.
+            Next, we provide a full performance evaluation in \chapterRef{chapter:problem}. We present a thorough evaluation of self-hosting on meta-tracing \gls{jit} compilers, identifying and analyzing critical performance bottlenecks that inherently arise in this approach. In \chapterRef{chapter:solution}, we explore various strategies to overcome these performance challenges. While it is difficult to conclude that full efficiency in self-hosting on meta-tracing can be achieved based on the current evidence, we provide concrete progress in exposing and understanding the performance challenges fundamental to this approach. Finally, we conclude with a discussion of related work and broader implications of our findings in \chapterRef{chapter:conclusion}.
 
         \paragraph{}% 12
             The primary technical contributions of this dissertation are:
