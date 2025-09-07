@@ -196,7 +196,7 @@
       \inputFigure{solution}{approaches-cek-stackful-expansion}
 
       \paragraph{}% 36
-        \figref{fig:crossbenchmark-expansion-times-vs-R-hybrid-model} shows that the hybrid model is roughly two orders of magnitude slower than vanilla Pycket across the suite (geometric mean around 356000 ms vs.\ 4060 ms, about 90x). The Racket expander used here is far larger than Branchy, and expansion repeatedly descends into inner loops with many indirections, which triggers frequent switches between the stackful and CEK interpreters. Each switch unwinds the native stack and rebuilds continuations in CEK, so the conversion cost dominates the measurement. As a result, any benefit from reduced heap pressure is masked by switching overhead, and the prototype requires tuning of both the switching policy and the conversion mechanics before a fair assessment is possible. For the same reason, combining this hybrid model with the extended green-variables technique would not be informative yet, since the hybrid model’s overhead would dominate the combined results.
+        \figref{fig:crossbenchmark-expansion-times-vs-R-hybrid-model} shows that the hybrid model is roughly two orders of magnitude slower than vanilla Pycket across the suite (geometric mean around 356000 ms vs.\ 4060 ms, about 90x). The Racket expander used here is far larger than Branchy, and expansion repeatedly descends into inner loops with many indirections, which triggers frequent switches between the stackful and CEK interpreters. Each switch unwinds the native stack and rebuilds continuations in CEK, so the conversion cost dominates the measurement. As a result, any benefit from reduced heap pressure is masked by switching overhead, and the prototype requires tuning of both the switching policy and the conversion mechanics before a fair assessment is possible. For the same reason, combining this hybrid model with the extended green-variables technique would not be informative yet, since the hybrid model's overhead would dominate the combined results.
 
 
     \subsection{Formalism for CEK \+ Stackful}
@@ -214,7 +214,7 @@
       % \end{todo}
 
       \paragraph{}% 39
-        Taking a step towards addressing the fundamental challenges in self-hosting on meta-tracing frameworks--namely, intelligent meta-tracing of programs with complex control flows and effective management of heap memory pressure--we demonstrate viable strategies for achieving efficient self-hosting of Racket on Pycket. We believe the approaches explored herein hold broad applicability, potentially serving as foundational methods for self-hosting on meta-tracing frameworks more generally.
+        Taking a step towards addressing the fundamental challenges in self-hosting on meta-tracing frameworks--namely, intelligent meta-tracing of programs with complex control flows and effective management of heap memory pressure--we present potentially viable strategies for achieving efficient self-hosting of Racket on Pycket. We believe that the approaches explored herein hold broad applicability, potentially serving as foundational methods for self-hosting on meta-tracing frameworks more generally.
 
 
 
