@@ -4,32 +4,32 @@
                           {2. RPython \& Meta-tracing}]{META-TRACING JUST-IN-TIME (JIT) COMPILERS}
     \label{chapter:rpython}
 
-    \begin{chaptersynopsis}[Chapter Synopsis]
-        \footnotesize
+    % \begin{chaptersynopsis}[Chapter Synopsis]
+    %     \footnotesize
 
-        We do three things in this chapter:
+    %     We do three things in this chapter:
 
-        1. Thesis statement refers to meta-tracing JITs, so we explain what a meta-tracing \gls{jit} compiler is.
+    %     1. Thesis statement refers to meta-tracing JITs, so we explain what a meta-tracing \gls{jit} compiler is.
 
-        2. Introduce RPython as a language, and as a framework that Pycket is built on.
+    %     2. Introduce RPython as a language, and as a framework that Pycket is built on.
 
-        3. Provide context for meta-tracing-related technical discussions in the rest of the study. traces, warmup, optimizations, runtime feedback, etc.
+    %     3. Provide context for meta-tracing-related technical discussions in the rest of the study. traces, warmup, optimizations, runtime feedback, etc.
 
-        \vspace{2em}
+    %     \vspace{2em}
 
-        Sections:
-		\begin{itemize}
-			\item Meta-tracing \& RPython Framework
+    %     Sections:
+	% 	\begin{itemize}
+	% 		\item Meta-tracing \& RPython Framework
 
-                What problem does PyPy solve? How do they capture loops in user programs? \gls{jit} drivers, interpreter hints, green/red variables etc.
-			\item Pycket: A Rudimentary Racket Interpreter Built on RPython Framework
+    %             What problem does PyPy solve? How do they capture loops in user programs? \gls{jit} drivers, interpreter hints, green/red variables etc.
+	% 		\item Pycket: A Rudimentary Racket Interpreter Built on RPython Framework
 
-                Primer on Pycket's fundamentals. It's language RPython, CEK core, and how it is built.
-			\item Trace Optimizations \& Runtime Feedback
+    %             Primer on Pycket's fundamentals. It's language RPython, CEK core, and how it is built.
+	% 		\item Trace Optimizations \& Runtime Feedback
 
-                Traces are the real performance currency. Relevant optimizations and runtime feedback (e.g promote, escape analysis, warmup, etc.).
-		\end{itemize}
-    \end{chaptersynopsis}
+    %             Traces are the real performance currency. Relevant optimizations and runtime feedback (e.g promote, escape analysis, warmup, etc.).
+	% 	\end{itemize}
+    % \end{chaptersynopsis}
 
     \paragraph{}% 1
         In this chapter, we have three main objectives. First, we explain the concept of a meta-tracing \gls{jit} compiler, connecting it to our thesis statement presented earlier, that self-hosting of full-scale functional languages is achievable using meta-tracing \gls{jit} compilation. Second, we introduce the RPython framework. We detail its role as the foundational technology upon which Pycket is constructed, including the aspects of translation and toolchain workflow. Lastly, we outline key concepts related to RPython and meta-tracing--such as trace formation, optimization strategies, and runtime feedback--which serve as essential context for technical discussions and evaluations relating to performance in \chapterRef{chapter:problem} and \chapterRef{chapter:solution}.

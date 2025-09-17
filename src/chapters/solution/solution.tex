@@ -3,25 +3,25 @@
 
 	\label{chapter:solution}
 
-  \begin{chaptersynopsis}[Chapter Synopsis]\footnotesize
-    \footnotesize
+  % \begin{chaptersynopsis}[Chapter Synopsis]\footnotesize
+  %   \footnotesize
 
-    We have identified solution approaches that are worthy of further investigation for improving self-hosting performance.
+  %   We have identified solution approaches that are worthy of further investigation for improving self-hosting performance.
 
-    Sections:
-		\begin{itemize}
-			\item \ref{section:hot-branches} Guiding Tracer Away from Branch-Heavy Computation
+  %   Sections:
+	% 	\begin{itemize}
+	% 		\item \ref{section:hot-branches} Guiding Tracer Away from Branch-Heavy Computation
 
-        The problem originates from the weak nature of tracing JIT compilation against branch-heavy computations because of over-specialization.
+  %       The problem originates from the weak nature of tracing JIT compilation against branch-heavy computations because of over-specialization.
 
-        So we get around the issue by trying to stay away from branch-heavy computations.
+  %       So we get around the issue by trying to stay away from branch-heavy computations.
 
-        Presenting two approaches that help tracer avoid such computations. They exhibit promising results in benchmarks for certain scenarios.
-			\item \ref{section:stackful} Mitigating Memory Pressure in Branch-Heavy Computation
+  %       Presenting two approaches that help tracer avoid such computations. They exhibit promising results in benchmarks for certain scenarios.
+	% 		\item \ref{section:stackful} Mitigating Memory Pressure in Branch-Heavy Computation
 
-				A hybrid model of computation (e.g., a stackful model alongside CEK) seems to mitigate memory issues in some cases.
-		\end{itemize}
-  \end{chaptersynopsis}
+	% 			A hybrid model of computation (e.g., a stackful model alongside CEK) seems to mitigate memory issues in some cases.
+	% 	\end{itemize}
+  % \end{chaptersynopsis}
 
   \paragraph{}% 1
     We demonstrated extensively in \chapterRef{chapter:problem}, that the predominant performance degradation on Pycket self-hosting Racket arises from intricate branching patterns during macro expansion and associated runtime computations. This degradation significantly inflates both trace sizes and the GC overhead. In other words, branch-heavy computation and memory problems appear central to the performance challenges encountered when self-hosting on a meta-tracing \gls{jit} compiler.

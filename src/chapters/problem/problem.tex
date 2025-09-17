@@ -3,29 +3,29 @@
 
 	\label{chapter:problem}
 
-	\begin{chaptersynopsis}[Chapter Synopsis]
-		\footnotesize
-		Self-hosting on a meta-tracing JIT compiler introduces several performance issues.
+	% \begin{chaptersynopsis}[Chapter Synopsis]
+	% 	\footnotesize
+	% 	Self-hosting on a meta-tracing JIT compiler introduces several performance issues.
 
-		Sections:
-		\begin{itemize}
-			\item \ref{section:pycket-performance-characteristics} Pycket's Performance Characteristics
+	% 	Sections:
+	% 	\begin{itemize}
+	% 		\item \ref{section:pycket-performance-characteristics} Pycket's Performance Characteristics
 
-				Pycket is generally fast, but self-hosting exacerbates issues in tracing interpreter-style code.
-			\item \ref{section:module-and-language-loading} Module and Language Loading
+	% 			Pycket is generally fast, but self-hosting exacerbates issues in tracing interpreter-style code.
+	% 		\item \ref{section:module-and-language-loading} Module and Language Loading
 
-				Self-hosting adds a "boot and language expansion" overhead, which Pycket didn't have before.
-			\item \ref{section:cross-benchmarks} Cost of Self-hosting
+	% 			Self-hosting adds a "boot and language expansion" overhead, which Pycket didn't have before.
+	% 		\item \ref{section:cross-benchmarks} Cost of Self-hosting
 
-				While self-hosting introduces minimal overhead for back-end performance, it degrades front-end performance; subsequent sections investigate the underlying reasons.
-			\item \ref{section:nature-of-the-beast} The Nature of the Beast: Tracing Data-Dependent Computation
+	% 			While self-hosting introduces minimal overhead for back-end performance, it degrades front-end performance; subsequent sections investigate the underlying reasons.
+	% 		\item \ref{section:nature-of-the-beast} The Nature of the Beast: Tracing Data-Dependent Computation
 
-				Data-dependent, interpreter-style computations essential to self-hosting inherently produce overspecialized and inefficient traces under meta-tracing.
-			\item \ref{section:memory} Memory Pressure under Self-hosting
+	% 			Data-dependent, interpreter-style computations essential to self-hosting inherently produce overspecialized and inefficient traces under meta-tracing.
+	% 		\item \ref{section:memory} Memory Pressure under Self-hosting
 
-				Late binding, long continuation chains due to numerous control-flow indirections, and frequent allocation of large, long-lived heap objects significantly increase \gls{gc} pressure in self-hosting on meta-tracing.
-		\end{itemize}
-	\end{chaptersynopsis}
+	% 			Late binding, long continuation chains due to numerous control-flow indirections, and frequent allocation of large, long-lived heap objects significantly increase \gls{gc} pressure in self-hosting on meta-tracing.
+	% 	\end{itemize}
+	% \end{chaptersynopsis}
 
 	\paragraph{}%
 	 	Self-hosting introduces performance issues on a language runtime in several ways. Data-dependent, interpreter-style, branch-heavy code produces overspecialized, non-reusable traces; self-hosting raises memory-usage concerns; and computations that are critical to self-hosting --such as program expansion--seem to be poorly suited to meta-tracing because they contain no hot loops for the tracer to capture. Although the exact symptoms may vary with the design of a given runtime and the hosted language, the underlying issues remain the same on every meta-tracing system.

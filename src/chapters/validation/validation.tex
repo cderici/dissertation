@@ -3,34 +3,34 @@
 
 	\label{chapter:validation}
 
-	\begin{chaptersynopsis}[Chapter Synopsis]
-		\footnotesize
+	% \begin{chaptersynopsis}[Chapter Synopsis]
+	% 	\footnotesize
 
-        We demonstrate three things in this chapter:
+    %     We demonstrate three things in this chapter:
 
-        1. Self-hosted implementation of Racket on Pycket works.
+    %     1. Self-hosted implementation of Racket on Pycket works.
 
-        2. Semantics of the self-hosted Racket on Pycket are identical to the semantics of Racket on Chez Scheme (Racket's own default runtime).
+    %     2. Semantics of the self-hosted Racket on Pycket are identical to the semantics of Racket on Chez Scheme (Racket's own default runtime).
 
-        3. You can evaluate on Pycket anything you can express in Racket.
+    %     3. You can evaluate on Pycket anything you can express in Racket.
 
-        \vspace{2em}
+    %     \vspace{2em}
 
-        Sections:
-		\begin{itemize}
-			\item Correctness by Construction
+    %     Sections:
+	% 	\begin{itemize}
+	% 		\item Correctness by Construction
 
-                Semantics of the self-hosted Racket on Pycket are identical to the semantics of Racket on Chez Scheme (Racket's own default runtime).
+    %             Semantics of the self-hosted Racket on Pycket are identical to the semantics of Racket on Chez Scheme (Racket's own default runtime).
 
-				\textasciitilde 550 Test Suites.
+	% 			\textasciitilde 550 Test Suites.
 
-				Same tests against Racket, Pycket \& Redex Models.
-				Randomized testing for the linklet Redex model.
-			\item Completeness under Self-Hosting
+	% 			Same tests against Racket, Pycket \& Redex Models.
+	% 			Randomized testing for the linklet Redex model.
+	% 		\item Completeness under Self-Hosting
 
-                Pycket can evaluate any \#lang that Racket can evaluate.
-		\end{itemize}
-    \end{chaptersynopsis}
+    %             Pycket can evaluate any \#lang that Racket can evaluate.
+	% 	\end{itemize}
+    % \end{chaptersynopsis}
 
 	\paragraph{}% 1
 		In this chapter, we demonstrate that Pycket's self-hosted implementation of Racket is both correct and complete with respect to the original Racket implementation. Correctness here means that the semantics provided by Pycket exactly match those provided by Racket's default runtime on Chez Scheme, and completeness means that any program expressible in Racket can be successfully evaluated by Pycket. Establishing these two properties is essential to demonstrate that Pycket can indeed serve as a fully functional drop-in replacement for Racket.

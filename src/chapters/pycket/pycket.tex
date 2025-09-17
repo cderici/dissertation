@@ -2,31 +2,31 @@
                           {4. Pycket as Full Racket}]{FROM RUDIMENTARY INTERPRETER TO FULL LANGUAGE IMPLEMENTATION}
 	\label{chapter:pycket}
 
-	\begin{chaptersynopsis}[Chapter Synopsis]
-		\footnotesize
+	% \begin{chaptersynopsis}[Chapter Synopsis]
+	% 	\footnotesize
 
-        Languages can influence the capabilities of the run-time they are implemented on.
+    %     Languages can influence the capabilities of the run-time they are implemented on.
 
-		Concrete realization of self-hosting of Racket on Pycket.
+	% 	Concrete realization of self-hosting of Racket on Pycket.
 
-        \vspace{2em}
+    %     \vspace{2em}
 
-        Sections:
-		\begin{itemize}
-			\item Implementing Linklets on Pycket
+    %     Sections:
+	% 	\begin{itemize}
+	% 		\item Implementing Linklets on Pycket
 
-			This is how Pycket is enhanced to interface with linklets. Representation choices, etc.
+	% 		This is how Pycket is enhanced to interface with linklets. Representation choices, etc.
 
-			\item Enhancing Run-time with Bootstrapping Linklets
+	% 		\item Enhancing Run-time with Bootstrapping Linklets
 
-			Importing functionality straight from the language in the form of linklets allows the language to shape the behavior of the run-time.
+	% 		Importing functionality straight from the language in the form of linklets allows the language to shape the behavior of the run-time.
 
-			\item From Rudimentary Interpreter to Full Language Implementation
+	% 		\item From Rudimentary Interpreter to Full Language Implementation
 
-			Pycket becomes a full working Racket, proving the self-hosting hypothesis.
+	% 		Pycket becomes a full working Racket, proving the self-hosting hypothesis.
 
-		\end{itemize}
-    \end{chaptersynopsis}
+	% 	\end{itemize}
+    % \end{chaptersynopsis}
 
 	\paragraph{}% 1
 		Languages can influence and enhance the capabilities of the run-time environments or \glspl{vm} they are implemented on. This influence is evident in mature language implementations such as Smalltalk's Squeak, Erlang's OTP on the BEAM \gls{vm}, and Common Lisp's CLOS Meta-Object Protocol (MOP). For example, Smalltalk allows core image manipulation within Smalltalk itself, extending \gls{vm} semantics dynamically \cite{squeak_smalltalk_vm}. Erlang uses its OTP libraries written in Erlang to dynamically control crucial runtime semantics like process scheduling and fault tolerance \cite{erlang_otp_hpc}. Similarly, Common Lisp employs the CLOS MOP to redefine fundamental object system semantics at runtime without altering the native runtime \cite{clos_overview_mop}.
