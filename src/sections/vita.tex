@@ -1,8 +1,19 @@
+
+
 \chapter*{Vita}
+
+\makeatletter
+\let\ps@plain\ps@empty
+\makeatother
+\pagestyle{empty}
+
+
 \addtocontents{toc}{
  \unexpanded{\unexpanded{\renewcommand{\cftchapdotsep}{\cftnodots}}}%
 }
 \addtocontents{toc}{\protect\contentsline{chapter}{Curriculum Vitae}{}{}}
+
+\thispagestyle{empty}
 
 \doublespacing
 
