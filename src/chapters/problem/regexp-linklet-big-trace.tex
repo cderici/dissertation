@@ -1,63 +1,63 @@
 \begin{figure}[!htbp]
 	\centering
 
-	%\begin{minipage}{1\textwidth}
+	\begin{minipage}{0.92\textwidth}
 \begin{lstlisting}[style=rptrace-style]
 # Loop with 191 ops
 # start of the trace (preamble)
-label(p0, p1)                                                                                                1
-guard_class(p0)                                                                                              2
-p3  = getfield_gc_r(p0)                     ; ConsEnvSize1.vals                                              3
-guard_nonnull(p3)                                                                                            4
-i5  = instance_ptr_eq(p3, ConstPtr(ptr4))                                                                    5
-guard_true(i5)                                                                                               6
-guard_class(p1)                                                                                              7
-p7  = getfield_gc_r(p1)                     ; LetCont.ast                                                    8
-guard_value(p7, ConstPtr(ptr8))                                                                              9
-p9  = getfield_gc_r(p1)                     ; Cont.env                                                       10
-guard_not_invalidated()                                                                                      11
-p10 = getfield_gc_r(p1)                     ; Cont.prev                                                      12
-guard_class(p9)                                                                                              13
-p12 = getfield_gc_r(p9)                     ; ConsEnv.prev                                                   14
-guard_class(p12)                                                                                             15
-p14 = getfield_gc_r(p12)                    ; W_Closure1AsEnv.caselam                                        16
-guard_value(p14, ConstPtr(ptr15))                                                                            17
-i16 = getfield_gc_i(p9)                     ; ConsEnvSize1Fixed.                                             18
-i18 = int_add_ovf(i16, 1)                                                                                    19
-guard_no_overflow()                                                                                          20
-                                                                                                             |
+label(p0, p1)                                                                                      1
+guard_class(p0)                                                                                    2
+p3  = getfield_gc_r(p0)                     ; ConsEnvSize1.vals                                    3
+guard_nonnull(p3)                                                                                  4
+i5  = instance_ptr_eq(p3, ConstPtr(ptr4))                                                          5
+guard_true(i5)                                                                                     6
+guard_class(p1)                                                                                    7
+p7  = getfield_gc_r(p1)                     ; LetCont.ast                                          8
+guard_value(p7, ConstPtr(ptr8))                                                                    9
+p9  = getfield_gc_r(p1)                     ; Cont.env                                             10
+guard_not_invalidated()                                                                            11
+p10 = getfield_gc_r(p1)                     ; Cont.prev                                            12
+guard_class(p9)                                                                                    13
+p12 = getfield_gc_r(p9)                     ; ConsEnv.prev                                         14
+guard_class(p12)                                                                                   15
+p14 = getfield_gc_r(p12)                    ; W_Closure1AsEnv.caselam                              16
+guard_value(p14, ConstPtr(ptr15))                                                                  17
+i16 = getfield_gc_i(p9)                     ; ConsEnvSize1Fixed.                                   18
+i18 = int_add_ovf(i16, 1)                                                                          19
+guard_no_overflow()                                                                                20
+                                                                                                   |
 # ... ~120 guards / field loads elided
 # ... checks on start-range, lazy-bytes, regexp state, etc.
 
 # peeled-iteration (inner loop)
-label(p20, p12, i18, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, p61, i73, p72, p25, i82, p81, p43)    55
-guard_not_invalidated()                                                                                      56
-i89 = int_add_ovf(i18, 1)                                                                                    57
-guard_no_overflow()                                                                                          58
-guard_nonnull_class(p20, ForwardLink)           ; Continuation mark walk                                     59
-                                                                                                             |
+label(p20, p12, i18, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, p61, i73, ...)              55
+guard_not_invalidated()                                                                            56
+i89 = int_add_ovf(i18, 1)                                                                          57
+guard_no_overflow()                                                                                58
+guard_nonnull_class(p20, ForwardLink)           ; Continuation mark walk                           59
+                                                                                                   |
 # ... more guards elided
 
-i92 = int_sub_ovf(i89, i70)                     ; compute new byte offset                                    110
-guard_no_overflow()                                                                                          111
-i94 = int_lt(i92, 0)                            ; bounds check (low)                                         112
-guard_false(i94)                                                                                             113
-i95 = int_ge(i92, i73)                          ; bounds check (high)                                        114
-guard_false(i95)                                                                                             115
-i96 = getarrayitem_gc_i(p72, i92)               ; in_3[pos]                                                  116
-i97 = int_ge(i96, i82)                          ; second-vector bound                                        117
-guard_false(i97)                                                                                             118
-i98 = getarrayitem_gc_i(p81, i96)               ; indexing into mutable-byte vectors                         119
-i100 = int_eq(1, i98)                           ; (eq? 1 byte)                                               120
-guard_false(i100)                                                                                            121
-                                                                                                             |
+i92 = int_sub_ovf(i89, i70)                     ; compute new byte offset                          110
+guard_no_overflow()                                                                                111
+i94 = int_lt(i92, 0)                            ; bounds check (low)                               112
+guard_false(i94)                                                                                   113
+i95 = int_ge(i92, i73)                          ; bounds check (high)                              114
+guard_false(i95)                                                                                   115
+i96 = getarrayitem_gc_i(p72, i92)               ; in_3[pos]                                        116
+i97 = int_ge(i96, i82)                          ; second-vector bound                              117
+guard_false(i97)                                                                                   118
+i98 = getarrayitem_gc_i(p81, i96)               ; indexing into mutable-byte vectors               119
+i100 = int_eq(1, i98)                           ; (eq? 1 byte)                                     120
+guard_false(i100)                                                                                  121
+                                                                                                   |
 # more "not-AppRand784" range checks
 
-i101 = arraylen_gc(p43)                                                                                      150
-jump(p20, p12, i89, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, p61, i73, p72, p25, i82, p81, p43)     151
+i101 = arraylen_gc(p43)                                                                            150
+jump(p20, p12, i89, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, p61, i73,...)                151
 \end{lstlisting}
 
-	%\end{minipage}
+	\end{minipage}
 \caption{\small Trace of Pycket using the regexp linklet, matching
 		{\tt\#rx"defg"}.}
 \label{fig:regexp-linklet-big-trace}
