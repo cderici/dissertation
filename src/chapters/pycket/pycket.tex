@@ -111,7 +111,7 @@
 				As described in \chapterRef{chapter:linklets}, the expander linklet is generated offline by running the expander on itself, resulting in a serialized s-expression. Pycket reads this serialized s-expression, compiles it into a linklet object using \racketcode{compile-linklet}, and then instantiates it using \racketcode{instantiate-linklet}. Once instantiated, Pycket incorporates all exported functions from the expander--such as \racketcode{read}, \racketcode{expand}, and \racketcode{eval}--into its runtime environment, allowing direct invocation of these functions as native primitives.
 
 			\begin{center}
-				\begin{minipage}{0.7\textwidth}
+				\begin{minipage}{0.95\textwidth}
 					\begin{lstlisting}[style=inline-python,frame=lines,numbers=none]
 	expander_linklet_obj = compile_linklet([expander_linklet_sexp, ...])
 	expander_linklet_instance = instantiate_linklet([expander_linklet_obj, ...])
@@ -123,7 +123,7 @@
 				Having direct access to the expander's runtime functions enables Pycket to implement language-level operations such as a top-level \gls{repl} through Racket's own primitives. A minimal implementation of a \gls{repl} can be realized simply by invoking Racket's \racketcode{read}, \racketcode{expand}, and \racketcode{eval} functions within Pycket, as illustrated in the small inline example below. Furthermore, since the expander linklet provides the complete implementations of Racket's macro and module systems, Pycket can directly execute programs written in languages layered on top of the Racket core, such as \racketcode{racket/base}. As a result, instead of implementing a custom \gls{repl}, Pycket can directly apply \racketcode{dynamic-require} to Racket's standard \racketcode{racket/repl} module. This yields a REPL functionally identical to Racket’s own, executed within Pycket’s meta-tracing JIT environment.
 
 			\begin{center}
-				\begin{minipage}{0.6\textwidth}
+				\begin{minipage}{0.75\textwidth}
 					\begin{lstlisting}[style=inline-python,frame=lines,numbers=none]
 				while True:
 					r_exp = read.call_racket([repl.readline(), ...])
@@ -168,8 +168,8 @@
 					With thread support enabled, all operations in Pycket run within the context of a Racket-level thread, initiated through the primitive \racketcode{call-in-main-thread}. Additional threads are spawned from this main thread, including a thread responsible for running a \gls{repl}, as well as any threads created during interactions within that \gls{repl}. To illustrate this clearly, consider the following example within Pycket's \gls{repl}:
 
 				\begin{center}
-					\begin{minipage}{0.5\textwidth}
-						\begin{lstlisting}[style=bashstyle,frame=lines,numbers=none,basicstyle=\scriptsize\ttfamily\linespread{0.85}\selectfont]
+					\begin{minipage}{0.75\textwidth}
+						\begin{lstlisting}[style=bashstyle,frame=lines,numbers=none,basicstyle=\small\ttfamily\linespread{0.85}\selectfont]
 				Welcome to Pycket v8.17.0.3
 				> (define ch (make-channel))
 				> (thread (lambda () (channel-put ch 3)))

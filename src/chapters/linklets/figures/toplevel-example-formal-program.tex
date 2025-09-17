@@ -2,9 +2,9 @@
 
 \begin{figure}[!htbp]
 \centering
-\small
-\begin{minipage}{\textwidth}
-\begin{lstlisting}[mathescape]
+\footnotesize
+\begin{minipage}{0.9\textwidth}
+\begin{lstlisting}[mathescape,numbers=none]
 (program ([l1 (linklet () (a k) (define-values (k) (lambda () a)) (void))]
           [l2 (linklet () (a) (define-values (a) 10) (void))]
           [l3 (linklet () (k) (k))])
