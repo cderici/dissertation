@@ -177,10 +177,12 @@
 		\paragraph{}% 39
 			Since linklets alone are binding constructs and cannot initiate computation, we introduce a top-level construct named \racketcode{program} to demonstrate their operational semantics in context. A \racketcode{program} comprises a set of linklets to load and a single top-level expression to initiate computation. The grammar for \racketcode{program} is shown in \figref{fig:linklet-program-source-language}, where the \racketcode{let-inst} form names linklet instances, and the \racketcode{seq} form sequences computations. Additionally, the function $\bm{\Phi^V}$ (\emph{instance-variable-value}) retrieves the value of an exported variable from a given instance.
 
-		\inputFigure{linklets}{linklets-reduction-relation}
+		\inputFigure{linklets}{linklets-reduction-relation-beta-l}
+
+		\inputFigure{linklets}{linklets-reduction-relation-beta-p}
 
 		\paragraph{}% 40
-			\figref{fig:linklets-reduction-relation} presents the reduction relation, $\beta_p$, which defines the evaluation of linklet programs along with the reduction relation $\beta_l$ for the \gls{lkl}. For clarity and simplicity, the evaluation of programs and linklet instantiations are both expressed by the single relation $\beta_p$, thus forming a coherent, small-step evaluation sequence from programs to values. To maintain readability, trivial reduction rules for forms such as \racketcode{seq} and \racketcode{let-inst} are omitted.
+			\figref{fig:linklets-reduction-relation-beta-l} presents the reduction relation $\beta_l$ for the \gls{lkl}. \figref{fig:linklets-reduction-relation} presents the reduction relation $\beta_p$. Together they define the evaluation of linklet programs. For clarity and simplicity, the evaluation of programs and linklet instantiations are both expressed by the single relation $\beta_p$, thus forming a coherent, small-step evaluation sequence from programs to values. To maintain readability, trivial reduction rules for forms such as \racketcode{seq} and \racketcode{let-inst} are omitted.
 
 		\subsection{Top-level REPL Example in the Formal Model}
 		\label{subsec:toplevel-example-formal}
