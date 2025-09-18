@@ -2,49 +2,52 @@
 %\begin{sidewaysfigure}[p]
 %\begin{landscape}
 
-  \begin{figure}[!h]
-  \tiny
+  \begin{figure}
+  \fontsize{10.5}{12.5}\selectfont
   \centering
   \fbox{%
     \begin{minipage}{\textwidth}
       \setlength{\jot}{2pt}
       \begin{align*}
 % ─────────────────────────────── application rules ──────────────────────────────
+% 1
         [\,(e_{rator}\;e_{rands}\;\ldots),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rator},\;\rho,\;\Sigma,\;((\operatorname{arg-\kappa}(e_{rands}\;\ldots))\;\kappa\;\ldots)\,]
-        &&\textsc{[app‑rator‑push]}\\[2pt]
-%
-        [\,(closure\ x\;\ldots\;e_{body}\;\rho_{clo}),\;\rho,\;\Sigma,\;((\operatorname{arg-\kappa}())\;\kappa\;\ldots)\,]
+        [\,e_{rator},\;\rho,\;\Sigma,\;((\operatorname{arg-\kappa}(e_{rands}\;\ldots))\;\kappa\;\ldots)\,]\\
+        % &&\textsc{[app‑rator‑push]}\\[2pt]
+% 2
+        [\,(closure\ x\;\ldots\;e_{body}\;\rho_{clo}),\;\rho,\;\Sigma,\\
+        ((\operatorname{arg-\kappa}())\;\kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\;
+        [\,e_{body},\;\rho_{clo},\;\Sigma,\;(\kappa\;\ldots)\,]\\
+        % &&\textsc{[app‑no‑rand‑plug]}\\[2pt]
+% 3
+        [\,v_{clo},\;\rho,\;\Sigma, \hspace{4cm} \\
+        ((\operatorname{arg-\kappa}(e_{rand_1}\;e_{rands}\;\ldots))\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{body},\;\rho_{clo},\;\Sigma,\;(\kappa\;\ldots)\,]
-        &&\textsc{[app‑no‑rand‑plug]}\\[2pt]
-%
-        [\,v_{clo},\;\rho,\;\Sigma,\;((\operatorname{arg-\kappa}(e_{rand_1}\;e_{rands}\;\ldots))\;\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rand_1},\;\rho,\;\Sigma,\;((\operatorname{fun-\kappa}v_{clo}(e_{rands}\;\ldots)())\;\kappa\;\ldots)\,]
-        &&\textsc{[app‑rand‑push]}\\[2pt]
-%
-        [\,v_{rand},\;\rho,\;\Sigma,\;((\operatorname{fun-\kappa}v_{clo}(e_{rand_1}\;e_{rands}\;\ldots)(v\;\ldots))\;\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rand_1},\;\rho,\;\Sigma,\;((\operatorname{fun-\kappa}v_{clo}(e_{rands}\;\ldots)(v\;\ldots\;v_{rand}))\;\kappa\;\ldots)\,]
-        &&\textsc{[app‑rand‑switch]}\\[2pt]
-%
-        [\,v_{rand},\;\rho,\;\Sigma,\;((\operatorname{fun-\kappa}
-            (\operatorname{closure}\;x\;\ldots\;e_{body}\;\rho_{clo})() (v\;\ldots))\;\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{body},\;
-          \operatorname{extend}(\rho_{clo},(x\;\ldots),(cell_{addr}\;\ldots)),\\
-        &\hspace{7.6em}
-          \operatorname{extend}(\Sigma,(cell_{addr}\;\ldots),(v\;\ldots\;v_{rand})),\;(\kappa\;\ldots)\,] \\
-        &\hspace{1em}
-          \where (cell_{addr}\;\ldots)=\operatorname{variables-not-in}(e_{body},(x\;\ldots))
-        &&\textsc{[app‑plug]}
+        [\,e_{rand_1},\;\rho,\;\Sigma,\\
+        & \hspace{2cm} ((\operatorname{fun-\kappa}v_{clo}(e_{rands}\;\ldots)())\;\kappa\;\ldots)\,]\\
+        % &&\textsc{[app‑rand‑push]}\\[2pt]
+% 4
+        [\,v_{rand},\;\rho,\;\Sigma, \hspace{4cm} \\
+        ((\operatorname{fun-\kappa}v_{clo}(e_{rand_1}\;e_{rands}\;\ldots)(v\;\ldots)) \\
+        \kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\;
+        [\,e_{rand_1},\;\rho,\;\Sigma,\\
+        & \hspace{2cm} ((\operatorname{fun-\kappa}v_{clo}(e_{rands}\;\ldots)(v\;\ldots\;v_{rand}))\;\kappa\;\ldots)\,]\\
+        % &&\textsc{[app‑rand‑switch]}\\[2pt]
+% 5
+        [\,v_{rand},\;\rho,\;\Sigma, \hspace{4cm} \\
+        ((\operatorname{fun-\kappa}\;(\operatorname{closure}\;x\;\ldots\;e_{body}\;\rho_{clo})\\
+        ()\;(v\;\ldots))\;\kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\;
+        [\,e_{body},\\
+        & \operatorname{extend}(\rho_{clo},(x\;\ldots),(cell_{addr}\;\ldots)),\\
+        & \operatorname{extend}(\Sigma,(cell_{addr}\;\ldots),(v\;\ldots\;v_{rand})),\;(\kappa\;\ldots)\,] \\
+        & \where (cell_{addr}\;\ldots)=\operatorname{variables-not-in}(e_{body},(x\;\ldots))\\
+        % &&\textsc{[app‑plug]}
       \end{align*}
     \end{minipage}%
   }
   \vspace{0.6em}
-  \caption{CEK (CESK) Reduction Relation $;\longrightarrow_{\textit{cek}}$ Part III: Application Rules}
+  \caption{CEK (CESK) Reduction Relation $;\longrightarrow_{\textit{cek}}$ Part II: Application Rules}
   \label{fig:cek-reduction-relation-redacted-application}
 \end{figure}
 %\end{landscape}
