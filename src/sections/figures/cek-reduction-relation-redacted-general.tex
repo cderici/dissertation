@@ -3,75 +3,76 @@
 %\begin{landscape}
 
   \begin{figure}[!h]
-  \tiny
+  \fontsize{10.5}{12.5}\selectfont
   \centering
   \fbox{%
-    \begin{minipage}{\textwidth}
+    \begin{minipage}{0.95\textwidth}
       \setlength{\jot}{2pt}
       \begin{align*}
         [\,x,\;\rho,\;\Sigma,\;\kappa\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,\operatorname{lookup}(\Sigma,\operatorname{lookup}(\rho,x)),\;\rho,\;\Sigma,\;\kappa\,]
-        &&\textsc{[lookup]}\\[2pt]
+        [\,\operatorname{lookup}(\Sigma,\operatorname{lookup}(\rho,x)),\;\rho,\;\Sigma,\;\kappa\,]\\
+% &&\textsc{[lookup]}\\[2pt]
 %
         [\,(\lambda (x\;\ldots)\,e),\;\rho,\;\Sigma,\;\kappa\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,(\operatorname{closure}\;x\;\ldots\;e\;\rho),\;\rho,\;\Sigma,\;\kappa\,]
-        &&\textsc{[closure]}\\[6pt]
+        [\,(\operatorname{closure}\;x\;\ldots\;e\;\rho),\;\rho,\;\Sigma,\;\kappa\,]\\
+% &&\textsc{[closure]}\\[6pt]
 %
 % ──────────────────────────────── plug frame rules ────────────────────────────────
-        [\,v_1,\;\rho,\;\Sigma,\;((\operatorname{op-\kappa}\;op\;(v\;\ldots)\;()\;\rho_{op})\;\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
-        [\,\delta(op\;v\;\ldots\;v_1),\;\rho_{op},\;\Sigma,\;(\kappa\;\ldots)\,]
-        &&\textsc{[op‑plug]}\\[2pt]
+        [\,v_1,\;\rho,\;\Sigma, \hspace{4cm} & \; \\
+        \;((\operatorname{op-\kappa}\;op\;(v\;\ldots)\;()\;\rho_{op})\;\kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\;
+        [\,\delta(op\;v\;\ldots\;v_1),\;\rho_{op},\;\Sigma,\;(\kappa\;\ldots)\,]\\
+% &&\textsc{[op‑plug]}\\[2pt]
 %
         [\,v,\;\rho,\;\Sigma,\;((\operatorname{if-\kappa}\;e_1\;e_2)\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e,\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
-        \;\where e = (if\;(equal?\;v\;false)\;e_2\;e_1)
-        &&\textsc{[if‑true‑plug]}\\[2pt]
+        [\,e,\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]\\
+        &\; \hspace{1cm} \where e = (if\;(equal?\;v\;false)\;e_2\;e_1)\\
+% &&\textsc{[if‑true‑plug]}\\[2pt]
 %
         [\,v,\;\rho,\;\Sigma,\;((\operatorname{set-\kappa}\;x)\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,(void),\;\rho,\;\operatorname{overwrite}(\Sigma,x,v),\;(\kappa\;\ldots)\,]
-        &&\textsc{[set‑plug]}\\[2pt]
+        [\,(void),\;\rho,\;\operatorname{overwrite}(\Sigma,x,v),\;(\kappa\;\ldots)\,]\\
+% &&\textsc{[set‑plug]}\\[2pt]
 %
 % ──────────────────────────────── op frame rules ────────────────────────────────
-        [\,v_1,\;\rho,\;\Sigma,\;((\operatorname{op-\kappa}\;op\;(v\;\ldots)\;(e_1\;e_{\ldots})\;\rho_{op})\;\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_1,\;\rho_{op},\;\Sigma,\;((\operatorname{op-\kappa}\;op\;(v\;\ldots\;v_1)\;(e_{\ldots})\;\rho_{op})\;\kappa\;\ldots)\,]
-        &&\textsc{[op‑switch]}\\[2pt]
+        [\,v_1,\;\rho,\;\Sigma, \hspace{4.5cm} & \; \\
+        \;((\operatorname{op-\kappa}\;op\;(v\;\ldots)\;(e_1\;e_{\ldots})\;\rho_{op})\;\kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\;
+        [\,e_1,\;\rho_{op},\;\Sigma,\\
+        &\; \hspace{1.5cm} \;((\operatorname{op-\kappa}\;op\;(v\;\ldots\;v_1)\;(e_{\ldots})\;\rho_{op})\;\kappa\;\ldots)\,]\\
+% &&\textsc{[op‑switch]}\\[2pt]
 %
         [\,(op\;e_1\;e_{\ldots}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{op-\kappa}\;op\;()\;(e_{\ldots})\;\rho)\;\kappa\;\ldots)\,]
-        &&\textsc{[op‑push]}\\[6pt]
+        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{op-\kappa}\;op\;()\;(e_{\ldots})\;\rho)\;\kappa\;\ldots)\,]\\
+% &&\textsc{[op‑push]}\\[6pt]
 %
 % ──────────────────────────────── if / set! / begin ─────────────────────────────
         [\,(if\;e_{test}\;e_1\;e_2),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{test},\;\rho,\;\Sigma,\;((\operatorname{if-\kappa}\;e_1\;e_2)\;\kappa\;\ldots)\,]
-        &&\textsc{[if‑push]}\\[2pt]
+        [\,e_{test},\;\rho,\;\Sigma,\;((\operatorname{if-\kappa}\;e_1\;e_2)\;\kappa\;\ldots)\,]\\
+% &&\textsc{[if‑push]}\\[2pt]
 %
         [\,(set!\;x\;e),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e,\;\rho,\;\Sigma,\;((\operatorname{set-\kappa}(\operatorname{lookup}(\rho,x)))\;\kappa\;\ldots)\,]
-        &&\textsc{[set‑push]}\\[2pt]
+        [\,e,\;\rho,\;\Sigma,\;((\operatorname{set-\kappa}(\operatorname{lookup}(\rho,x)))\;\kappa\;\ldots)\,]\\
+% &&\textsc{[set‑push]}\\[2pt]
 %
         [\,(begin\;e_1\;e_{\ldots}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa}\;e_{\ldots})\;\kappa\;\ldots)\,]
-        &&\textsc{[begin‑push]}\\[2pt]
+        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa}\;e_{\ldots})\;\kappa\;\ldots)\,]\\
+% &&\textsc{[begin‑push]}\\[2pt]
 %
         [\,v,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa}\;e_1\;e_{\ldots})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa}\;e_{\ldots})\;\kappa\;\ldots)\,]
-        &&\textsc{[begin‑switch]}\\[2pt]
+        [\,e_1,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa}\;e_{\ldots})\;\kappa\;\ldots)\,]\\
+% &&\textsc{[begin‑switch]}\\[2pt]
 %
         [\,v,\;\rho,\;\Sigma,\;((\operatorname{seq-\kappa})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,v,\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
-        &&\textsc{[begin‑plug]}\\[6pt]
+        [\,v,\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]\\
+% &&\textsc{[begin‑plug]}\\[6pt]
       \end{align*}
     \end{minipage}%
   }
