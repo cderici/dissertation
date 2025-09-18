@@ -1,12 +1,12 @@
 \begin{figure}[ht]
   \centering
-  \begin{tikzpicture}[font=\scriptsize]
+  \begin{tikzpicture}[font=\footnotesize]
 
     % left listing (A)
     \node[anchor=north west] (A) at (0,0) {%
-      \begin{minipage}{0.45\linewidth}
+      \begin{minipage}{0.4\linewidth}
 \begin{lstlisting}[language=racket,
-                   basicstyle=\ttfamily\scriptsize,
+                   basicstyle=\ttfamily\footnotesize,
                    numbers=none,
                    frame=none]
 #lang racket/base
@@ -16,7 +16,8 @@
 (define (ack m n)
   (cond ((= m 0) (+ n 1))
         ((= n 0) (ack (- m 1) 1))
-        (else (ack (- m 1) (ack m (- n 1))))))
+        (else (ack (- m 1) 
+              (ack m (- n 1))))))
 
 (for ([i (in-range outer)])
   (time (for ([j (in-range ack-iters)])
@@ -25,39 +26,44 @@
       \end{minipage}};
 
     % sub‑caption A
-    \node (captionA) at ([yshift=-1.8cm]A.south) {(A) Back-end benchmark};
+    \node (captionA) at ([yshift=-1cm]A.south) {(A) Back-end benchmark};
 
     % right listing (B)
-    \node[anchor=north west] (B) at ($(A.north east)+(2.0cm,0)$) {%
-      \begin{minipage}{0.45\linewidth}
+    \node[anchor=north west] (B) at ($(A.north east)+(1.0cm,0)$) {%
+      \begin{minipage}{0.4\linewidth}
 \begin{lstlisting}[language=racket,
-                   basicstyle=\ttfamily\scriptsize,
+                   basicstyle=\ttfamily\footnotesize,
                    numbers=none,
                    frame=none]
 #lang racket/base
 
-(require racket/syntax "conf.rkt")
+(require racket/syntax 
+         "conf.rkt")
 
 (define stx
   #'(module ack racket/base
-      (define outer 100)
-      (define (ack m n)
-        (cond ((= m 0) (+ n 1))
-              ((= n 0) (ack (- m 1) 1))
-              (else (ack (- m 1) (ack m (- n 1))))))))
-
+     (define outer 100)
+     (define (ack m n)
+       (cond ((= m 0) (+ n 1))
+             ((= n 0) 
+               (ack (- m 1) 1))
+             (else 
+               (ack (- m 1) 
+               (ack m (- n 1))))))))
 (for ([i (in-range expand-outer)])
-  (time (for ([j (in-range expand-inner)])
+  (time (for ([j (in-range
+               expand-inner)])
           (expand stx))))
 \end{lstlisting}
       \end{minipage}};
 
     % sub‑caption B (aligned with A)
-    \node at ([xshift=0cm]B.south |- captionA) {(B) Front-end benchmark};
-
+    % \node at ([xshift=0cm]B.south |- captionA) {(B) Front-end benchmark};
+    \node (captionB) at ([yshift=-1cm]B.south) {(B) Front-end benchmark};
+    
     % centre divider
     \draw[very thick,gray!50]
-          ($(A.north east)+(1cm,0.2cm)$) -- ++(0,-6.2cm);
+          ($(A.north east)+(0.2cm,0.2cm)$) -- ++(0,-9cm);
 
   \end{tikzpicture}
 
