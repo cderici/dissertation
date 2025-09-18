@@ -1,53 +1,53 @@
 \begin{figure}[!htbp]
 	\centering
 
-	\begin{minipage}{\textwidth}
+	\begin{minipage}{0.95\textwidth}
 \begin{lstlisting}[style=rptrace-style]
 # Loop with 191 ops
 # start of the trace (preamble)
-label(p0, p1)                                                                  1
-guard_class(p0)                                                                2
-p3  = getfield_gc_r(p0)                     ; ConsEnvSize1.vals                3
-guard_nonnull(p3)                                                              4
-i5  = instance_ptr_eq(p3, ConstPtr(ptr4))                                      5
-guard_true(i5)                                                                 6
-guard_class(p1)                                                                7
-p7  = getfield_gc_r(p1)                     ; LetCont.ast                      8
-guard_value(p7, ConstPtr(ptr8))                                                9
-p9  = getfield_gc_r(p1)                     ; Cont.env                         10
-guard_not_invalidated()                                                        11
-p12 = getfield_gc_r(p9)                     ; ConsEnv.prev                     12
-guard_class(p12)                                                               13
-p14 = getfield_gc_r(p12)                    ; W_Closure1AsEnv.caselam          14
-guard_value(p14, ConstPtr(ptr15))                                              15
-i16 = getfield_gc_i(p9)                     ; ConsEnvSize1Fixed.               16
-i18 = int_add_ovf(i16, 1)                                                      17
-guard_no_overflow()                                                            18
-                                                                               |
+label(p0, p1)                                                                1
+guard_class(p0)                                                              2
+p3  = getfield_gc_r(p0)                     ; ConsEnvSize1.vals              3
+guard_nonnull(p3)                                                            4
+i5  = instance_ptr_eq(p3, ConstPtr(ptr4))                                    5
+guard_true(i5)                                                               6
+guard_class(p1)                                                              7
+p7  = getfield_gc_r(p1)                     ; LetCont.ast                    8
+guard_value(p7, ConstPtr(ptr8))                                              9
+p9  = getfield_gc_r(p1)                     ; Cont.env                       10
+guard_not_invalidated()                                                      11
+p12 = getfield_gc_r(p9)                     ; ConsEnv.prev                   12
+guard_class(p12)                                                             13
+p14 = getfield_gc_r(p12)                    ; W_Closure1AsEnv.caselam        14
+guard_value(p14, ConstPtr(ptr15))                                            15
+i16 = getfield_gc_i(p9)                     ; ConsEnvSize1Fixed.             16
+i18 = int_add_ovf(i16, 1)                                                    17
+guard_no_overflow()                                                          18
+                                                                             |
 # ... ~30 guards / field loads elided
 # ... checks on start-range, lazy-bytes, regexp state, etc.
 # peeled-iteration (inner loop)
-label(p20, p12, i18, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, ...)    55
-guard_not_invalidated()                                                        56
-guard_nonnull_class(p20, ForwardLink)           ; Continuation mark walk       57
-                                                                               |
+label(p20, p12, i18, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, ...)  55
+guard_not_invalidated()                                                      56
+guard_nonnull_class(p20, ForwardLink)           ; Continuation mark walk     57
+                                                                             |
 # ... more guards elided
-i92 = int_sub_ovf(i89, i70)                     ; compute new byte offset      110
-guard_no_overflow()                                                            111
-i94 = int_lt(i92, 0)                            ; bounds check (low)           112
-guard_false(i94)                                                               113
-i95 = int_ge(i92, i73)                          ; bounds check (high)          114
-guard_false(i95)                                                               115
-i96 = getarrayitem_gc_i(p72, i92)               ; in_3[pos]                    116
-i97 = int_ge(i96, i82)                          ; second-vector bound          117
-guard_false(i97)                                                               118
-i98 = getarrayitem_gc_i(p81, i96)               ; idx mutable-byte vectors     119
-i100 = int_eq(1, i98)                           ; (eq? 1 byte)                 120
-guard_false(i100)                                                              121
-                                                                               |
+i92 = int_sub_ovf(i89, i70)                     ; compute new byte offset    110
+guard_no_overflow()                                                          111
+i94 = int_lt(i92, 0)                            ; bounds check (low)         112
+guard_false(i94)                                                             113
+i95 = int_ge(i92, i73)                          ; bounds check (high)        114
+guard_false(i95)                                                             115
+i96 = getarrayitem_gc_i(p72, i92)               ; in_3[pos]                  116
+i97 = int_ge(i96, i82)                          ; second-vector bound        117
+guard_false(i97)                                                             118
+i98 = getarrayitem_gc_i(p81, i96)               ; idx mutable-byte vectors   119
+i100 = int_eq(1, i98)                           ; (eq? 1 byte)               120
+guard_false(i100)                                                            121
+                                                                             |
 # more "not-AppRand784" range checks
-i101 = arraylen_gc(p43)                                                        150
-jump(p20, p12, i89, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, ...)     151
+i101 = arraylen_gc(p43)                                                      150
+jump(p20, p12, i89, p10, p20, p29, p45, p46, i48, p60, p67, p68, i70, ...)   151
 \end{lstlisting}
 
 	\end{minipage}
