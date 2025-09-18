@@ -3,68 +3,72 @@
 %\begin{landscape}
 
   \begin{figure}[!h]
-  \tiny
+  \fontsize{10.5}{12.5}\selectfont
   \centering
   \fbox{%
     \begin{minipage}{\textwidth}
       \setlength{\jot}{2pt}
       \begin{align*}
-%
-        [\,v,\;\rho,\;\Sigma,\;((\operatorname{let-\kappa}\;()\;(x_{rhs}\;\ldots)\;(v_{rhs}\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{body},\;\operatorname{extend}(\rho,(x_{rhs}\;\ldots),(cell_{addr}\;\ldots)),\\
-        &\hspace{7.6em}
-          \operatorname{extend}(\Sigma,(cell_{addr}\;\ldots),(v\;v_{rhs}\;\ldots)),\;(\kappa\;\ldots)\,] \\
-        &\hspace{1em}
-          \where (cell_{addr}\;\ldots)=\operatorname{variables-not-in}(e_{body},(x_{rhs}\;\ldots))
-        &&\textsc{[let‑plug]}\\[2pt]
-%
+% 1
+        [\,v,\;\rho,\;\Sigma,\; ((\operatorname{let-\kappa}\;()\;(x_{rhs}\;\ldots) \hspace{1cm} & \; \\
+        (v_{rhs}\;\ldots)\;e_{body})\;\kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\;
+        [\,e_{body},\\
+        & \operatorname{extend}(\rho,(x_{rhs}\;\ldots),(cell_{addr}\;\ldots)),\\
+        & \operatorname{extend}(\Sigma,(cell_{addr}\;\ldots),(v\;v_{rhs}\;\ldots)),\;(\kappa\;\ldots)\,] \\
+        & \where (cell_{addr}\;\ldots)=\\
+                & \hspace{1cm} \operatorname{vars-not-in}(e_{body},(x_{rhs}\;\ldots)) \\
+        % &&\textsc{[let‑plug]}\\[2pt]
+% 2
         [\,v,\;\rho,\;\Sigma,\;((\operatorname{letrec-\kappa}\;()\;x_{prev}\;e_{body})\;\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{body},\;\rho,\;\operatorname{extend}(\Sigma,(\operatorname{lookup}(\rho,x_{prev})),(v)),\;(\kappa\;\ldots)\,]
-        &&\textsc{[letrec‑plug]}\\[2pt]
-%
+        [\,e_{body},\;\rho,\\
+        & \operatorname{extend}(\Sigma,(\operatorname{lookup}(\rho,x_{prev})),(v)),\;(\kappa\;\ldots)\,]\\
+        % &&\textsc{[letrec‑plug]}\\[2pt]
+% 3
         [\,(\operatorname{letrec-values}\;()\;e_{body}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
         &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{body},\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
-        &&\textsc{[letrec‑no‑rhs]}\\[6pt]
-%
+        [\,e_{body},\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]\\
+        % &&\textsc{[letrec‑no‑rhs]}\\[6pt]
+% 4
 % ───────────────────────────── let‑values (push / switch) ────────────────────────
-        [\,v_{rhs},\;\rho,\;\Sigma,\;((\operatorname{let-\kappa}(((x_1)\,e_{rhs\_next})((x_2)\,e_2)\;\ldots)\\(x\;\ldots)\;(v\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
+        [\,v_{rhs},\;\rho,\;\Sigma,\;((\operatorname{let-\kappa}(((x_1)\,e_{rhs\_next}) \hspace{1cm}\\
+        ((x_2)\,e_2)\;\ldots)(x\;\ldots)\;(v\;\ldots)\;e_{body})\;\kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\;
         [\,e_{rhs\_next},\;\rho,\;\Sigma,\;((\operatorname{let-\kappa}(((x_2)\,e_2)\;\ldots)\\
-        &\hspace{7.6em}
-          (x_1\;x\;\ldots)\;(v_{rhs}\;v\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]
-        &&\textsc{[let‑rhs‑switch]}\\[2pt]
-%
-        [\,(let\!-\!values\ (((x_{rhs})\,e_{rhs})((x_2)\,e_2)\;\ldots)\ e_{body}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rhs},\;\rho,\;\Sigma,\;((\operatorname{let-\kappa}(((x_2)\,e_2)\;\ldots)(x_{rhs})()\;e_{body})\;\kappa\;\ldots)\,]
-        &&\textsc{[let‑push]}\\[6pt]
-%
+        & (x_1\;x\;\ldots)\;(v_{rhs}\;v\;\ldots)\;e_{body})\;\kappa\;\ldots)\,]\\
+        % &&\textsc{[let‑rhs‑switch]}\\[2pt]
+% 5
+        [\,(let\!-\!values\ (((x_{rhs})\,e_{rhs}) \hspace{2cm} & \; \\
+        ((x_2)\,e_2)\;\ldots)\ e_{body}),\;\rho,\;\Sigma,\;(\kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\;
+        [\,e_{rhs},\;\rho,\;\Sigma, \\
+        & ((\operatorname{let-\kappa}(((x_2)\,e_2)\;\ldots)(x_{rhs})()\;e_{body})\;\kappa\;\ldots)\,]\\
+        % &&\textsc{[let‑push]}\\[6pt]
+% 6
 % ─────────────────────────── letrec‑values (push / switch) ──────────────────────
-        [\,v_{rhs},\;\rho,\;\Sigma,\;((\operatorname{letrec-\kappa}\\(((x_{rhs\_next})\,e_{rhs\_next})((x_{rhs\_rest})\,e_{rhs\_rest})\;\ldots)\\
-                                       x_{prev}\;e_{body})\;\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rhs\_next},\;\rho,\;\operatorname{extend}(\Sigma,(\operatorname{lookup}(\rho,x_{prev})),(v_{rhs})),\\
-        &\hspace{7.6em}
-          ((\operatorname{letrec-\kappa}(((x_{rhs\_rest})\,e_{rhs\_rest})\;\ldots)\;x_{rhs\_next}\;e_{body})\;\kappa\;\ldots)\,]
-        &&\textsc{[letrec‑rhs‑switch]}\\[2pt]
-%
-        [\,(letrec\!-\!values\ (((x_{rhs})\,e_{rhs})((x_{rhs\_next})\,e_{rhs\_next})\;\ldots)\ e_{body}),\\ \rho,\;\Sigma,\;(\kappa\;\ldots)\,]
-        &\;\longrightarrow_{\textit{cek}}\;
-        [\,e_{rhs},\;
-          \operatorname{extend}(\rho,(x_{rhs}\;x_{rhs\_next}\;\ldots),(cell_{addr}\;\ldots)),\;\Sigma,\\
-        &\hspace{7.6em}
-          ((\operatorname{letrec-\kappa}(((x_{rhs\_next})\,e_{rhs\_next})\;\ldots)\;x_{rhs}\;e_{body})\;\kappa\;\ldots)\,] \\
-        &\hspace{1em}
-          \where (cell_{addr}\;\ldots)=\operatorname{variables-not-in}(e_{body},(x_{rhs}\;x_{rhs\_next}\;\ldots))
-        &&\textsc{[letrec‑push]}\\[6pt]
+        [\,v_{rhs},\;\rho,\;\Sigma, \hspace{4cm} \\
+        ((\operatorname{letrec-\kappa}\; (((x_{rhs\_next})\,e_{rhs\_next}) \hspace{0cm} \\
+        ((x_{rhs\_rest})\,e_{rhs\_rest})\;\ldots)\\ 
+        x_{prev}\;e_{body})\;\kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\;
+        [\,e_{rhs\_next},\;\rho,\\
+        & \operatorname{extend}(\Sigma,(\operatorname{lookup}(\rho,x_{prev})),(v_{rhs})),\\
+        & ((\operatorname{letrec-\kappa}(((x_{rhs\_rest})\,e_{rhs\_rest})\;\ldots) \\
+        & \hspace{2cm} x_{rhs\_next}\;e_{body})\;\kappa\;\ldots)\,] \\
+        % &&\textsc{[letrec‑rhs‑switch]}\\[2pt]
+% 7
+        [\,(letrec\!-\!values\ \; (((x_{rhs})\,e_{rhs}) \hspace{1cm} & \; \\
+        ((x_{rhs\_next})\,e_{rhs\_next})\;\ldots)\ e_{body}), & \; \\ 
+        \rho,\;\Sigma,\;(\kappa\;\ldots)\,] &\;\longrightarrow_{\textit{cek}}\; [\,e_{rhs},\\
+        & \operatorname{extend}(\rho,(x_{rhs}\;x_{rhs\_next}\;\ldots),\\
+                & \hspace{1cm} (cell_{addr}\;\ldots)),\;\Sigma,\\
+        & ((\operatorname{letrec-\kappa}(((x_{rhs\_next})\,e_{rhs\_next})\;\ldots)\\
+                & \hspace{1cm} x_{rhs}\;e_{body})\;\kappa\;\ldots)\,] \\
+        & \where (cell_{addr}\;\ldots)=\\
+                & \hspace{1cm} \operatorname{vars-not-in}(e_{body},(x_{rhs}\;x_{rhs\_next}\;\ldots))\\
+        % &&\textsc{[letrec‑push]}\\[6pt]
       \end{align*}
     \end{minipage}%
   }
   \vspace{0.6em}
-  \caption{CEK Reduction Relation $;\longrightarrow_{\textit{cek}}$ Part II: Let/Letrec Rules}
+  \caption{CEK (CESK) Reduction Relation $;\longrightarrow_{\textit{cek}}$ Part II: Let/Letrec Rules}
   \label{fig:cek-reduction-relation-redacted-letrec}
 \end{figure}
 %\end{landscape}
