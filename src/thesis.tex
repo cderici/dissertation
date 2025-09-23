@@ -55,11 +55,11 @@
 
 
 \makeatletter
-\renewcommand{\@makeschapterhead}[1]{%
-    \vspace*{50pt}% Adjust vertical space before title
+\renewcommand{\@makeschapterhead}[1]{
+    \vspace*{50pt}
     {\parindent \z@ \raggedright
-    \chapsc\normalfont\Huge #1\par % Apply your font and size to the title text
-    \vskip 40pt % Adjust vertical space after title
+    \chapsc\normalfont\normalsize #1\par
+    \vskip 40pt
     }
 }
 \makeatother
@@ -186,14 +186,14 @@
 % \renewcommand{\cftsecdotsep}{\cftnodots}
 \renewcommand{\cftsubsecdotsep}{\cftnodots}
 
-\renewcommand{\cftchapfont}{\footnotesize\chapsc\bfseries}
+\renewcommand{\cftchapfont}{\small\chapsc\bfseries}
 \renewcommand{\cftchappagefont}{}
 \renewcommand{\cftchappresnum}{}
 \renewcommand{\cftchapaftersnum}{\enspace}
 \settowidth{\cftchapnumwidth}{99\enspace}
 \renewcommand{\cftchapafterpnum}{}
 
-\renewcommand{\cftsecfont}{\footnotesize\sectionsc}
+\renewcommand{\cftsecfont}{\small\sectionsc}
 \renewcommand{\cftsecafterpnum}{}
 \renewcommand{\cftsubsecafterpnum}{}
 \renewcommand{\cftsubsubsecafterpnum}{}
@@ -201,7 +201,7 @@
 \setcounter{tocdepth}{1}
 
 
-\renewcommand\contentsname{Contents}
+\renewcommand\contentsname{\normalfont\bfseries\normalsize Contents}
 \currentpdfbookmark{Table of Contents}{TOC}
 %\begin{singlespace}
 \tableofcontents
@@ -214,9 +214,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \phantomsection
 \begin{singlespace}
-\setlength\cftbeforesecskip{\baselineskip}
-{\footnotesize
-\printglossary[type=\acronymtype, title=List of Abbreviations]
+{\normalsize
+\printglossary[
+  type=\acronymtype,
+  title={\normalfont\bfseries\normalsize List of Abbreviations},
+  toctitle={List of Abbreviations}
+]
 }
 \end{singlespace}
 
@@ -232,7 +235,8 @@
 \begingroup
   \setlength{\cftbeforefigskip}{0pt}
   \setlength{\cftparskip}{0pt}
-  \footnotesize
+  \small
+  \renewcommand{\listfigurename}{\normalfont\bfseries\normalsize List of Figures}
   \listoffigures
 \endgroup
 \end{singlespace}
@@ -249,7 +253,8 @@
 \begingroup
   \setlength{\cftbeforetabskip}{0pt}
   \setlength{\cftparskip}{0pt}
-  \footnotesize
+  \small
+  \renewcommand{\listtablename}{\normalfont\bfseries\normalsize List of Tables}
   \listoftables
 \endgroup
 \end{singlespace}
@@ -278,20 +283,20 @@
 % \titleformat{\chapter}[display]{\normalfont\bfseries\filcenter}{\MakeUppercase\chaptertitlename\ \thechapter}{0pt}{\MakeUppercase{#1}}
 % \titleformat{\chapter}[display]{\normalfont\bfseries\large\filcenter}{\MakeUppercase\chaptertitlename\ \thechapter}{30pt}{\MakeUppercase{#1}}
 % WARN: this line might be redundant, see chapfmt in common/config.tex
-\titleformat{\chapter}[block]{\normalfont\chapsc\large\raggedright}{\MakeUppercase{\thechapter}.}{1em}{\MakeUppercase{#1}}
+\titleformat{\chapter}[block]{\normalfont\chapsc\normalsize\raggedright}{\MakeUppercase{\thechapter}.}{1em}{\MakeUppercase{#1}}
 
 
 %spacing between titles
 \titlespacing*{\chapter}{0pt}{0pt}{30pt}	%controls vertical margins on title
 
 % Adjust section title formatting
-\titleformat{\section}{\normalfont\sectionsc\bfseries}{\thesection}{1em}{#1}
+\titleformat{\section}{\small\sectionsc\bfseries}{\thesection}{1em}{#1}
 
 % Adjust subsection title formatting
-\titleformat{\subsection}{\normalfont\sectionsc\bfseries}{\thesubsection}{1em}{#1}
+\titleformat{\subsection}{\small\sectionsc\bfseries}{\thesubsection}{1em}{#1}
 
 % Adjust subsubsection title formatting
-\titleformat{\subsubsection}{\normalfont\sectionsc\itshape}{\thesubsubsection}{1em}{#1}
+\titleformat{\subsubsection}{\small\sectionsc\itshape}{\thesubsubsection}{1em}{#1}
 
 %%%%%%%%%%%%%%%%
 % 1 - Introduction
